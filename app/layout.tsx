@@ -10,7 +10,7 @@ import { Analytics } from '@vercel/analytics/react';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bihance",
+  title: "NTUC Workflow",
   description: "Enhance your jobs",
 };
 
@@ -20,16 +20,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en" className="min-h-100">
-        <head>
-          <meta name="robots" content="index, follow" />
-          <link rel="icon" href="/favicon.ico" />
-          <title>NTUC Workflow</title>
-          <meta name="description" content="Enhance your jobs" />
-        </head>
-        <body className={inter.className}>
+    <html lang="en" className="min-h-100">
+      <head>
+        <meta name="robots" content="index, follow" />
+        <link rel="icon" href="/NTUC-Fairprice-Logo.png" />
+        <title>NTUC Workflow</title>
+        <meta name="description" content="Enhance your jobs" />
+      </head>
+      <body className={inter.className}>
         {children}
-        </body>
-      </html>
+      </body>
+    </html>
   );
 }
