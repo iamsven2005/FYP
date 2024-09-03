@@ -1,8 +1,8 @@
+"use client";
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
-
-const Register = () => {
+const Page = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,18 +12,18 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     // Simple validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
+  
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       return;
     }
-
+  
     // Call the registration API
     const res = await fetch('/api/register', {
       method: 'POST',
@@ -36,14 +36,21 @@ const Register = () => {
         password,
       }),
     });
-
+  
     if (res.ok) {
       router.push('/api/auth/signin');
     } else {
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error('Failed to parse JSON:', err);
+        setError('Something went wrong');
+        return;
+      }
       setError(data.message || 'Something went wrong');
     }
-  };
+  };  
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -57,7 +64,7 @@ const Register = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
             required
           />
         </div>
@@ -68,7 +75,7 @@ const Register = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
             required
           />
         </div>
@@ -79,7 +86,7 @@ const Register = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
             required
           />
         </div>
@@ -90,7 +97,7 @@ const Register = () => {
             id="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
             required
           />
         </div>
@@ -100,4 +107,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Page;

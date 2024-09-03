@@ -21,11 +21,11 @@ const MainPage = async () => {
             <CardDescription>Your one-stop solution for enhanced food label compliance and safety monitoring.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Image 
-              src="/NTUC-Fairprice-Logo.png"  
-              alt="NTUC Logo" 
-              width={200} 
-              height={100} 
+            <Image
+              src="/NTUC-Fairprice-Logo.png"
+              alt="NTUC Logo"
+              width={200}
+              height={100}
               className="mx-auto mb-4"
             />
             <Accordion type="single" collapsible className="w-full">
@@ -47,7 +47,7 @@ const MainPage = async () => {
             <Link href="/signin">
               <Button variant="default">Login</Button>
             </Link>
-            <Link href="/register">
+            <Link href="/Register">
               <Button variant="secondary">Register</Button>
             </Link>
           </CardFooter>
