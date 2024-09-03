@@ -7,4 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+model images{
+  id String @id @default(cuid())
+  imageurl String
+  name String
+  userId String
+  approved  String
+  retrived String
+}
