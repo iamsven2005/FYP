@@ -1,5 +1,5 @@
 import * as React from "react";
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -22,24 +22,18 @@ const Navbar = () => {
         <NavigationMenu className="flex space-x-4">
           <NavigationMenuList className="flex items-center space-x-4">
             <NavigationMenuItem>
-              <Link href="/about" passHref>
-                <NavigationMenuLink className="text-gray-700 hover:text-blue-600">
-                  About Us
-                </NavigationMenuLink>
+              <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                About Us
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/api/auth/signin" passHref>
-                <NavigationMenuLink className="text-gray-700 hover:text-blue-600">
-                  Login
-                </NavigationMenuLink>
+              <Link href="/api/auth/signin" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Login
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/register" passHref>
-                <NavigationMenuLink className="text-gray-700 hover:text-blue-600">
-                  Sign Up
-                </NavigationMenuLink>
+              <Link href="/register" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Register
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
