@@ -12,18 +12,21 @@ const Page = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    console.log('Register form submitted');
+
     // Simple validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      console.log('Password mismatch error');
       return;
     }
-  
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
+      console.log('Password length error');
       return;
     }
-  
+
     // Call the registration API
     const res = await fetch('/api/register', {
       method: 'POST',
@@ -36,9 +39,10 @@ const Page = () => {
         password,
       }),
     });
-  
+
     if (res.ok) {
-      router.push('/api/auth/signin');
+      console.log('Registration successful');
+      router.push('Login');
     } else {
       let data;
       try {
@@ -48,9 +52,10 @@ const Page = () => {
         setError('Something went wrong');
         return;
       }
+      console.log('Registration error:', data.message);
       setError(data.message || 'Something went wrong');
     }
-  };  
+  };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -64,7 +69,7 @@ const Page = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             required
           />
         </div>
@@ -75,7 +80,7 @@ const Page = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             required
           />
         </div>
@@ -86,7 +91,7 @@ const Page = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             required
           />
         </div>
@@ -97,7 +102,7 @@ const Page = () => {
             id="confirmPassword"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"  // Add text-white class here
+            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             required
           />
         </div>
