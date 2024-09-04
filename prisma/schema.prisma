@@ -17,12 +17,12 @@ model images{
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   username  String   @unique
   email     String   @unique
   password  String
-  otp       String?  // Optional field for OTP
-  otpExpires DateTime? // Optional field for OTP expiration
+  otp       String?  
+  otpExpires DateTime? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -54,5 +54,5 @@ model Notification{
 model Checklist{
   id        String   @id @default(cuid())
   name      String
-  body      String
+  body      String
 }
