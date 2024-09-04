@@ -50,12 +50,44 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Send OTP to user's email
+    // Send OTP email with HTML formatting and logo
+    const htmlContent = `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+    <!-- Header without NTUC Logo -->
+    <div style="text-align: center; padding: 10px; background-color: #007bff; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+      <h2 style="color: #fff; margin: 0; font-size: 24px;">NTUC - One-Time Password</h2>
+    </div>
+
+    <!-- OTP Box -->
+    <div style="padding: 20px; text-align: center;">
+      <p style="font-size: 16px; color: #333;">
+        Hello,
+      </p>
+      <p style="font-size: 16px; color: #333;">
+        Please use the following OTP to complete your login. The OTP will expire in <strong>10 minutes</strong>.
+      </p>
+      <div style="display: inline-block; padding: 10px 20px; font-size: 24px; background-color: #f7f7f7; border: 2px solid #007bff; border-radius: 8px; margin: 20px auto; font-weight: bold; color: #333;">
+        ${otp}
+      </div>
+    </div>
+
+    <!-- Footer Message -->
+    <div style="padding: 20px; text-align: center;">
+      <p style="font-size: 14px; color: #666;">
+        If you didn't request this OTP, please ignore this email. For any assistance, please contact NTUC support.
+      </p>
+      <p style="font-size: 12px; color: #999;">
+        © NTUC - All Rights Reserved
+      </p>
+    </div>
+  </div>
+`;
+
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: user.email,
-      subject: 'Your OTP Code',
-      text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
+      subject: 'Your OTP Code - NTUC',
+      html: htmlContent,
     });
 
     return NextResponse.json({ message: 'OTP sent to your email', userId: user.id }, { status: 200 });
