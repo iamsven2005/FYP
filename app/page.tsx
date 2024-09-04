@@ -12,10 +12,8 @@ import {
 
 const MainPage = async () => {
   return (
-    <>
-      <Navbar />  {/* Ensure this is correctly rendered */}
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <Card className="w-full max-w-md bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <Card className="w-full max-w-md shadow-md rounded-lg overflow-hidden">
           <CardHeader>
             <CardTitle>Welcome to NTUC</CardTitle>
             <CardDescription>Your one-stop solution for enhanced food label compliance and safety monitoring.</CardDescription>
@@ -44,8 +42,8 @@ const MainPage = async () => {
             </Accordion>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Link href="/Login">
-              <Button variant="default">Login</Button>
+            <Link href="/login">
+             Login
             </Link>
             <Link href="/Register">
               <Button variant="secondary">Register</Button>
@@ -53,7 +51,6 @@ const MainPage = async () => {
           </CardFooter>
         </Card>
       </div>
-    </>
   );
 }
 

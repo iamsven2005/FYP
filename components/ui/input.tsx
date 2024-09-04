@@ -11,7 +11,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "input m-5 input-bordered input-primary w-full max-w-xs",
+          "input m-5 input-bordered input-primary w-full max-w-xs text-base-content",
           className
         )}
         ref={ref}

@@ -21,7 +21,38 @@ model User {
   username  String   @unique
   email     String   @unique
   password  String
+  otp       String?  // Optional field for OTP
+  otpExpires DateTime? // Optional field for OTP expiration
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model Company {
+  id        String   @id @default(cuid())
+  imgurl    String
+  name      String
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
 
+
+model Role{
+    id        String   @id @default(cuid())
+    companyId String
+    userId    String
+    rolename  String
+    position  Int
+}
+
+model Notification{
+    id        String   @id @default(cuid())
+    user_from  String
+    user_to    String
+    body       String
+    read       String
+}
+
+model Checklist{
+  id        String   @id @default(cuid())
+  name      String
+  body      String
+}

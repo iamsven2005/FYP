@@ -1,115 +1,122 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
-const Page = () => {
+const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Register form submitted');
 
-    // Simple validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      console.log('Password mismatch error');
       return;
     }
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
-      console.log('Password length error');
       return;
     }
 
-    // Call the registration API
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-      }),
-    });
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    if (res.ok) {
-      console.log('Registration successful');
-      router.push('Login');
-    } else {
-      let data;
-      try {
-        data = await res.json();
-      } catch (err) {
-        console.error('Failed to parse JSON:', err);
-        setError('Something went wrong');
-        return;
+      if (res.ok) {
+        router.push('/login');
+      } else {
+        const data = await res.json();
+        setError(data.message || 'Something went wrong');
       }
-      console.log('Registration error:', data.message);
-      setError(data.message || 'Something went wrong');
+    } catch {
+      setError('Something went wrong');
     }
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 className="text-2xl font-bold mb-6">Register</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="mb-4">
-          <label htmlFor="username" className="block text-gray-700">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-gray-700">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label htmlFor="confirmPassword" className="block text-gray-700">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full p-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-            required
-          />
-        </div>
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Register</button>
-      </form>
-    </div>
+    <Card className="max-w-sm mx-auto mt-10 mb-10">
+      <CardHeader>
+        <h2 className="text-xl font-bold">Register</h2>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit}>
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          <div className="mb-4">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              type={showPassword ? "text" : "password"}
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox
+              checked={showPassword}
+              onCheckedChange={() => setShowPassword(!showPassword)}
+              id="show-password"
+            />
+            <label
+              htmlFor="show-password"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show Password
+            </label>
+          </div>
+          <Button type="submit" className="w-full bg-blue-600">
+            Register
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
-export default Page;
+export default RegisterPage;

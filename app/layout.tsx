@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from '@vercel/analytics/react';
+import Navbar from "@/components/ui/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,14 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="min-h-100">
+    <html lang="en" className="min-h-100"data-theme="light">
       <head>
         <meta name="robots" content="index, follow" />
         <link rel="icon" href="/NTUC-Fairprice-Logo.png" />
         <title>NTUC Workflow</title>
         <meta name="description" content="Enhance your jobs" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} text-base-content bg-base-100` }>
+        <Navbar />
         {children}
       </body>
     </html>
