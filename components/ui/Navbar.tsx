@@ -27,7 +27,7 @@ const Navbar = () => {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/api/auth/signin" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+              <Link href="/Login" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
                 Login
               </Link>
             </NavigationMenuItem>

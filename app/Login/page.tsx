@@ -14,6 +14,7 @@ const LoginPage = () => {
     console.log('Email:', email);
     console.log('Password:', password);
 
+    // Ensure that email and password are not empty or undefined
     if (!email || !password) {
       setError('Email and Password are required');
       return;
@@ -31,8 +32,9 @@ const LoginPage = () => {
       if (res.ok) {
         const data = await res.json();
         console.log('Login successful, token:', data.token);
-        router.push('/'); // Redirect to home page or dashboard
-      } else {
+        localStorage.setItem('token', data.token);
+        router.push('/Homepage'); // Redirect to Homepage
+      }else {
         const data = await res.json();
         console.log('Login error:', data.message);
         setError(data.message || 'Something went wrong');

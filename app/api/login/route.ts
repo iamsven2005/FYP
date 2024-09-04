@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
-    // Create JWT token
+    // Create JWT token with username
     const token = sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET as string, // Use a secret from your environment variables
       { expiresIn: '1h' } // Token expires in 1 hour
     );
