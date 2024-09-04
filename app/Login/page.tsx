@@ -6,6 +6,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import Link from 'next/link'; // Import Link
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -120,6 +121,14 @@ const LoginPage = () => {
                   </label>
                 </div>
               </div>
+
+              {/* Forgot Password Link */}
+              <div className="mb-4">
+                <Link href="/auth/forgot-password" className="text-blue-600 hover:underline text-sm">
+                  Forgot Password?
+                </Link>
+              </div>
+
               <Button type="submit" className="w-full bg-blue-600">Login</Button>
             </>
           )}

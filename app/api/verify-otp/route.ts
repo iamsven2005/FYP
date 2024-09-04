@@ -5,6 +5,8 @@ import { sign } from 'jsonwebtoken';
 export async function POST(req: NextRequest) {
   try {
     const { userId, otp } = await req.json();
+    
+    console.log(`Received userId: ${userId}, OTP: ${otp}`);
 
     if (!userId || !otp) {
       return NextResponse.json({ message: 'User ID and OTP are required' }, { status: 400 });
@@ -12,8 +14,9 @@ export async function POST(req: NextRequest) {
 
     // Find the user by ID
     const user = await prisma.user.findUnique({ where: { id: userId } });
-
+    
     if (!user || user.otp !== otp || !user.otpExpires || new Date() > user.otpExpires) {
+      console.log(`Invalid OTP or expired for userId: ${userId}`);
       return NextResponse.json({ message: 'Invalid or expired OTP' }, { status: 401 });
     }
 
@@ -26,6 +29,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log(`OTP successfully verified for userId: ${userId}`);
+
     // Create JWT token
     const token = sign(
       { userId: user.id, email: user.email, username: user.username },
@@ -33,7 +38,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: '1h' }
     );
 
-    return NextResponse.json({ message: 'Login successful', token }, { status: 200 });
+    return NextResponse.json({ message: 'OTP verified', token }, { status: 200 });
   } catch (error) {
     console.error('OTP verification error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
