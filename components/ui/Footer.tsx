@@ -1,12 +1,13 @@
+// components/ui/Footer.tsx
 import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-gray-200 py-6 mt-auto w-full">
+    <footer className="bg-gray-900 text-gray-200 py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6">
             <h6 className="text-lg font-semibold text-white mb-4">NTUC</h6>
             <p className="text-sm">
               NTUC is committed to food quality, safety, and compliance, ensuring transparency and trust across the industry.
@@ -14,7 +15,7 @@ const Footer = () => {
           </div>
 
           {/* Useful Links */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6">
             <h6 className="text-lg font-semibold text-white mb-4">Useful Links</h6>
             <ul className="space-y-2 text-sm">
               <li><a href="#" className="hover:underline">Home</a></li>
@@ -25,7 +26,7 @@ const Footer = () => {
           </div>
 
           {/* Products */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6">
             <h6 className="text-lg font-semibold text-white mb-4">Our Products</h6>
             <ul className="space-y-2 text-sm">
               <li><a href="#" className="hover:underline">Product 1</a></li>
@@ -36,7 +37,7 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div className="mb-6 md:mb-0">
+          <div className="mb-6">
             <h6 className="text-lg font-semibold text-white mb-4">Contact Us</h6>
             <p className="text-sm mb-2">
               123 NTUC Road, Singapore, SG

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 const About = () => {
   return (
-    <Card className="max-w-sm mx-auto mt-10 mb-10">
+    <Card className="max-w-sm mx-auto mt-10 bg-base-100 text-base-content">
       <CardHeader>
         <h2 className="text-2xl font-bold text-primary">About Us</h2>
       </CardHeader>

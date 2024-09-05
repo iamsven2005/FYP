@@ -9,6 +9,7 @@ import { UploadButton } from "@/lib/uploadthing";
 import Link from "next/link";
 import { Company } from "@prisma/client";
 
+// JWT Decode Function (as per your original code)
 function parseJwt(token: string) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
