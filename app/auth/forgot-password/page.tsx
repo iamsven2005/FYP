@@ -91,7 +91,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <Card className="max-w-sm mx-auto mt-10">
+    <Card className="max-w-sm mx-auto mt-10 mb-10">
       <CardHeader>
         <h2 className="text-xl font-bold">Forgot Password</h2>
       </CardHeader>
