@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Add confirm password
+  const [confirmPassword, setConfirmPassword] = useState(""); 
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -77,7 +79,7 @@ export default function ResetPassword() {
           <div className="mb-4">
             <Label htmlFor="newPassword">New Password</Label>
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="newPassword"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -88,12 +90,27 @@ export default function ResetPassword() {
           <div className="mb-4">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
+          </div>
+
+          {/* Show Password Checkbox */}
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox
+              checked={showPassword}
+              onCheckedChange={() => setShowPassword(!showPassword)}
+              id="show-password"
+            />
+            <label
+              htmlFor="show-password"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show Password
+            </label>
           </div>
 
           <Button type="submit" className="w-full bg-blue-600">
