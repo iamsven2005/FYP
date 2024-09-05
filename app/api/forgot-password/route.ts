@@ -54,7 +54,9 @@ export async function POST(req: Request) {
   try {
     await transporter.sendMail(mailOptions);
     console.log(`OTP sent to email: ${email}`);
-    return NextResponse.json({ message: "OTP sent successfully" }, { status: 200 });
+
+    // Return the userId along with the success message
+    return NextResponse.json({ message: "OTP sent successfully", userId: user.id }, { status: 200 });
   } catch (error) {
     console.error(`Failed to send OTP to email: ${email}`, error);
     return NextResponse.json({ message: "Failed to send OTP" }, { status: 500 });
