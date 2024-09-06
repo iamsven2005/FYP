@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Toaster } from "@/components/ui/sonner";
-import { Analytics } from '@vercel/analytics/react';
+
 import Navbar from "@/components/ui/Navbar";
-import Footer from "@/components/ui/Footer"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,9 +26,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} text-base-content bg-base-100 flex flex-col min-h-screen`}>
         <Navbar />
-        <main className="flex-grow">{children}</main> {/* Main content */}
-        <Footer /> {/* Footer stays at the bottom */}
-        <Analytics />
+        <main className="flex-grow">{children}</main> 
       </body>
     </html>
   );

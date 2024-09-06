@@ -12,7 +12,7 @@ import {
 
 const MainPage = async () => {
   return (
-          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+          <div className="flex flex-col items-center justify-center min-h-screen">
         <Card className="w-full max-w-md shadow-md rounded-lg overflow-hidden">
           <CardHeader>
             <CardTitle>Welcome to NTUC</CardTitle>

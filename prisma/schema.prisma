@@ -9,11 +9,11 @@ datasource db {
 
 model images{
   id String @id @default(cuid())
-  imageurl String
-  name String
-  userId String
+  imageurl  String
+  name      String
+  companyId String
   approved  String
-  retrived String
+  retrived  String
 }
 
 model User {
@@ -32,6 +32,8 @@ model Company {
   imgurl    String
   name      String
   archived  Boolean  @default(false)
+  staff   String?
+  manager String?
   createdAt DateTime @default(now())
 }
 

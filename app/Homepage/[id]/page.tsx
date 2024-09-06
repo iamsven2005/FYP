@@ -1,145 +1,84 @@
-"use client"
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { SortableItem } from '@/components/SortableItem';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { ComboboxDemo } from "@/components/ComboboxDemo";
-import { Role, User } from "@prisma/client";
+"use client";
 
-interface Props {
-  params: {
-    id: string;
-  };
-}
+import React, { useRef, useState } from "react";
+import { BsImageFill } from "react-icons/bs";
+import TextCard from "./TextCard";
+import convertor from "./converter";
 
+const Home = () => {
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [texts, setTexts] = useState<Array<string>>([]);
+  const imageInputRef: any = useRef(null);
 
-
-
-const CompanyPage = ({ params }: Props) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [roleName, setRoleName] = useState("");
-  const router = useRouter();
-
-  useEffect(() => {
-    // Fetch users
-    const fetchUsers = async () => {
-      const res = await fetch("/api/users"); // Create an API route to fetch all users
-      const data = await res.json();
-      setUsers(data);
-    };
-
-    // Fetch roles
-    const fetchRoles = async () => {
-      const res = await fetch(`/api/companies/${params.id}/roles`); // Create an API route to fetch roles for a specific company
-      const data = await res.json();
-      setRoles(data);
-    };
-
-    fetchUsers();
-    fetchRoles();
-  }, [params.id]);
-
-  const createRole = async () => {
-    if (!selectedUser || !roleName) {
-      alert("Please select a user and enter a role name");
-      return;
-    }
-
-    const res = await fetch(`/api/companies/${params.id}/roles`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: selectedUser,
-        rolename: roleName,
-      }),
-    });
-
-    if (res.ok) {
-      const newRole = await res.json();
-      setRoles([...roles, newRole]);
-      setRoleName("");
-      setSelectedUser(null);
-    }
+  const openBrowseImage = async () => {
+    await imageInputRef.current.click();
   };
 
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      const oldIndex = roles.findIndex((role) => role.id === active.id);
-      const newIndex = roles.findIndex((role) => role.id === over.id);
-
-      const newOrder = arrayMove(roles, oldIndex, newIndex);
-      setRoles(newOrder);
-
-      // Update the position in the database
-      newOrder.forEach(async (role, index) => {
-        await fetch(`/api/companies/${role.id}/position`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ position: index + 1 }),
-        });
-      });
+  const convert = async (url: string): Promise<void> => {
+    if (url.length) {
+      setProcessing(true);
+      try {
+        const txt: string = await convertor(url);
+        setTexts((prevTexts) => [...prevTexts, txt]); // Avoid direct mutation
+      } catch (error) {
+        console.error("Error during conversion", error);
+      } finally {
+        setProcessing(false);
+      }
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Manage Roles for Company</h1>
-
-      <div className="mb-6">
-        <label className="block mb-2">Role Name</label>
-        <input
-          type="text"
-          value={roleName}
-          onChange={(e) => setRoleName(e.target.value)}
-          className="border p-2 w-full mb-4"
-        />
-
-        <ComboboxDemo
-          items={users.map((user) => ({
-            value: user.id,
-            label: user.username,
-          }))}
-          value={selectedUser}
-          onChange={(value) => setSelectedUser(value)}
-        />
-
-        <Button onClick={createRole} className="mt-4">
-          Create Role
-        </Button>
-      </div>
-
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis]}
-      >
-        <SortableContext
-          items={roles.map((role) => role.id)}
+    <div className="min-h-[90vh]">
+      <h1 className="text-white text-4xl md:text-6xl text-center px-5 pt-5 font-[800]">
+        Built With{" "}
+        <span className="bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text">
+          Tesseract Js{" "}
+        </span>
+      </h1>
+      <input
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          e.preventDefault();
+          const url: string = URL.createObjectURL(e.target.files?.[0]!);
+          convert(url);
+        }}
+        ref={imageInputRef}
+        type="file"
+        hidden
+        required
+      />
+      <div className="relative md:bottom-10 w-full flex flex-col gap-10 items-center justify-center p-5 md:p-20">
+        <div
+          onClick={() => {
+            openBrowseImage();
+          }}
+          onDragOver={(e: any) => {
+            e.preventDefault();
+          }}
+          onDrop={(e: any) => {
+            e.preventDefault();
+            const url: string = URL.createObjectURL(e.dataTransfer.files?.[0]!);
+            convert(url);
+          }}
+          className="w-full min-h-[30vh] md:min-h-[50vh] p-5 bg-[#202020] cursor-pointer rounded-xl flex items-center justify-center"
         >
-          {roles.map((role) => (
-            <SortableItem key={role.id} id={role.id}>
-              <div className="border p-4 mb-2 rounded-md flex items-center justify-between">
-                <span>{role.rolename} - {role.userId}</span>
-              </div>
-            </SortableItem>
-          ))}
-        </SortableContext>
-      </DndContext>
+          <div className="w-full flex items-center justify-center flex-col gap-3">
+            <p className="text-2xl md:text-3xl text-center text-[#707070] font-[800]">
+              {processing
+                ? "Processing Image..."
+                : "Browse Or Drop Your Image Here"}
+            </p>
+            <span className="text-8xl md:text-[150px] block text-[#5f5f5f]">
+              <BsImageFill className={processing ? "animate-pulse" : ""} />
+            </span>
+          </div>
+        </div>
+        {texts.map((t, i) => (
+          <TextCard key={i} t={t} i={i} />
+        ))}
+      </div>
     </div>
   );
 };
 
-export default CompanyPage;
+export default Home;

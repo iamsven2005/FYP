@@ -27,16 +27,3 @@ export async function GET() {
 }
 
 // Archive a company
-export async function PATCH(req: Request) {
-  const { id } = await req.json();
-
-  try {
-    const updatedCompany = await db.company.update({
-      where: { id },
-      data: { archived: true },
-    });
-    return NextResponse.json(updatedCompany, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to archive company" }, { status: 500 });
-  }
-}
