@@ -3,34 +3,50 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faSave } from "@fortawesome/free-solid-svg-icons"; // Import icons
+import { faTrash, faSave, faPlusCircle, faArchive, faBoxOpen } from "@fortawesome/free-solid-svg-icons"; // Import icons
 import { confirmAlert } from "react-confirm-alert"; // Import for confirm alert
 import "react-confirm-alert/src/react-confirm-alert.css"; // Alert CSS
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { UploadButton } from "@/lib/uploadthing";
 
-// Define the types for User
+// Define the types for User and Company
 type User = {
   id: string;
   username: string;
   role: string;
 };
 
+type Company = {
+  id: string;
+  name: string;
+  archived: boolean;
+  imgurl: string;
+};
+
+const roles = ["Admin", "Staff", "Manager", "Client"]; // Available roles
+
 const Admin = () => {
-  const [users, setUsers] = useState<User[]>([]); // Store the list of users
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]); // Store filtered users based on search
-  const [searchTerm, setSearchTerm] = useState<string>(""); // Search term for filtering users
-  const [message, setMessage] = useState<string>(""); // Message for success or failure
-  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({}); // Store the selected role per user
-  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Store the loading state for each user
-  const [isFetching, setIsFetching] = useState<boolean>(false); // Loading state for data fetching
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
   // Pagination state
-  const [page, setPage] = useState<number>(1); // Current page
-  const [limit, setLimit] = useState<number>(5); // Users per page
-  const [totalPages, setTotalPages] = useState<number>(1); // Total number of pages
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(5);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
-  const roles = ["Admin", "Staff", "Manager", "Client"]; // Available roles
+  // Company management states
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [companyName, setCompanyName] = useState<string>("");
+  const [companyImgUrl, setCompanyImgUrl] = useState<string>("");
+  const [companySearchTerm, setCompanySearchTerm] = useState<string>("");
 
-  // Fetch users from the API when the component loads
+  // Fetch users from the API
   useEffect(() => {
     const fetchUsers = async () => {
       setIsFetching(true);
@@ -38,10 +54,10 @@ const Admin = () => {
         const res = await fetch(`/api/users?page=${page}&limit=${limit}`);
         const data = await res.json();
         setUsers(data.users);
-        setFilteredUsers(data.users); // Initialize filteredUsers with all users
-        setTotalPages(data.totalPages); // Set total number of pages
+        setFilteredUsers(data.users);
+        setTotalPages(data.totalPages);
       } catch (error) {
-        setMessage("Failed to fetch users");
+        toast.error("Failed to fetch users");
       } finally {
         setIsFetching(false);
       }
@@ -59,31 +75,54 @@ const Admin = () => {
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
 
+  // Fetch companies from the API
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const res = await fetch("/api/companies");
+        const data = await res.json();
+        setCompanies(data);
+        setFilteredCompanies(data);
+      } catch (error) {
+        toast.error("Failed to fetch companies");
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
+  // Filter companies based on the search term
+  useEffect(() => {
+    const filtered = companies.filter((company) =>
+      company.name.toLowerCase().includes(companySearchTerm.toLowerCase())
+    );
+    setFilteredCompanies(filtered);
+  }, [companySearchTerm, companies]);
+
   // Function to assign a role to a user
   const assignRole = async (userId: string, newRole: string) => {
-    setLoading((prev) => ({ ...prev, [userId]: true })); // Set loading for the specific user
+    setLoading((prev) => ({ ...prev, [userId]: true }));
     try {
       const res = await fetch("/api/roles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId, rolename: newRole }), // Use "rolename" instead of "role"
+        body: JSON.stringify({ userId, rolename: newRole }),
       });
 
       if (res.ok) {
-        setMessage("Role assigned successfully");
-        // Update the user's role locally after a successful role assignment
+        toast.success("Role assigned successfully");
         setUsers((prevUsers) =>
           prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
         );
       } else {
-        setMessage("Failed to assign role");
+        toast.error("Failed to assign role");
       }
     } catch (error) {
-      setMessage("An error occurred while assigning the role");
+      toast.error("An error occurred while assigning the role");
     } finally {
-      setLoading((prev) => ({ ...prev, [userId]: false })); // Stop loading for the specific user
+      setLoading((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -109,13 +148,13 @@ const Admin = () => {
                 method: "DELETE",
               });
               if (res.ok) {
-                setMessage("User deleted successfully");
+                toast.success("User deleted successfully");
                 setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
               } else {
-                setMessage("Failed to delete user");
+                toast.error("Failed to delete user");
               }
             } catch (error) {
-              setMessage("An error occurred while deleting the user");
+              toast.error("An error occurred while deleting the user");
             }
           },
         },
@@ -126,16 +165,54 @@ const Admin = () => {
     });
   };
 
+  // Handle company creation
+  const createCompany = async () => {
+    try {
+      const res = await fetch("/api/companies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: companyName, imgurl: companyImgUrl }),
+      });
+      if (res.ok) {
+        toast.success("Company created successfully");
+        const newCompany = await res.json();
+        setCompanies((prevCompanies) => [...prevCompanies, newCompany]);
+        setCompanyName("");
+        setCompanyImgUrl("");
+      } else {
+        toast.error("Failed to create company");
+      }
+    } catch (error) {
+      toast.error("An error occurred while creating the company");
+    }
+  };
+
+  // Handle company archiving/unarchiving
+  const toggleArchiveCompany = async (companyId: string, archived: boolean) => {
+    try {
+      const res = await fetch(`/api/companies/${companyId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived }),
+      });
+      if (res.ok) {
+        setCompanies((prevCompanies) =>
+          prevCompanies.map((company) =>
+            company.id === companyId ? { ...company, archived } : company
+          )
+        );
+        toast.success(`Company ${archived ? "archived" : "unarchived"} successfully`);
+      } else {
+        toast.error("Failed to update company status");
+      }
+    } catch (error) {
+      toast.error("An error occurred while updating company status");
+    }
+  };
+
   return (
     <div className="container mx-auto mt-10">
-      <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-
-      {/* Success or Error Message */}
-      {message && (
-        <p className={`mt-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
-          {message}
-        </p>
-      )}
+      <h1 className="text-3xl font-bold text-base-content">Admin Dashboard</h1>
 
       {/* Search Input */}
       <div className="flex justify-end mb-4">
@@ -149,18 +226,19 @@ const Admin = () => {
       </div>
 
       {/* User Table */}
-      <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
+      <div className="overflow-x-auto mb-8">
+        <h2 className="text-xl font-bold mb-4">User Management</h2>
+        <table className="table">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="text-left">Username</th>
-              <th className="text-left">Role</th>
-              <th className="text-center">Actions</th>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
+              <tr key={user.id}>
                 <td>{user.username}</td>
                 <td>
                   <select
@@ -175,11 +253,11 @@ const Admin = () => {
                     ))}
                   </select>
                 </td>
-                <td className="text-center">
+                <td>
                   <Button
                     className="btn btn-primary mr-2"
                     onClick={() => assignRole(user.id, selectedRoles[user.id] || user.role)}
-                    disabled={loading[user.id]} // Disable only for the specific user
+                    disabled={loading[user.id]}
                   >
                     <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Changes
                   </Button>
@@ -197,7 +275,7 @@ const Admin = () => {
       <div className="flex justify-between mt-4">
         <Button
           className="btn"
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))} // Previous page
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           disabled={page === 1 || isFetching}
         >
           Previous
@@ -209,7 +287,7 @@ const Admin = () => {
 
         <Button
           className="btn"
-          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} // Next page
+          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={page === totalPages || isFetching}
         >
           Next
@@ -223,15 +301,99 @@ const Admin = () => {
           value={limit}
           onChange={(e) => setLimit(parseInt(e.target.value))}
         >
-          <option value={5}>5 per page
-          </option>
+          <option value={5}>5 per page</option>
           <option value={10}>10 per page</option>
           <option value={20}>20 per page</option>
         </select>
+      </div>
+
+      {/* Company Section */}
+      <div className="my-10">
+        <h2 className="text-xl font-bold mb-4">Company Management</h2>
+
+        {/* Company Search */}
+        <div className="flex justify-end mb-4">
+          <Input
+            type="text"
+            placeholder="Search companies..."
+            className="input input-bordered w-full max-w-xs"
+            value={companySearchTerm}
+            onChange={(e) => setCompanySearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Company Table */}
+        <div className="overflow-x-auto">
+          <table className="table">
+            <thead>
+              <tr>
+              <th>Logo</th>
+                <th>Company Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCompanies.map((company) => (
+                <tr key={company.id}>
+                                    <td><img src={company.imgurl} className="h-full rounded-sm"/></td>
+
+                  <td>{company.name}</td>
+                  <td>{company.archived ? "Archived" : "Active"}</td>
+                  <td>
+                    <Button
+                      className={`btn ${company.archived ? "btn-secondary" : "btn-primary"} mr-2`}
+                      onClick={() => toggleArchiveCompany(company.id, !company.archived)}
+                    >
+                      <FontAwesomeIcon icon={company.archived ? faBoxOpen : faArchive} className="mr-2" />
+                      {company.archived ? "Unarchive" : "Archive"}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Create Company Dialog */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="mt-4">
+              <FontAwesomeIcon icon={faPlusCircle} className="mr-2" /> Create Company
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create a Company</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <Input
+                type="text"
+                placeholder="Company Name"
+                className="input input-bordered w-full mb-4"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+              <UploadButton
+                endpoint="imageUploader"
+                onClientUploadComplete={(res: { url: any; }[]) => {
+                  setCompanyImgUrl(res[0]?.url || "");
+                }}
+                onUploadError={(error: Error) => {
+                  alert(`ERROR! ${error.message}`);
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button className="btn btn-primary" onClick={createCompany}>
+                <FontAwesomeIcon icon={faSave} className="mr-2" /> Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 };
 
 export default Admin;
-
