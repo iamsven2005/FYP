@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db as prisma } from "@/lib/db"; // Assuming you have set up Prisma and db correctly in lib/db
+import { db, db as prisma } from "@/lib/db"; // Assuming you have set up Prisma and db correctly in lib/db
 
 export async function PATCH(req: Request, { params }: { params: { userId: string } }) {
   const { userId } = params;
