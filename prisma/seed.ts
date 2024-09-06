@@ -2,12 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import { db } from "@/lib/db";
 import bcrypt from 'bcryptjs';
 
-// Run this script to seed the default admin, staff, and manager accounts
+// Run this script to seed the default admin, staff, manager, and client accounts
 async function seed() {
   const usersToCreate = [
     { username: "admin", email: 'admin@ntuc.com', password: 'admin123', role: 'Admin' },
     { username: "staff", email: 'staff@ntuc.com', password: 'staff123', role: 'Staff' },
-    { username: "manager", email: 'manager@ntuc.com', password: 'manager123', role: 'Manager' }
+    { username: "manager", email: 'manager@ntuc.com', password: 'manager123', role: 'Manager' },
+    { username: "client", email: 'client@ntuc.com', password: 'client123', role: 'Client' },
   ];
 
   for (const userToCreate of usersToCreate) {
@@ -15,7 +16,7 @@ async function seed() {
     const existingUser = await db.user.findUnique({ where: { email: userToCreate.email } });
 
     if (!existingUser) {
-      // Create the user account
+      // Create the user account with the role directly in the User table
       const hashedPassword = await bcrypt.hash(userToCreate.password, 10);
 
       const newUser = await db.user.create({
@@ -23,16 +24,7 @@ async function seed() {
           username: userToCreate.username,
           email: userToCreate.email,
           password: hashedPassword,
-        },
-      });
-
-      // Assign Role
-      await db.role.create({
-        data: {
-          userId: newUser.id,
-          companyId: "default-company-id", // Adjust company ID logic if needed
-          rolename: userToCreate.role,
-          position: userToCreate.role === "Admin" ? 1 : 2,
+          role: userToCreate.role, // Assign role directly in the User table
         },
       });
 

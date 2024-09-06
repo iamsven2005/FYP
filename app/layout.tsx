@@ -22,17 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="min-h-100" data-theme="light">
+    <html lang="en" className="min-h-screen flex flex-col">
       <head>
         <meta name="robots" content="index, follow" />
         <link rel="icon" href="/NTUC-Fairprice-Logo.png" />
         <title>NTUC Workflow</title>
         <meta name="description" content="Enhance your jobs" />
       </head>
-      <body className={`${inter.className} text-base-content bg-base-100`}>
+      <body className={`${inter.className} text-base-content bg-base-100 flex flex-col min-h-screen`}>
         <Navbar />
-        <main>{children}</main> {/* Main content */}
-        <Footer /> {/* Add the footer at the bottom */}
+        <main className="flex-grow">{children}</main> {/* Main content */}
+        <Footer /> {/* Footer stays at the bottom */}
         <Analytics />
       </body>
     </html>

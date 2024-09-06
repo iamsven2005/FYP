@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-// Define the types for User and Role
+// Define the types for User
 type User = {
   id: string;
   username: string;
+  role: string;
 };
 
 const Admin = () => {
@@ -43,16 +44,23 @@ const Admin = () => {
     setLoading(true); // Start loading state
 
     try {
+      // Correct API path to assign roles
       const res = await fetch("/api/roles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: selectedUser, rolename: selectedRole }),
+        body: JSON.stringify({ userId: selectedUser, rolename: selectedRole }), // Use "rolename" instead of "role"
       });
 
       if (res.ok) {
         setMessage("Role assigned successfully");
+        // Update the user's role locally after a successful role assignment
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user.id === selectedUser ? { ...user, role: selectedRole } : user
+          )
+        );
       } else {
         setMessage("Failed to assign role");
       }
@@ -66,7 +74,7 @@ const Admin = () => {
   return (
     <div className="container mx-auto mt-10">
       <h1 className="text-2xl font-bold">Admin Page</h1>
-      
+
       {/* Success or Error Message */}
       {message && <p className={`mt-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>{message}</p>}
 
@@ -80,7 +88,7 @@ const Admin = () => {
           <option value="">Select User</option>
           {users.map((user) => (
             <option key={user.id} value={user.id}>
-              {user.username}
+              {user.username} - {user.role}
             </option>
           ))}
         </select>

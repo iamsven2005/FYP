@@ -18,7 +18,8 @@ const transporter = nodemailer.createTransport({
 const bypassOtpAccounts = [
   { email: 'admin@ntuc.com', role: 'Admin', redirectTo: '/admin' },
   { email: 'staff@ntuc.com', role: 'Staff', redirectTo: '/Homepage' },
-  { email: 'manager@ntuc.com', role: 'Manager', redirectTo: '/Homepage' },
+  { email: 'manager@ntuc.com', role: 'Manager', redirectTo: '/manager' },
+  { email: 'client@ntuc.com', role: 'Client', redirectTo: '/Homepage' },
 ];
 
 export async function POST(req: NextRequest) {
@@ -40,9 +41,6 @@ export async function POST(req: NextRequest) {
     if (!isValid) {
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
-
-    // If valid, proceed with login
-    console.log('User found and password is valid');
 
     // Bypass OTP for default admin, staff, and manager accounts
     const bypassAccount = bypassOtpAccounts.find(acc => acc.email === email);

@@ -6,10 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     const { userId, otp } = await req.json();
 
-    console.log("Received UserID:", userId, "and OTP:", otp); // Log the received data
-
     if (!userId || !otp) {
-      console.log("Missing UserID or OTP");
       return NextResponse.json({ message: 'User ID and OTP are required' }, { status: 400 });
     }
 
@@ -17,17 +14,14 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } }) as { id: string; username: string; email: string; password: string; otp: string | null; otpExpires: Date | null; createdAt: Date; updatedAt: Date; role: string };
     
     if (!user) {
-      console.log("User not found with ID:", userId);
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
     if (user.otp !== otp) {
-      console.log("OTP does not match for user:", userId);
       return NextResponse.json({ message: 'Invalid OTP' }, { status: 401 });
     }
 
     if (!user.otpExpires || new Date() > user.otpExpires) {
-      console.log("OTP has expired for user:", userId);
       return NextResponse.json({ message: 'Expired OTP' }, { status: 401 });
     }
 
@@ -40,8 +34,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("OTP verified successfully for user:", userId);
-
     // Create JWT token
     const token = sign(
       { userId: user.id, email: user.email, username: user.username, role: user.role },
@@ -49,7 +41,15 @@ export async function POST(req: NextRequest) {
       { expiresIn: '1h' }
     );
 
-    return NextResponse.json({ message: 'OTP verified', token, role: user.role }, { status: 200 });
+    // Redirect based on role
+    let redirectTo = '/Homepage'; // Default redirect
+    if (user.role === 'Admin') {
+      redirectTo = '/admin';
+    } else if (user.role === 'Manager') {
+      redirectTo = '/manager';
+    }
+
+    return NextResponse.json({ message: 'OTP verified', token, role: user.role, redirectTo }, { status: 200 });
   } catch (error) {
     console.error('OTP verification error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

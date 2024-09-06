@@ -38,13 +38,9 @@ const LoginPage = () => {
       const data = await res.json();
   
       if (res.ok && data.token) {
-        // If user is Admin or assigned a role that bypasses OTP, redirect to /admin
+        // If user is Admin or assigned a role that bypasses OTP, redirect based on role
         localStorage.setItem('token', data.token);
-        if (data.role === 'Admin') {
-          router.push('/admin');  // Redirect admins to the admin page
-        } else {
-          router.push(data.redirectTo || '/Homepage');  // Redirect non-admin users to the homepage
-        }
+        router.push(data.redirectTo); // Dynamically redirect based on role
       } else if (data.userId) {
         // Non-admin users, proceed with OTP flow
         setUserId(data.userId);
@@ -59,12 +55,12 @@ const LoginPage = () => {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!otp) {
       setError('OTP is required');
       return;
     }
-
+  
     try {
       const res = await fetch('/api/verify-otp', {
         method: 'POST',
@@ -73,24 +69,21 @@ const LoginPage = () => {
         },
         body: JSON.stringify({ userId, otp }),
       });
-
+  
       const data = await res.json();
       
       if (res.ok) {        
-        // Successful OTP verification, redirect
+        // Successful OTP verification, redirect based on role
         localStorage.setItem('token', data.token);
-        if (data.role === 'Admin') {
-          router.push('/admin');  // Redirect admins to the admin page
-        } else {
-          router.push('/Homepage');  // Redirect non-admin users to the homepage
-        }
+        const redirectTo = data.redirectTo || '/Homepage'; // Ensure there's always a fallback
+        router.push(redirectTo);  // Dynamically redirect based on role
       } else {
         setError(data.message || 'Something went wrong');
       }
     } catch {
       setError('Something went wrong');
     }
-  };
+  };  
 
   return (
     <Card className="max-w-sm mx-auto mt-10 mb-10">
