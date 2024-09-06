@@ -22,21 +22,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Email and Password are required' }, { status: 400 });
     }
 
-    // Find the user by email
+    // Check if the user is found
     const user = await prisma.user.findUnique({ where: { email } });
-
     if (!user) {
+      console.log('User not found');
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
     // Check if the password is correct
     const isValid = await bcrypt.compare(password, user.password);
-
     if (!isValid) {
+      console.log('Invalid password');
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
-    // Generate OTP
+    // If valid, proceed with login
+    console.log('User found and password is valid');
+
+
+    // Bypass OTP for admin account
+    if (email === 'admin@ntuc.com') {
+      console.log("Admin login detected, bypassing OTP"); // Log for debugging
+
+      // Generate JWT token for admin login
+      const token = sign(
+        { userId: user.id, email: user.email, username: user.username },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '1h' }
+      );
+
+      // Send response with the token for the admin
+      return NextResponse.json({ message: 'Login successful (Admin)', token }, { status: 200 });
+    }
+
+    // For non-admin users, generate OTP
+    console.log("Generating OTP for non-admin user"); // Log for debugging
     const otp = crypto.randomInt(100000, 999999).toString(); // 6-digit OTP
     const otpExpires = new Date();
     otpExpires.setMinutes(otpExpires.getMinutes() + 10); // OTP expires in 10 minutes

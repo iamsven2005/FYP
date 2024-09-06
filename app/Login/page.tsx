@@ -20,12 +20,12 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       setError('Email and Password are required');
       return;
     }
-
+  
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -34,19 +34,24 @@ const LoginPage = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-
-      if (res.ok) {
-        const data = await res.json();
+  
+      const data = await res.json();
+  
+      if (res.ok && data.token) {
+        // Admin login detected, bypass OTP and redirect
+        localStorage.setItem('token', data.token);
+        router.push('/Homepage');  // Redirect admin to the homepage
+      } else if (data.userId) {
+        // Non-admin users, set OTP flow
         setUserId(data.userId);
-        setIsOtpSent(true);
+        setIsOtpSent(true);  // This is for non-admin users
       } else {
-        const data = await res.json();
         setError(data.message || 'Something went wrong');
       }
     } catch {
       setError('Something went wrong');
     }
-  };
+  };  
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
