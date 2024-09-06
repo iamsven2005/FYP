@@ -2,6 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faSave } from "@fortawesome/free-solid-svg-icons"; // Import icons
+import { confirmAlert } from "react-confirm-alert"; // Import for confirm alert
+import "react-confirm-alert/src/react-confirm-alert.css"; // Alert CSS
 
 // Define the types for User
 type User = {
@@ -17,12 +21,12 @@ const Admin = () => {
   const [message, setMessage] = useState<string>(""); // Message for success or failure
   const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({}); // Store the selected role per user
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Store the loading state for each user
+  const [isFetching, setIsFetching] = useState<boolean>(false); // Loading state for data fetching
 
   // Pagination state
   const [page, setPage] = useState<number>(1); // Current page
   const [limit, setLimit] = useState<number>(5); // Users per page
   const [totalPages, setTotalPages] = useState<number>(1); // Total number of pages
-  const [isFetching, setIsFetching] = useState<boolean>(false); // Loading state for data fetching
 
   const roles = ["Admin", "Staff", "Manager", "Client"]; // Available roles
 
@@ -91,14 +95,40 @@ const Admin = () => {
     }));
   };
 
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  // Handle user deletion
+  const deleteUser = async (userId: string) => {
+    confirmAlert({
+      title: "Confirm Deletion",
+      message: "Are you sure you want to delete this user?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            try {
+              const res = await fetch(`/api/users/${userId}`, {
+                method: "DELETE",
+              });
+              if (res.ok) {
+                setMessage("User deleted successfully");
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+              } else {
+                setMessage("Failed to delete user");
+              }
+            } catch (error) {
+              setMessage("An error occurred while deleting the user");
+            }
+          },
+        },
+        {
+          label: "No",
+        },
+      ],
+    });
   };
 
   return (
     <div className="container mx-auto mt-10">
-      <h1 className="text-2xl font-bold">Admin Page</h1>
+      <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
 
       {/* Success or Error Message */}
       {message && (
@@ -122,15 +152,15 @@ const Admin = () => {
       <div className="overflow-x-auto">
         <table className="table table-zebra w-full">
           <thead>
-            <tr>
-              <th>Username</th>
-              <th>Role</th>
-              <th>Actions</th>
+            <tr className="bg-gray-100">
+              <th className="text-left">Username</th>
+              <th className="text-left">Role</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user.id}>
+              <tr key={user.id} className="hover:bg-gray-50">
                 <td>{user.username}</td>
                 <td>
                   <select
@@ -145,13 +175,16 @@ const Admin = () => {
                     ))}
                   </select>
                 </td>
-                <td>
+                <td className="text-center">
                   <Button
-                    className="btn btn-primary"
+                    className="btn btn-primary mr-2"
                     onClick={() => assignRole(user.id, selectedRoles[user.id] || user.role)}
                     disabled={loading[user.id]} // Disable only for the specific user
                   >
-                    {loading[user.id] ? "Assigning..." : "Assign Role"}
+                    <FontAwesomeIcon icon={faSave} className="mr-2" /> Save Changes
+                  </Button>
+                  <Button className="btn btn-error" onClick={() => deleteUser(user.id)}>
+                    <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete
                   </Button>
                 </td>
               </tr>
@@ -190,7 +223,8 @@ const Admin = () => {
           value={limit}
           onChange={(e) => setLimit(parseInt(e.target.value))}
         >
-          <option value={5}>5 per page</option>
+          <option value={5}>5 per page
+          </option>
           <option value={10}>10 per page</option>
           <option value={20}>20 per page</option>
         </select>
@@ -200,3 +234,4 @@ const Admin = () => {
 };
 
 export default Admin;
+
