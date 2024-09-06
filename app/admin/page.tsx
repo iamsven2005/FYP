@@ -12,54 +12,66 @@ type User = {
 
 const Admin = () => {
   const [users, setUsers] = useState<User[]>([]); // Store the list of users
-  const [selectedUser, setSelectedUser] = useState<string>(""); // Store the selected user
-  const [selectedRole, setSelectedRole] = useState<string>(""); // Store the selected role
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]); // Store filtered users based on search
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Search term for filtering users
   const [message, setMessage] = useState<string>(""); // Message for success or failure
-  const [loading, setLoading] = useState<boolean>(false); // State for button loading
+  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({}); // Store the selected role per user
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({}); // Store the loading state for each user
+
+  // Pagination state
+  const [page, setPage] = useState<number>(1); // Current page
+  const [limit, setLimit] = useState<number>(5); // Users per page
+  const [totalPages, setTotalPages] = useState<number>(1); // Total number of pages
+  const [isFetching, setIsFetching] = useState<boolean>(false); // Loading state for data fetching
 
   const roles = ["Admin", "Staff", "Manager", "Client"]; // Available roles
 
   // Fetch users from the API when the component loads
   useEffect(() => {
     const fetchUsers = async () => {
+      setIsFetching(true);
       try {
-        const res = await fetch("/api/users");
+        const res = await fetch(`/api/users?page=${page}&limit=${limit}`);
         const data = await res.json();
-        setUsers(data);
+        setUsers(data.users);
+        setFilteredUsers(data.users); // Initialize filteredUsers with all users
+        setTotalPages(data.totalPages); // Set total number of pages
       } catch (error) {
         setMessage("Failed to fetch users");
+      } finally {
+        setIsFetching(false);
       }
     };
 
     fetchUsers();
-  }, []);
+  }, [page, limit]);
+
+  // Filter users based on the search term
+  useEffect(() => {
+    const filtered = users.filter((user) =>
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
 
   // Function to assign a role to a user
-  const assignRole = async () => {
-    if (!selectedUser || !selectedRole) {
-      setMessage("Please select a user and role");
-      return;
-    }
-
-    setLoading(true); // Start loading state
-
+  const assignRole = async (userId: string, newRole: string) => {
+    setLoading((prev) => ({ ...prev, [userId]: true })); // Set loading for the specific user
     try {
-      // Correct API path to assign roles
       const res = await fetch("/api/roles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: selectedUser, rolename: selectedRole }), // Use "rolename" instead of "role"
+        body: JSON.stringify({ userId, rolename: newRole }), // Use "rolename" instead of "role"
       });
 
       if (res.ok) {
         setMessage("Role assigned successfully");
         // Update the user's role locally after a successful role assignment
         setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === selectedUser ? { ...user, role: selectedRole } : user
-          )
+          prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
         );
       } else {
         setMessage("Failed to assign role");
@@ -67,8 +79,21 @@ const Admin = () => {
     } catch (error) {
       setMessage("An error occurred while assigning the role");
     } finally {
-      setLoading(false); // Stop loading state
+      setLoading((prev) => ({ ...prev, [userId]: false })); // Stop loading for the specific user
     }
+  };
+
+  // Handle role change in the dropdown
+  const handleRoleChange = (userId: string, newRole: string) => {
+    setSelectedRoles((prevRoles) => ({
+      ...prevRoles,
+      [userId]: newRole,
+    }));
+  };
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
   return (
@@ -76,45 +101,99 @@ const Admin = () => {
       <h1 className="text-2xl font-bold">Admin Page</h1>
 
       {/* Success or Error Message */}
-      {message && <p className={`mt-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>{message}</p>}
+      {message && (
+        <p className={`mt-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>
+          {message}
+        </p>
+      )}
 
-      <div className="mt-4 space-y-4">
-        {/* Select User */}
-        <select
-          value={selectedUser}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedUser(e.target.value)}
-          className="border p-2 rounded-md w-full"
-        >
-          <option value="">Select User</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.username} - {user.role}
-            </option>
-          ))}
-        </select>
+      {/* Search Input */}
+      <div className="flex justify-end mb-4">
+        <Input
+          type="text"
+          placeholder="Search by username or role..."
+          className="input input-bordered w-full max-w-xs"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-        {/* Select Role */}
-        <select
-          value={selectedRole}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedRole(e.target.value)}
-          className="border p-2 rounded-md w-full"
-        >
-          <option value="">Select Role</option>
-          {roles.map((role) => (
-            <option key={role} value={role}>
-              {role}
-            </option>
-          ))}
-        </select>
+      {/* User Table */}
+      <div className="overflow-x-auto">
+        <table className="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr key={user.id}>
+                <td>{user.username}</td>
+                <td>
+                  <select
+                    value={selectedRoles[user.id] || user.role}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleRoleChange(user.id, e.target.value)}
+                    className="select select-bordered"
+                  >
+                    {roles.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <Button
+                    className="btn btn-primary"
+                    onClick={() => assignRole(user.id, selectedRoles[user.id] || user.role)}
+                    disabled={loading[user.id]} // Disable only for the specific user
+                  >
+                    {loading[user.id] ? "Assigning..." : "Assign Role"}
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        {/* Assign Role Button */}
+      {/* Pagination Controls */}
+      <div className="flex justify-between mt-4">
         <Button
-          className="mt-4 w-full bg-blue-600"
-          onClick={assignRole}
-          disabled={loading}
+          className="btn"
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))} // Previous page
+          disabled={page === 1 || isFetching}
         >
-          {loading ? "Assigning..." : "Assign Role"}
+          Previous
         </Button>
+
+        <span>
+          Page {page} of {totalPages}
+        </span>
+
+        <Button
+          className="btn"
+          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} // Next page
+          disabled={page === totalPages || isFetching}
+        >
+          Next
+        </Button>
+      </div>
+
+      {/* Page Size Select */}
+      <div className="flex justify-end mt-2">
+        <select
+          className="select select-bordered w-32"
+          value={limit}
+          onChange={(e) => setLimit(parseInt(e.target.value))}
+        >
+          <option value={5}>5 per page</option>
+          <option value={10}>10 per page</option>
+          <option value={20}>20 per page</option>
+        </select>
       </div>
     </div>
   );
