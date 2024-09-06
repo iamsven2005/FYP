@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; // Import eye icons
 import Link from 'next/link';
 
 const LoginPage = () => {
@@ -16,16 +16,43 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [userId, setUserId] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Error validation for email and password
+  const validateForm = () => {
+    if (!email) {
+      setError('Email is required.');
+      return false;
+    }
+
+    if (!emailRegex.test(email)) {
+      setError('Invalid email format.');
+      return false;
+    }
+
+    if (!password) {
+      setError('Password is required.');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    if (!email || !password) {
-      setError('Email and Password are required');
+    setLoading(true);
+
+    // Validate the form before making API request
+    if (!validateForm()) {
+      setLoading(false);
       return;
     }
-  
+
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -34,9 +61,9 @@ const LoginPage = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok && data.token) {
         // If user is Admin or assigned a role that bypasses OTP, redirect based on role
         localStorage.setItem('token', data.token);
@@ -49,18 +76,20 @@ const LoginPage = () => {
         setError(data.message || 'Something went wrong');
       }
     } catch {
-      setError('Something went wrong');
+      setError('Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!otp) {
       setError('OTP is required');
       return;
     }
-  
+
     try {
       const res = await fetch('/api/verify-otp', {
         method: 'POST',
@@ -69,10 +98,10 @@ const LoginPage = () => {
         },
         body: JSON.stringify({ userId, otp }),
       });
-  
+
       const data = await res.json();
-      
-      if (res.ok) {        
+
+      if (res.ok) {
         // Successful OTP verification, redirect based on role
         localStorage.setItem('token', data.token);
         const redirectTo = data.redirectTo || '/Homepage'; // Ensure there's always a fallback
@@ -81,9 +110,9 @@ const LoginPage = () => {
         setError(data.message || 'Something went wrong');
       }
     } catch {
-      setError('Something went wrong');
+      setError('Something went wrong. Please try again later.');
     }
-  };  
+  };
 
   return (
     <Card className="max-w-sm mx-auto mt-10 mb-10">
@@ -103,29 +132,28 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="input input-bordered w-full"
+                  placeholder="Enter your email"
                 />
               </div>
-              <div className="mb-4">
+              <div className="mb-4 relative">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <div className="flex items-center space-x-2 mt-2">
-                  <Checkbox
-                    checked={showPassword}
-                    onCheckedChange={() => setShowPassword(!showPassword)}
-                    id="show-password"
+                <div className="relative w-full">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="input input-bordered w-full pr-10" // Add padding for icon
+                    placeholder="Enter your password"
                   />
-                  <label
-                    htmlFor="show-password"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  <span
+                    className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    Show Password
-                  </label>
+                    {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+                  </span>
                 </div>
               </div>
 
@@ -135,7 +163,9 @@ const LoginPage = () => {
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full bg-blue-600">Login</Button>
+              <Button type="submit" className="w-full bg-blue-600" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
+              </Button>
             </>
           )}
           {isOtpSent && (
@@ -148,9 +178,13 @@ const LoginPage = () => {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required
+                  className="input input-bordered w-full"
+                  placeholder="Enter OTP sent to your email"
                 />
               </div>
-              <Button type="submit" className="w-full bg-blue-600">Verify OTP</Button>
+              <Button type="submit" className="w-full bg-blue-600" disabled={loading}>
+                {loading ? 'Verifying OTP...' : 'Verify OTP'}
+              </Button>
             </>
           )}
         </form>
