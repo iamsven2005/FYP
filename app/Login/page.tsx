@@ -75,11 +75,15 @@ const LoginPage = () => {
       });
 
       const data = await res.json();
-
-      if (res.ok) {
+      
+      if (res.ok) {        
         // Successful OTP verification, redirect
         localStorage.setItem('token', data.token);
-        router.push('/Homepage');
+        if (data.role === 'Admin') {
+          router.push('/admin');  // Redirect admins to the admin page
+        } else {
+          router.push('/Homepage');  // Redirect non-admin users to the homepage
+        }
       } else {
         setError(data.message || 'Something went wrong');
       }

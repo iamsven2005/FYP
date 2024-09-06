@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Find the user by ID
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.user.findUnique({ where: { id: userId } }) as { id: string; username: string; email: string; password: string; otp: string | null; otpExpires: Date | null; createdAt: Date; updatedAt: Date; role: string };
     
     if (!user) {
       console.log("User not found with ID:", userId);
@@ -44,12 +44,12 @@ export async function POST(req: NextRequest) {
 
     // Create JWT token
     const token = sign(
-      { userId: user.id, email: user.email, username: user.username },
+      { userId: user.id, email: user.email, username: user.username, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: '1h' }
     );
 
-    return NextResponse.json({ message: 'OTP verified', token }, { status: 200 });
+    return NextResponse.json({ message: 'OTP verified', token, role: user.role }, { status: 200 });
   } catch (error) {
     console.error('OTP verification error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

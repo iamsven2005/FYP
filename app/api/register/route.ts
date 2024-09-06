@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       data: {
         username,
         email,
-        password: hashedPassword,
+        password: hashedPassword
       },
     });
     console.log('User created successfully:', user);
