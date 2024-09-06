@@ -16,9 +16,9 @@ const transporter = nodemailer.createTransport({
 
 // Define the default accounts that should bypass OTP
 const bypassOtpAccounts = [
-  { email: 'admin@ntuc.com', role: 'Admin' },
-  { email: 'staff@ntuc.com', role: 'Staff' },
-  { email: 'manager@ntuc.com', role: 'Manager' },
+  { email: 'admin@ntuc.com', role: 'Admin', redirectTo: '/admin' },
+  { email: 'staff@ntuc.com', role: 'Staff', redirectTo: '/Homepage' },
+  { email: 'manager@ntuc.com', role: 'Manager', redirectTo: '/Homepage' },
 ];
 
 export async function POST(req: NextRequest) {
@@ -32,14 +32,12 @@ export async function POST(req: NextRequest) {
     // Check if the user is found
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      console.log('User not found');
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
     // Check if the password is correct
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      console.log('Invalid password');
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
@@ -58,8 +56,8 @@ export async function POST(req: NextRequest) {
         { expiresIn: '1h' }
       );
 
-      // Send response with the token
-      return NextResponse.json({ message: `Login successful (${bypassAccount.role})`, token }, { status: 200 });
+      // Send response with the token and redirection URL
+      return NextResponse.json({ message: `Login successful (${bypassAccount.role})`, token, redirectTo: bypassAccount.redirectTo }, { status: 200 });
     }
 
     // For non-default users, generate OTP

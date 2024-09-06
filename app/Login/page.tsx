@@ -6,7 +6,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -38,20 +38,24 @@ const LoginPage = () => {
       const data = await res.json();
   
       if (res.ok && data.token) {
-        // Admin login detected, bypass OTP and redirect
+        // If user is Admin or assigned a role that bypasses OTP, redirect to /admin
         localStorage.setItem('token', data.token);
-        router.push('/Homepage');  // Redirect admin to the homepage
+        if (data.role === 'Admin') {
+          router.push('/admin');  // Redirect admins to the admin page
+        } else {
+          router.push(data.redirectTo || '/Homepage');  // Redirect non-admin users to the homepage
+        }
       } else if (data.userId) {
-        // Non-admin users, set OTP flow
+        // Non-admin users, proceed with OTP flow
         setUserId(data.userId);
-        setIsOtpSent(true);  // This is for non-admin users
+        setIsOtpSent(true);
       } else {
         setError(data.message || 'Something went wrong');
       }
     } catch {
       setError('Something went wrong');
     }
-  };  
+  };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,12 +74,13 @@ const LoginPage = () => {
         body: JSON.stringify({ userId, otp }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        const data = await res.json();
+        // Successful OTP verification, redirect
         localStorage.setItem('token', data.token);
         router.push('/Homepage');
       } else {
-        const data = await res.json();
         setError(data.message || 'Something went wrong');
       }
     } catch {
@@ -127,7 +132,6 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              {/* Forgot Password Link */}
               <div className="mb-4">
                 <Link href="/auth/forgot-password" className="text-blue-600 hover:underline text-sm">
                   Forgot Password?
