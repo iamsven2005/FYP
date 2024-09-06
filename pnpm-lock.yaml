@@ -6,6 +6,7 @@ specifiers:
   '@dnd-kit/modifiers': ^7.0.0
   '@dnd-kit/sortable': ^8.0.0
   '@dnd-kit/utilities': ^3.2.2
+  '@fortawesome/fontawesome-svg-core': ^6.6.0
   '@fortawesome/free-brands-svg-icons': ^6.6.0
   '@fortawesome/free-solid-svg-icons': ^6.6.0
   '@fortawesome/react-fontawesome': ^0.2.2
@@ -53,6 +54,7 @@ specifiers:
   prisma: ^5.16.0
   qrcode: ^1.5.4
   react: ^18
+  react-confirm-alert: ^3.0.6
   react-day-picker: ^8.10.1
   react-dom: ^18
   react-hook-form: ^7.52.0
@@ -77,9 +79,10 @@ dependencies:
   '@dnd-kit/modifiers': 7.0.0_lapgn5tcydgksdf34zqcxexmfu
   '@dnd-kit/sortable': 8.0.0_lapgn5tcydgksdf34zqcxexmfu
   '@dnd-kit/utilities': 3.2.2_react@18.3.1
+  '@fortawesome/fontawesome-svg-core': 6.6.0
   '@fortawesome/free-brands-svg-icons': 6.6.0
   '@fortawesome/free-solid-svg-icons': 6.6.0
-  '@fortawesome/react-fontawesome': 0.2.2_react@18.3.1
+  '@fortawesome/react-fontawesome': 0.2.2_ef5hkbidzus3pndz3ixgj7egve
   '@hookform/resolvers': 3.6.0_react-hook-form@7.52.0
   '@prisma/client': 5.19.1_prisma@5.16.0
   '@radix-ui/react-accordion': 1.2.0_iv3fbzfqanoonyhoyrhhflyvgy
@@ -112,6 +115,7 @@ dependencies:
   nodemailer: 6.9.15
   qrcode: 1.5.4
   react: 18.3.1
+  react-confirm-alert: 3.0.6_nnrd3gsncyragczmpvfhocinkq
   react-day-picker: 8.10.1_hfty7ymruxwkehkosfmyiuvqkm
   react-dom: 18.3.1_react@18.3.1
   react-hook-form: 7.52.0_react@18.3.1
@@ -602,6 +606,13 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
+  /@fortawesome/fontawesome-svg-core/6.6.0:
+    resolution: {integrity: sha512-KHwPkCk6oRT4HADE7smhfsKudt9N/9lm6EJ5BVg0tD1yPA5hht837fB87F8pn15D8JfTqQOjhKTktwmLMiD7Kg==}
+    engines: {node: '>=6'}
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 6.6.0
+    dev: false
+
   /@fortawesome/free-brands-svg-icons/6.6.0:
     resolution: {integrity: sha512-1MPD8lMNW/earme4OQi1IFHtmHUwAKgghXlNwWi9GO7QkTfD+IIaYpIai4m2YJEzqfEji3jFHX1DZI5pbY/biQ==}
     engines: {node: '>=6'}
@@ -616,12 +627,13 @@ packages:
       '@fortawesome/fontawesome-common-types': 6.6.0
     dev: false
 
-  /@fortawesome/react-fontawesome/0.2.2_react@18.3.1:
+  /@fortawesome/react-fontawesome/0.2.2_ef5hkbidzus3pndz3ixgj7egve:
     resolution: {integrity: sha512-EnkrprPNqI6SXJl//m29hpaNzOp1bruISWaOiRtkMi/xSvHJlzc2j2JAYS7egxt/EbjSNV/k6Xy0AQI6vB2+1g==}
     peerDependencies:
       '@fortawesome/fontawesome-svg-core': ~1 || ~6
       react: '>=16.3'
     dependencies:
+      '@fortawesome/fontawesome-svg-core': 6.6.0
       prop-types: 15.8.1
       react: 18.3.1
     dev: false
@@ -4562,6 +4574,16 @@ packages:
 
   /queue-microtask/1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
+
+  /react-confirm-alert/3.0.6_nnrd3gsncyragczmpvfhocinkq:
+    resolution: {integrity: sha512-rplP6Ed9ZSNd0KFV5BUzk4EPQ77BxsrayllBXGFuA8xPXc7sbBjgU5KUrNpl7aWFmP7mXRlVXfuy1IT5DbffYw==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=10.0.0'
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1_react@18.3.1
+    dev: false
 
   /react-day-picker/8.10.1_hfty7ymruxwkehkosfmyiuvqkm:
     resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
