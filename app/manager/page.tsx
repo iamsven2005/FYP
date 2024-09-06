@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type StaffRequest = {
   id: string;
@@ -20,7 +19,13 @@ const ManagerPage = () => {
       try {
         const res = await fetch("/api/staff-requests");
         const data = await res.json();
-        setStaffRequests(data);
+
+        // Check if the data is an array, otherwise set an empty array
+        if (Array.isArray(data)) {
+          setStaffRequests(data);
+        } else {
+          setStaffRequests([]);
+        }
       } catch (error) {
         setMessage("Failed to fetch staff requests");
       }
