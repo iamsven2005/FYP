@@ -1,27 +1,33 @@
-"use client"; // Ensures this component is treated as a client component
+"use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation"; // Updated import
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
-  const router = useRouter(); // useRouter from next/navigation
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Theme management
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
-  // Check login status on initial render
-  useEffect(() => {
+  const checkLoginStatus = () => {
     const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true); // User is logged in
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
     }
+  };
 
-    // Check the current theme from localStorage or default
+  useEffect(() => {
+    checkLoginStatus(); // Call initially to set login status
+
+    // Listen for custom "storage" event to check token updates
+    window.addEventListener('storage', checkLoginStatus);
+
+    // Handle theme from localStorage
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setIsDarkTheme(savedTheme === "dark");
@@ -30,12 +36,17 @@ const Navbar = () => {
       setIsDarkTheme(false);
       document.documentElement.setAttribute("data-theme", "light");
     }
+
+    // Cleanup event listener when the component unmounts
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear the token from localStorage
+    localStorage.removeItem("token");
     setIsLoggedIn(false);
-    router.push("/"); // Redirect to main page
+    router.push("/");
   };
 
   const handleThemeSwitch = () => {
@@ -48,7 +59,6 @@ const Navbar = () => {
   return (
     <header className="bg-secondary shadow">
       <nav className="container mx-auto px-6 py-3 flex justify-between items-center">
-        {/* Logo */}
         <Link href="/" passHref>
           <img src="/NTUC-Fairprice-Logo.png" alt="NTUC Logo" width={50} height={50} className="cursor-pointer" />
         </Link>
@@ -85,7 +95,6 @@ const Navbar = () => {
               </>
             )}
 
-            {/* Theme Switcher */}
             <div className="ml-auto">
               <label className="swap swap-rotate">
                 <input
@@ -94,8 +103,6 @@ const Navbar = () => {
                   checked={isDarkTheme}
                   onChange={handleThemeSwitch}
                 />
-
-                {/* Updated Sun Icon */}
                 <svg
                   className="swap-off h-6 w-6 fill-current"
                   xmlns="http://www.w3.org/2000/svg"
@@ -106,11 +113,10 @@ const Navbar = () => {
                   5 0 100-10 5 5 0 000 10zm0-8a3 3 0 110 6 3 3 0 010-6zm9-1h-2a1 1 0 010-2h2a1 1 
                   0 010 2zM4.22 18.36a1 1 0 01-1.42-1.42l1.42-1.42a1 1 0 111.41 1.42L4.22 
                   18.36zM19.78 5.64a1 1 0 011.42 0l.01.01a1 1 0 01-.01 1.41l-1.42 1.42a1 1 
-                  0 11-1.42-1.41L19.78 5.64zM12 21a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 
+                  11-1.42-1.41L19.78 5.64zM12 21a1 1 0 011 1v2a1 1 0 01-2 0v-2a1 1 0 
                   011-1zm6.36-5.64l-1.42-1.42a1 1 0 011.42-1.41l1.42 1.42a1 1 0 01-1.42 1.41z" />
                 </svg>
 
-                {/* Moon Icon */}
                 <svg
                   className="swap-on h-6 w-6 fill-current"
                   xmlns="http://www.w3.org/2000/svg"

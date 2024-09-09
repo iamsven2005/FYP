@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; // Import eye icons
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
 import Link from 'next/link';
 
 const LoginPage = () => {
@@ -19,10 +19,8 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // Error validation for email and password
   const validateForm = () => {
     if (!email) {
       setError('Email is required.');
@@ -47,7 +45,6 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate the form before making API request
     if (!validateForm()) {
       setLoading(false);
       return;
@@ -65,11 +62,14 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
-        // If user is Admin or assigned a role that bypasses OTP, redirect based on role
+        // Store token and notify Navbar of login
         localStorage.setItem('token', data.token);
+
+        // Dispatch a custom event to notify components
+        window.dispatchEvent(new Event('storage'));
+
         router.push(data.redirectTo); // Dynamically redirect based on role
       } else if (data.userId) {
-        // Non-admin users, proceed with OTP flow
         setUserId(data.userId);
         setIsOtpSent(true);
       } else {
@@ -102,10 +102,13 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (res.ok) {
-        // Successful OTP verification, redirect based on role
         localStorage.setItem('token', data.token);
-        const redirectTo = data.redirectTo || '/Homepage'; // Ensure there's always a fallback
-        router.push(redirectTo);  // Dynamically redirect based on role
+
+        // Notify the Navbar of the login
+        window.dispatchEvent(new Event('storage'));
+
+        const redirectTo = data.redirectTo || '/Homepage'; // Ensure fallback
+        router.push(redirectTo); 
       } else {
         setError(data.message || 'Something went wrong');
       }
@@ -145,7 +148,7 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="input input-bordered w-full pr-10" // Add padding for icon
+                    className="input input-bordered w-full pr-10" 
                     placeholder="Enter your password"
                   />
                   <span
