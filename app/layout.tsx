@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="min-h-screen flex flex-col">
+    <html lang="en" className="min-h-screen flex flex-col" data-theme="dark">
       <head>
         <meta name="robots" content="index, follow" />
         <link rel="icon" href="/NTUC-Fairprice-Logo.png" />
