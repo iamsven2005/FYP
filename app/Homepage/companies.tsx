@@ -5,11 +5,11 @@ interface Props{
     user: string
 }
 const Company = async({user}: Props) => {
-    const list = await db.company.findMany({
-        where:{
-            staff: user
-        }
-    })
+    // const list = await db.company.findMany({
+    //     where:{
+    //         staff: user
+    //     }
+    // })
     return ( 
         <div>
             

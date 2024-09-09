@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
 import Navbar from "@/components/ui/Navbar";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +27,8 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} text-base-content bg-base-100 flex flex-col min-h-screen`}>
         <Navbar />
-        <main className="flex-grow">{children}</main> 
+        <ToastContainer /> {/* Include ToastContainer to enable toasts globally */}
+        <main className="flex-grow">{children}</main>
       </body>
     </html>
   );

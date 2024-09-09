@@ -7,8 +7,12 @@ import { useEffect, useState } from "react";
 
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
-
-const Admin = () => {
+interface Props{
+  params:{
+    id: string
+  }
+}
+const Admin = ({params}: Props) => {
   const [staffUsers, setStaffUsers] = useState<User[]>([]);
   const [managerUsers, setManagerUsers] = useState<User[]>([]);
 

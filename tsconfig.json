@@ -39,7 +39,7 @@
     ".next/types/**/*.ts",
     "app/payment/[eventId]/ExportButton.tsx",
     "app/api/upload-file"
-, "app/api/upload/route.ts", "app/upload/page.tsx"  ],
+, "app/api/upload/route.ts", "app/upload/page.tsx", "app/api/saveImage"  ],
   "exclude": [
     "node_modules"
   ]

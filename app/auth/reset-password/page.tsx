@@ -4,65 +4,72 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
+import { toast } from 'react-toastify'; // Import react-toastify
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState(""); 
-  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // Ensure the user is authenticated to reset the password
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
+      console.log('No token found, redirecting to forgot-password page');
       router.push("/auth/forgot-password");
     }
   }, [router]);
 
-  // Function to handle password reset
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    // Validate that newPassword and confirmPassword match
+    console.log('New password:', newPassword);
+    console.log('Confirm password:', confirmPassword);
+
     if (newPassword !== confirmPassword) {
+      console.log('Passwords do not match');
       setError("Passwords do not match");
-      console.error("Passwords do not match");
       return;
     }
 
-    console.log("Submitting password reset request with newPassword:", newPassword);
-
     try {
+      console.log('Sending password reset request...');
       const res = await fetch("/api/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('authToken')}`, // Pass auth token
+          "Authorization": `Bearer ${localStorage.getItem('authToken')}`,
         },
-        body: JSON.stringify({ newPassword }), // Send new password to backend
+        body: JSON.stringify({ newPassword }),
       });
-      
-      const data = await res.json();
-      console.log("Response from reset-password API:", data);
 
-      if (res.ok) {
+      const data = await res.json();
+      console.log('Response status:', res.status);
+      console.log('Response data:', data);
+
+      if (res.status === 400) {
+        console.log('New password cannot be the same as the old password');
+        toast.error("New password cannot be the same as the old password");
+      } else if (res.ok) {
+        console.log('Password reset successful');
         setMessage("Password reset successfully");
-        localStorage.removeItem('authToken'); // Clear auth token
-        router.push("/Login"); // Redirect to login page after successful password reset
+        localStorage.removeItem('authToken');
+        router.push("/Login");
       } else {
+        console.log('Error from API:', data.message);
         setError(data.message);
         setMessage("");
-        console.error("Error from reset-password API:", data.message);
       }
     } catch (error) {
+      console.log('Failed to reset password:', error);
       setError("Failed to reset password");
-      console.error("Password reset failed:", error);
     }
   };
 
@@ -76,41 +83,44 @@ export default function ResetPassword() {
           {error && <p className="text-red-500 mb-4">{error}</p>}
           {message && <p className="text-green-500 mb-4">{message}</p>}
 
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <Label htmlFor="newPassword">New Password</Label>
-            <Input
-              type={showPassword ? "text" : "password"}
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
+            <div className="relative w-full">
+              <Input
+                type={showPassword ? "text" : "password"}
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                className="input input-bordered w-full pr-10"
+              />
+              <span
+                className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+              </span>
+            </div>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              type={showPassword ? "text" : "password"}
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          {/* Show Password Checkbox */}
-          <div className="flex items-center space-x-2 mb-4">
-            <Checkbox
-              checked={showPassword}
-              onCheckedChange={() => setShowPassword(!showPassword)}
-              id="show-password"
-            />
-            <label
-              htmlFor="show-password"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Show Password
-            </label>
+            <div className="relative w-full">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="input input-bordered w-full pr-10"
+              />
+              <span
+                className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+              </span>
+            </div>
           </div>
 
           <Button type="submit" className="w-full bg-blue-600">

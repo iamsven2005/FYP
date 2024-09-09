@@ -13,7 +13,10 @@ model images{
   name      String
   companyId String
   approved  String
-  retrived  String
+  retrived  String @db.Text
+  halal     Boolean
+  healthy   Boolean
+  AI        String
 }
 
 model User {
@@ -26,6 +29,7 @@ model User {
   otpExpires DateTime? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lastLogin DateTime?
 }
 model Company {
   id        String   @id @default(cuid())

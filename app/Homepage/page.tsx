@@ -39,7 +39,7 @@ const Homepage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen ">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
       <p className="text-xl mb-6">Email: {user.email}</p>
-      <Company user={user.username}/>
+      {/* <Company user={user.username}/> */}
 
     </div>
   );

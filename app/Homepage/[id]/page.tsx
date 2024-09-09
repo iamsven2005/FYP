@@ -5,6 +5,7 @@ import * as tmImage from "@teachablemachine/image";
 import "@tensorflow/tfjs";
 import Tesseract from "tesseract.js";
 import { BsImageFill } from "react-icons/bs";
+import { Button } from "@/components/ui/button"; // Assuming you're using some UI components
 
 export default function TeachableMachineWithOCR() {
   const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null);
@@ -18,6 +19,7 @@ export default function TeachableMachineWithOCR() {
   const [texts, setTexts] = useState<Array<string>>([]);
   const [processing, setProcessing] = useState<boolean>(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const [processedImage, setProcessedImage] = useState<string | null>(null); // State to hold base64 or file
 
   // Preload models on component mount
   useEffect(() => {
@@ -65,6 +67,7 @@ export default function TeachableMachineWithOCR() {
 
     setLoading(true);
     const imageUrl = URL.createObjectURL(file);
+    setProcessedImage(imageUrl); // Save the processed image for later use
 
     // Load the uploaded image into an HTML image element
     const imgElement = new Image();
@@ -102,6 +105,49 @@ export default function TeachableMachineWithOCR() {
 
       setLoading(false);
     };
+  };
+
+  // Function to send the processed image to an API endpoint
+  const handlePost = async () => {
+    if (!processedImage) {
+      alert("No image has been processed yet.");
+      return;
+    }
+  
+    setLoading(true);
+  
+    const dataToSend = {
+      imageurl: processedImage,   // The image URL from the uploaded file
+      name: "Processed Image",    // You can set this to the image name
+      companyId: "company-id",    // You can get this from context or props
+      approved: "pending",        // If this is manually approved later
+      retrived: texts.join(" "),  // Extracted text from Tesseract.js
+      halal: result.halal === "Halal",
+      healthy: result.healthy === "Healthy",
+      AI: "TeachableMachine & Tesseract.js", // This denotes the AI model used
+    };
+  
+    try {
+      const response = await fetch("/api/saveImage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToSend),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        alert("Image processed and saved successfully!");
+        console.log("API response:", data);
+      } else {
+        console.error("API request failed.");
+      }
+    } catch (error) {
+      console.error("Error sending image to API:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,6 +207,11 @@ export default function TeachableMachineWithOCR() {
             </div>
           ))}
         </div>
+
+        {/* Add Post Button */}
+        <Button onClick={handlePost} className="mt-4" disabled={loading}>
+          {loading ? "Posting..." : "Post Processed Image"}
+        </Button>
       </div>
     </div>
   );
