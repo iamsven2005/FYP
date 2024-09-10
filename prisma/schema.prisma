@@ -7,17 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model images{
-  id String @id @default(cuid())
-  imageurl  String
+model images {
+  id        String @id @default(cuid())
+  imageurl  String @db.LongText // Use LongText to store large base64 strings
   name      String
   companyId String
   approved  String
-  retrived  String @db.Text
+  retrived  String @db.Text // This should be fine as @db.Text
   halal     Boolean
   healthy   Boolean
-  AI        String
+  AI        String @db.Text
 }
+
 
 model User {
   id        String    @id @default(cuid())

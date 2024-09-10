@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faSave } from "@fortawesome/free-solid-svg-icons";
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "sonner";
+import { Trash } from "lucide-react";
 
 type User = {
   id: string;
@@ -193,7 +194,7 @@ const UserManagement = ({ roles }: UserManagementProps) => {
               </td>
               <td>
                 <Button className="btn btn-error" onClick={() => deleteUser(user.id)}>
-                  <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete
+                  <Trash/> Delete
                 </Button>
               </td>
             </tr>

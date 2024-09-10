@@ -9,7 +9,7 @@ import EditCompanyDialog from "./EditCompanyDialog";
 import Combobox from "@/components/Combobox";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { PlusCircle, Save } from "lucide-react";
+import { Archive, PlusCircle, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type User = {
@@ -222,7 +222,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
               className={`${company.archived ? "btn-secondary" : "btn-primary"}`}
               onClick={() => toggleArchiveCompany(company.id, !company.archived)}
             >
-              <FontAwesomeIcon icon={company.archived ? faBoxOpen : faArchive} className="mr-2" />
+              <Archive/>
               {company.archived ? "Unarchive" : "Archive"}
             </Button>
 

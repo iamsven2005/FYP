@@ -5,7 +5,17 @@ import * as tmImage from "@teachablemachine/image";
 import "@tensorflow/tfjs";
 import Tesseract from "tesseract.js";
 import { BsImageFill } from "react-icons/bs";
-import { Button } from "@/components/ui/button"; // Assuming you're using some UI components
+import { Button } from "@/components/ui/button";
+
+// Helper function to convert a file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 export default function TeachableMachineWithOCR() {
   const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null);
@@ -16,19 +26,18 @@ export default function TeachableMachineWithOCR() {
     halal: "",
     healthy: "",
   });
-  const [texts, setTexts] = useState<Array<string>>([]);
+  const [texts, setTexts] = useState<string>(""); // Single string for editable text
   const [processing, setProcessing] = useState<boolean>(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null); // State to hold base64 or file
+  const [processedImageBase64, setProcessedImageBase64] = useState<string | null>(null); // Hold base64 string
+  const [openAIResult, setOpenAIResult] = useState<string>(""); // State for OpenAI response
 
-  // Preload models on component mount
   useEffect(() => {
     const loadModels = async () => {
-      const halalModelURL = "/halal/model.json"; // Path to your Halal model.json file
-      const halalMetadataURL = "/halal/metadata.json"; // Path to your Halal metadata.json file
-
-      const healthyModelURL = "/healthy/model.json"; // Path to your Healthy model.json file
-      const healthyMetadataURL = "/healthy/metadata.json"; // Path to your Healthy metadata.json file
+      const halalModelURL = "/halal/model.json";
+      const halalMetadataURL = "/halal/metadata.json";
+      const healthyModelURL = "/healthy/model.json";
+      const healthyMetadataURL = "/healthy/metadata.json";
 
       const loadedHalalModel = await tmImage.load(halalModelURL, halalMetadataURL);
       const loadedHealthyModel = await tmImage.load(healthyModelURL, healthyMetadataURL);
@@ -37,21 +46,19 @@ export default function TeachableMachineWithOCR() {
       setHealthyModel(loadedHealthyModel);
     };
 
-    loadModels(); // Call the function to load models on mount
-  }, []); // Empty dependency array ensures this runs only once when the component is mounted
+    loadModels();
+  }, []);
 
-  // Open file input dialog
   const openBrowseImage = async () => {
     await imageInputRef.current?.click();
   };
 
-  // Convert image to text using Tesseract.js (OCR)
   const convert = async (url: string): Promise<void> => {
     if (url.length) {
       setProcessing(true);
       try {
         const { data: { text } } = await Tesseract.recognize(url, 'eng');
-        setTexts((prevTexts) => [...prevTexts, text]);
+        setTexts(text); // Save the extracted text in state
       } catch (error) {
         console.error("Error during conversion", error);
       } finally {
@@ -60,41 +67,37 @@ export default function TeachableMachineWithOCR() {
     }
   };
 
-  // Handle Image Upload and Prediction for both models, plus OCR
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !halalModel || !healthyModel) return;
 
     setLoading(true);
-    const imageUrl = URL.createObjectURL(file);
-    setProcessedImage(imageUrl); // Save the processed image for later use
 
-    // Load the uploaded image into an HTML image element
+    // Convert the uploaded file to base64
+    const base64Image = await fileToBase64(file);
+    setProcessedImageBase64(base64Image);
+
+    const imageUrl = URL.createObjectURL(file); // Still use this for predictions and OCR
     const imgElement = new Image();
     imgElement.src = imageUrl;
 
     imgElement.onload = async () => {
-      // Run OCR (Text extraction)
       await convert(imageUrl);
 
-      // Run predictions on the Halal model
       const halalPrediction = await halalModel.predict(imgElement);
       const halalResult =
         halalPrediction.length >= 2 && halalPrediction[0].probability > halalPrediction[1].probability
           ? "Not Halal"
           : "Halal";
 
-      // Run predictions on the Healthy model
       const healthyPrediction = await healthyModel.predict(imgElement);
       const healthyResult =
         healthyPrediction.length >= 2 && healthyPrediction[0].probability > healthyPrediction[1].probability
           ? "Not Healthy"
           : "Healthy";
 
-      // Update the result for both models
       setResult({ halal: halalResult, healthy: healthyResult });
 
-      // Update the label container with all results from both models
       const halalResults = halalPrediction.map(
         (pred) => `Halal Model - ${pred.className}: ${pred.probability.toFixed(2)}`
       );
@@ -107,26 +110,55 @@ export default function TeachableMachineWithOCR() {
     };
   };
 
-  // Function to send the processed image to an API endpoint
+  const handleOpenAICheck = async () => {
+    if (!texts) {
+      alert("No text extracted from the image.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/openaiCheck', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: texts }), // Send edited text to OpenAI
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOpenAIResult(data.classification); // Set the OpenAI response
+      } else {
+        console.error("Failed to get OpenAI classification.");
+      }
+    } catch (error) {
+      console.error("Error in OpenAI request:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to save processed image (base64) and OpenAI results
   const handlePost = async () => {
-    if (!processedImage) {
+    if (!processedImageBase64) {
       alert("No image has been processed yet.");
       return;
     }
-  
+
     setLoading(true);
-  
+
     const dataToSend = {
-      imageurl: processedImage,   // The image URL from the uploaded file
-      name: "Processed Image",    // You can set this to the image name
-      companyId: "company-id",    // You can get this from context or props
-      approved: "pending",        // If this is manually approved later
-      retrived: texts.join(" "),  // Extracted text from Tesseract.js
+      imageurl: processedImageBase64, // Send base64 image
+      name: "Processed Image",
+      companyId: "company-id",
+      approved: "pending",
+      retrived: texts, // Send the edited text
       halal: result.halal === "Halal",
       healthy: result.healthy === "Healthy",
-      AI: "TeachableMachine & Tesseract.js", // This denotes the AI model used
+      AI: openAIResult || "TeachableMachine & Tesseract.js",
     };
-  
+
     try {
       const response = await fetch("/api/saveImage", {
         method: "POST",
@@ -135,7 +167,7 @@ export default function TeachableMachineWithOCR() {
         },
         body: JSON.stringify(dataToSend),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         alert("Image processed and saved successfully!");
@@ -198,20 +230,33 @@ export default function TeachableMachineWithOCR() {
           </>
         )}
 
-        {/* Display extracted text */}
+        {/* Editable Text Area for OCR extracted text */}
         <div className="w-full mt-5">
-          {texts.map((t, i) => (
-            <div key={i} className="text-white bg-gray-800 p-4 rounded-md mb-4">
-              <h3>Extracted Text:</h3>
-              <p>{t}</p>
-            </div>
-          ))}
+          <h3 className="text-white">Edit Extracted Text:</h3>
+          <textarea
+            className="w-full h-32 bg-gray-800 text-white p-4 rounded-md"
+            value={texts}
+            onChange={(e) => setTexts(e.target.value)} // Allow editing
+          />
         </div>
 
         {/* Add Post Button */}
         <Button onClick={handlePost} className="mt-4" disabled={loading}>
           {loading ? "Posting..." : "Post Processed Image"}
         </Button>
+
+        {/* Button to send edited text to OpenAI */}
+        <Button onClick={handleOpenAICheck} className="mt-4" disabled={loading}>
+          {loading ? "Processing..." : "Check if food is safe with OpenAI"}
+        </Button>
+
+        {/* Display OpenAI result */}
+        {openAIResult && (
+          <div className="text-white bg-green-700 p-4 rounded-md mt-4">
+            <h3>OpenAI Classification:</h3>
+            <p>{openAIResult}</p>
+          </div>
+        )}
       </div>
     </div>
   );

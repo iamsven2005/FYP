@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import Combobox from "@/components/Combobox";
+import { Edit, Save } from "lucide-react";
 
 // Define the types for User and Company
 type User = {
@@ -75,7 +76,7 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
     <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <FontAwesomeIcon icon={faEdit} className="mr-2" /> Edit Company
+          <Edit/> Edit Company
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -121,7 +122,7 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
         </div>
         <DialogFooter>
           <Button className="btn btn-primary" onClick={updateCompany} disabled={loading}>
-            <FontAwesomeIcon icon={faSave} className="mr-2" />
+            <Save/>
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

@@ -61,7 +61,7 @@ export default function ResetPassword() {
         console.log('Password reset successful');
         setMessage("Password reset successfully");
         localStorage.removeItem('authToken');
-        router.push("/Login");
+        router.push("/login");
       } else {
         console.log('Error from API:', data.message);
         setError(data.message);
