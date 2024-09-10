@@ -1,5 +1,7 @@
+// C:\Users\nasif\Documents\GitHub\FYP\app\api\users\[userId]\route.ts
 import { NextResponse } from "next/server";
-import { db, db as prisma } from "@/lib/db"; // Assuming you have set up Prisma and db correctly in lib/db
+import { db as prisma } from "@/lib/db"; // Prisma setup
+import { invalidateSession } from "@/lib/session"; // Assuming session handling logic is defined here
 
 export async function PATCH(req: Request, { params }: { params: { userId: string } }) {
   const { userId } = params;
@@ -28,13 +30,17 @@ export async function DELETE(req: Request, { params }: { params: { userId: strin
   const { userId } = params;
 
   try {
-    await db.user.delete({
+    // Invalidate session when user is deleted
+    await invalidateSession(userId); // Assumes a utility to invalidate user sessions
+
+    // Delete user from the database
+    await prisma.user.delete({
       where: { id: userId },
     });
 
-    return NextResponse.json({ message: 'User deleted successfully' });
+    return NextResponse.json({ message: "User deleted and session invalidated successfully" });
   } catch (error) {
-    console.error('Failed to delete user:', error);
-    return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
+    console.error("Failed to delete user:", error);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

@@ -20,17 +20,33 @@ model images{
 }
 
 model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  email     String   @unique
+  id        String    @id @default(cuid())
+  username  String    @unique
+  email     String    @unique
   password  String
-  role      String   @default("Staff")
-  otp       String?  
-  otpExpires DateTime? 
+  role      String    @default("Staff")
+  otp       String?
+  otpExpires DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime?
+
+  // Relation to Session (One-to-Many)
+  sessions  Session[] // Add this line to relate User to Session
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  lastLogin DateTime?
+
+  // Relation to User
+  user      User     @relation(fields: [userId], references: [id])
 }
+
+
 model Company {
   id        String   @id @default(cuid())
   imgurl    String

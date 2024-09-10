@@ -4,7 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Cookies from "js-cookie"; // To manage cookies in the client
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
@@ -12,45 +12,60 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
+  // Check the login status by looking for the token in the cookie or localStorage
   const checkLoginStatus = () => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    console.log("Checking login status...");
+
+    // Fetch token from both Cookies and localStorage
+    const storedToken = Cookies.get("token") || localStorage.getItem("token");
+    console.log("Token found:", storedToken); // Debug: Log the token value
+
+    if (storedToken) {
       setIsLoggedIn(true);
     } else {
+      console.log("No token found, setting isLoggedIn to false");
       setIsLoggedIn(false);
     }
   };
 
   useEffect(() => {
+    console.log("Navbar mounted. Checking login status...");
     checkLoginStatus(); // Call initially to set login status
-
-    // Listen for custom "storage" event to check token updates
-    window.addEventListener('storage', checkLoginStatus);
 
     // Handle theme from localStorage
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
+      console.log("Theme found:", savedTheme);
       setIsDarkTheme(savedTheme === "dark");
       document.documentElement.setAttribute("data-theme", savedTheme);
     } else {
+      console.log("No theme found, setting to light mode.");
       setIsDarkTheme(false);
       document.documentElement.setAttribute("data-theme", "light");
     }
 
+    // Listen for changes in token from localStorage (for multiple tabs)
+    window.addEventListener("storage", checkLoginStatus);
+
     // Cleanup event listener when the component unmounts
     return () => {
-      window.removeEventListener('storage', checkLoginStatus);
+      console.log("Cleaning up Navbar component.");
+      window.removeEventListener("storage", checkLoginStatus);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    console.log("Logging out. Removing token from cookies and localStorage.");
+    Cookies.remove("token"); // Remove token from the cookie
+    localStorage.removeItem("token"); // Remove token from localStorage (if it's stored there)
+    localStorage.setItem("isLoggedIn", "false"); // Ensure other tabs see the logout
     setIsLoggedIn(false);
     router.push("/");
   };
 
   const handleThemeSwitch = () => {
     const newTheme = isDarkTheme ? "light" : "dark";
+    console.log("Switching theme to:", newTheme);
     setIsDarkTheme(!isDarkTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
