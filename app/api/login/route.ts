@@ -39,9 +39,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if the password is valid
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+    if (user.password) {
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+      }
+    } else {
+      return NextResponse.json({ message: "Password is missing or invalid" }, { status: 401 });
     }
 
     // Check if user already has an active session
@@ -59,7 +63,7 @@ export async function POST(req: NextRequest) {
     const bypassAccount = bypassOtpAccounts.find(acc => acc.email === email);
     if (bypassAccount) {
       const token = createJWT(user.id, user.email, bypassAccount.role);
-      
+
       // Create a session for the user
       await createSession(user.id, token);
 
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
 
       response.cookies.set('token', token, {
         httpOnly: true,
-        secure: true, 
+        secure: true,
         path: '/',
         maxAge: 60 * 60 // 1 hour expiration
       });
