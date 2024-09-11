@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Homepage = () => {
   const [user, setUser] = useState<{ username: string; email: string; id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<any[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -26,7 +29,6 @@ const Homepage = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = parseJwt(token);
-      // Extract id, username, and email from the token
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
       router.push("/login");
@@ -36,13 +38,14 @@ const Homepage = () => {
 
   useEffect(() => {
     if (user) {
-      fetch(`/api/companies/${user.username}`)
+      fetch(`/api/companies/${user.id}`)
         .then((response) => response.json())
         .then((data) => {
           if (data.error) {
             setError(data.error);
           } else {
             setCompanies(data.companies);
+            setFilteredCompanies(data.companies); 
           }
         })
         .catch(() => {
@@ -51,6 +54,17 @@ const Homepage = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = companies.filter((company) =>
+        company.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCompanies(filtered);
+    } else {
+      setFilteredCompanies(companies);
+    }
+  }, [searchQuery, companies]);
+
   if (loading) return <p>Loading...</p>;
   if (!user) return <p>No user found</p>;
 
@@ -58,15 +72,22 @@ const Homepage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
       <p className="text-xl mb-2">Email: {user.email}</p>
-      {/* Display user ID */}
       <p className="text-xl mb-6">User ID: {user.id}</p>
+
+      <input
+        type="text"
+        placeholder="Search companies..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="mb-4 p-2 border rounded"
+      />
 
       {error ? (
         <p>{error}</p>
       ) : (
         <div>
-          {companies.length > 0 ? (
-            companies.map((company) => (
+          {filteredCompanies.length > 0 ? (
+            filteredCompanies.map((company) => (
               <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
                 <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
                 <div className="flex">
@@ -74,7 +95,8 @@ const Homepage = () => {
                   <p>{company.archived ? "Archived" : "Active"}</p>
                 </div>
                 <div className="flex gap-5">
-                  <a href={`/Homepage/${company.id}`}>View</a>
+                  <Link href={`/Homepage/${company.id}`}>View</Link>
+                  <Link href={`/Homepage/${company.id}/upload`}>Upload</Link>
                 </div>
               </div>
             ))
