@@ -30,20 +30,6 @@ model User {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   lastLogin  DateTime?
-
-  // Relation to Session (One-to-Many)
-  sessions Session[] // Add this line to relate User to Session
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @db.Text // Allow larger tokens by using the Text data type
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relation to User
-  user User @relation(fields: [userId], references: [id])
 }
 
 model Company {

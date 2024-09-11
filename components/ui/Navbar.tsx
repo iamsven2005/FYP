@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Cookies from "js-cookie"; // To manage cookies in the client
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
@@ -12,15 +11,15 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(false);
 
-  // Check the login status by looking for the token in the cookie or localStorage
+  // Check the login status by looking for the token in localStorage
   const checkLoginStatus = () => {
     console.log("Checking login status...");
 
-    // Fetch token from both Cookies and localStorage
-    const storedToken = Cookies.get("token") || localStorage.getItem("token");
+    // Fetch token from localStorage
+    const storedToken = localStorage.getItem("token");
     console.log("Token found:", storedToken); // Debug: Log the token value
 
-    if (storedToken) {
+    if (storedToken && storedToken !== "null") { // Ensure token is not 'null'
       setIsLoggedIn(true);
     } else {
       console.log("No token found, setting isLoggedIn to false");
@@ -55,9 +54,8 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
-    console.log("Logging out. Removing token from cookies and localStorage.");
-    Cookies.remove("token"); // Remove token from the cookie
-    localStorage.removeItem("token"); // Remove token from localStorage (if it's stored there)
+    console.log("Logging out. Removing token from localStorage.");
+    localStorage.removeItem("token"); // Remove token from localStorage
     localStorage.setItem("isLoggedIn", "false"); // Ensure other tabs see the logout
     setIsLoggedIn(false);
     router.push("/");
@@ -103,7 +101,7 @@ const Navbar = () => {
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link href="/Register" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                  <Link href="/register" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
                     Register
                   </Link>
                 </NavigationMenuItem>

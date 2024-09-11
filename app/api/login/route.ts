@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db as prisma } from "@/lib/db"; // Prisma client import
-import { createJWT, checkActiveSession, createSession } from "@/lib/session"; // Session utilities
+import { createJWT } from "@/lib/session"; 
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
@@ -39,24 +39,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if the password is valid
-    if (user.password) {
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) {
-        return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
-      }
-    } else {
-      return NextResponse.json({ message: "Password is missing or invalid" }, { status: 401 });
-    }
-
-    // Check if user already has an active session
-    const activeSession = await checkActiveSession(user.id);
-    if (activeSession) {
-      // If an active session exists, prompt the user to terminate or continue
-      return NextResponse.json({
-        message: "Active session detected. Do you want to terminate the previous session and continue?",
-        sessionExists: true,
-        userId: user.id,
-      }, { status: 200 });
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
     }
 
     // Bypass OTP for default accounts (admin, staff, manager, client)
@@ -64,29 +49,12 @@ export async function POST(req: NextRequest) {
     if (bypassAccount) {
       const token = createJWT(user.id, user.email, bypassAccount.role);
 
-      // Create a session for the user
-      await createSession(user.id, token);
-
-      // Debugging: Log the generated token
-      console.log("Generated token:", token);
-
-      // Set token in an HttpOnly cookie
+      // Send the token to the client to store it in localStorage
       const response = NextResponse.json({
         message: "Login successful",
         redirectTo: bypassAccount.redirectTo,
+        token: token // Pass the token in the response body
       });
-
-      // Debugging: Log the cookie being set
-      console.log("Setting cookie with token...");
-
-      response.cookies.set('token', token, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        maxAge: 60 * 60 // 1 hour expiration
-      });
-
-      console.log("Cookie set successfully");
 
       return response;
     }

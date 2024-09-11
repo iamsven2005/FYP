@@ -45,7 +45,7 @@ const MainPage = async () => {
             <Link href="/login">
              Login
             </Link>
-            <Link href="/Register">
+            <Link href="/register">
               <Button variant="secondary">Register</Button>
             </Link>
           </CardFooter>
