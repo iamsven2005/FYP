@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 // Define the POST method
@@ -21,7 +22,6 @@ export async function POST(req: Request) {
       },
     });
 
-    // Return success response
     return NextResponse.json({ success: true, data: newImage });
   } catch (error) {
     console.error("Error saving image data", error);

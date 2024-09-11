@@ -1,104 +1,110 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 
-type StaffRequest = {
-  id: string;
-  username: string;
-  email: string;
-  status: string; // e.g., "pending", "approved", "rejected"
-};
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-const ManagerPage = () => {
-  const [staffRequests, setStaffRequests] = useState<StaffRequest[]>([]);
-  const [message, setMessage] = useState<string>("");
+const Homepage = () => {
+  const [user, setUser] = useState<{ username: string; email: string; id: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Fetch staff requests from the API when the component loads
+  function parseJwt(token: string) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  }
+
   useEffect(() => {
-    const fetchStaffRequests = async () => {
-      try {
-        const res = await fetch("/api/staff-requests");
-        const data = await res.json();
-
-        // Check if the data is an array, otherwise set an empty array
-        if (Array.isArray(data)) {
-          setStaffRequests(data);
-        } else {
-          setStaffRequests([]);
-        }
-      } catch (error) {
-        setMessage("Failed to fetch staff requests");
-      }
-    };
-
-    fetchStaffRequests();
-  }, []);
-
-  // Function to approve or reject a staff request
-  const handleApproval = async (id: string, approve: boolean) => {
-    try {
-      const res = await fetch(`/api/staff-requests/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: approve ? "approved" : "rejected" }),
-      });
-
-      if (res.ok) {
-        setMessage(`Request ${approve ? "approved" : "rejected"} successfully`);
-        setStaffRequests((prevRequests) =>
-          prevRequests.map((req) =>
-            req.id === id ? { ...req, status: approve ? "approved" : "rejected" } : req
-          )
-        );
-      } else {
-        setMessage("Failed to process the request");
-      }
-    } catch (error) {
-      setMessage("An error occurred while processing the request");
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
+    } else {
+      router.push("/login");
     }
-  };
+    setLoading(false);
+  }, [router]);
+
+  useEffect(() => {
+    if (user) {
+      fetch(`/api/companies/${user.id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setCompanies(data.companies);
+            setFilteredCompanies(data.companies); 
+          }
+        })
+        .catch(() => {
+          setError("Failed to load companies");
+        });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = companies.filter((company) =>
+        company.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCompanies(filtered);
+    } else {
+      setFilteredCompanies(companies);
+    }
+  }, [searchQuery, companies]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!user) return <p>No user found</p>;
 
   return (
-    <div className="container mx-auto mt-10">
-      <h1 className="text-2xl font-bold">Manager Dashboard</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
+      <p className="text-xl mb-2">Email: {user.email}</p>
+      <p className="text-xl mb-6">User ID: {user.id}</p>
 
-      {/* Success or Error Message */}
-      {message && <p className={`mt-4 ${message.includes("successfully") ? "text-green-500" : "text-red-500"}`}>{message}</p>}
-
-      <div className="mt-4 space-y-4">
-        {staffRequests.length === 0 ? (
-          <p>No pending staff requests</p>
-        ) : (
-          staffRequests.map((request) => (
-            <div key={request.id} className="border p-4 rounded-md">
-              <h3 className="text-xl font-semibold">{request.username}</h3>
-              <p>{request.email}</p>
-              <p>Status: {request.status}</p>
-
-              {request.status === "pending" && (
-                <div className="mt-4 space-x-2">
-                  <Button
-                    onClick={() => handleApproval(request.id, true)}
-                    className="bg-green-600"
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    onClick={() => handleApproval(request.id, false)}
-                    className="bg-red-600"
-                  >
-                    Reject
-                  </Button>
+      <input
+        type="text"
+        placeholder="Search companies..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="mb-4 p-2 border rounded"
+      />
+      
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <div>
+          {filteredCompanies.length > 0 ? (
+            filteredCompanies.map((company) => (
+              <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
+                <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
+                <div className="flex">
+                  <h3 className="text-lg font-bold">{company.name}</h3>
+                  <p>{company.archived ? "Archived" : "Active"}</p>
                 </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+                <div className="flex gap-5">
+                  <a href={`/Homepage/${company.id}`}>View</a>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No companies found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default ManagerPage;
+export default Homepage;

@@ -18,7 +18,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   try {
     const companies = await db.company.findMany({
       where: {
-        staff: params.id,
+        OR: [
+          { staff: params.id }, 
+          { manager: params.id },
+        ],
         archived: false,
       },
     });
