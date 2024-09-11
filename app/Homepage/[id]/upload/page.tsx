@@ -190,13 +190,6 @@ export default function TeachableMachineWithOCR({params}: Props) {
 
   return (
     <div className="min-h-[90vh]">
-      <h1 className="text-white text-4xl md:text-6xl text-center px-5 pt-5 font-[800]">
-        Built With{" "}
-        <span className="bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text">
-          Teachable Machine & Tesseract.js
-        </span>
-      </h1>
-
       <input
         onChange={handleImageUpload}
         ref={imageInputRef}
@@ -224,13 +217,13 @@ export default function TeachableMachineWithOCR({params}: Props) {
           <p>Loading...</p>
         ) : (
           <>
-            <h2 className="text-xl md:text-2xl text-white">Halal: {result.halal}</h2>
-            <h2 className="text-xl md:text-2xl text-white">Healthy: {result.healthy}</h2>
+            <h2 className="text-xl md:text-2xl">Halal: {result.halal}</h2>
+            <h2 className="text-xl md:text-2xl">Healthy: {result.healthy}</h2>
 
             {/* Display all prediction labels */}
             <div id="label-container">
               {labelContainer.map((label, idx) => (
-                <div key={idx} className="text-white">{label}</div>
+                <div key={idx}>{label}</div>
               ))}
             </div>
           </>
@@ -238,7 +231,7 @@ export default function TeachableMachineWithOCR({params}: Props) {
 
         {/* Editable Text Area for OCR extracted text */}
         <div className="w-full mt-5">
-          <h3 className="text-white">Edit Extracted Text:</h3>
+          <h3>Edit Extracted Text:</h3>
           <textarea
             className="w-full h-32 bg-gray-800 text-white p-4 rounded-md"
             value={texts}
