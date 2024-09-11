@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button"; 
 
-const Homepage = () => {
+const ManagerDashboard = () => {
   const [user, setUser] = useState<{ username: string; email: string; id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<any[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Search query for filtering companies
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Function to decode JWT token
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -24,17 +27,19 @@ const Homepage = () => {
     return JSON.parse(jsonPayload);
   }
 
+  // Effect to handle user authentication
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      router.push("/login");
+      router.push("/login"); // Redirect to login if no token is found
     }
     setLoading(false);
   }, [router]);
 
+  // Fetch companies associated with the user (as manager or staff)
   useEffect(() => {
     if (user) {
       fetch(`/api/companies/${user.id}`)
@@ -44,7 +49,7 @@ const Homepage = () => {
             setError(data.error);
           } else {
             setCompanies(data.companies);
-            setFilteredCompanies(data.companies); 
+            setFilteredCompanies(data.companies); // Initialize filtered companies
           }
         })
         .catch(() => {
@@ -53,6 +58,7 @@ const Homepage = () => {
     }
   }, [user]);
 
+  // Filter companies based on search query
   useEffect(() => {
     if (searchQuery) {
       const filtered = companies.filter((company) =>
@@ -64,7 +70,9 @@ const Homepage = () => {
     }
   }, [searchQuery, companies]);
 
+  // If data is still loading
   if (loading) return <p>Loading...</p>;
+  // If no user is found
   if (!user) return <p>No user found</p>;
 
   return (
@@ -73,6 +81,7 @@ const Homepage = () => {
       <p className="text-xl mb-2">Email: {user.email}</p>
       <p className="text-xl mb-6">User ID: {user.id}</p>
 
+      {/* Search Input */}
       <input
         type="text"
         placeholder="Search companies..."
@@ -80,31 +89,51 @@ const Homepage = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="mb-4 p-2 border rounded"
       />
-      
+
+      {/* Handle error or display companies */}
       {error ? (
         <p>{error}</p>
       ) : (
-        <div>
-          {filteredCompanies.length > 0 ? (
-            filteredCompanies.map((company) => (
-              <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
-                <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
-                <div className="flex">
-                  <h3 className="text-lg font-bold">{company.name}</h3>
-                  <p>{company.archived ? "Archived" : "Active"}</p>
-                </div>
-                <div className="flex gap-5">
-                  <a href={`/Homepage/${company.id}`}>View</a>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No companies found.</p>
-          )}
+        <div className="w-full">
+          <table className="table-auto w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-4 py-2">Company Name</th>
+                <th className="border border-gray-300 px-4 py-2">Status</th>
+                <th className="border border-gray-300 px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCompanies.length > 0 ? (
+                filteredCompanies.map((company) => (
+                  <tr key={company.id} className="hover:bg-gray-200">
+                    <td className="border border-gray-300 px-4 py-2">{company.name}</td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {company.archived ? "Archived" : "Active"}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      {/* Actions: View Details */}
+                      <div className="flex gap-4">
+                        <Link href={`/manager/${company.id}`}>
+                          <Button className="btn-primary">View Details</Button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="text-center py-4">
+                    No companies found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
 };
 
-export default Homepage;
+export default ManagerDashboard;
