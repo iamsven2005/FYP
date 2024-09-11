@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db as prisma } from "@/lib/db"; // Prisma client import
-import { createJWT } from "@/lib/session"; 
+import { createJWT } from "@/lib/session";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
@@ -50,13 +50,11 @@ export async function POST(req: NextRequest) {
       const token = createJWT(user.id, user.email, bypassAccount.role);
 
       // Send the token to the client to store it in localStorage
-      const response = NextResponse.json({
+      return NextResponse.json({
         message: "Login successful",
         redirectTo: bypassAccount.redirectTo,
         token: token // Pass the token in the response body
-      });
-
-      return response;
+      }, { status: 200 });
     }
 
     // For non-default users, generate OTP
@@ -107,7 +105,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "OTP sent to your email", userId: user.id }, { status: 200 });
 
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error:", error); // Handle server-side error, no need for toast here
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
