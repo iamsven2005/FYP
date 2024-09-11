@@ -2,15 +2,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faArchive, faBoxOpen } from "@fortawesome/free-solid-svg-icons";
-import { UploadButton } from "@/lib/uploadthing";
 import EditCompanyDialog from "./EditCompanyDialog";
 import Combobox from "@/components/Combobox";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Archive, PlusCircle, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Company } from "@prisma/client";
 
 type User = {
   id: string;
@@ -18,12 +17,6 @@ type User = {
   role: string;
 };
 
-type Company = {
-  id: string;
-  name: string;
-  archived: boolean;
-  imgurl: string;
-};
 
 const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], managerUsers: User[] }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -89,6 +82,18 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
     }
   };
 
+  // Convert image to base64
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCompanyImgUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const createCompany = async () => {
     try {
       const res = await fetch("/api/companies", {
@@ -96,7 +101,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: companyName,
-          imgurl: companyImgUrl,
+          imgurl: companyImgUrl, // Now a base64 string
           staffId: selectedStaff,
           managerId: selectedManager,
         }),
@@ -174,15 +179,10 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
             />
-            <UploadButton
-              endpoint="imageUploader"
-              onClientUploadComplete={(res: { url: any }[]) => {
-                setCompanyImgUrl(res[0]?.url || "");
-              }}
-              onUploadError={(error: Error) => {
-                alert(`ERROR! ${error.message}`);
-              }}
-            />
+
+            {/* Image upload as base64 */}
+            <input type="file" accept="image/*" onChange={handleImageChange} />
+            {companyImgUrl && <img src={companyImgUrl} alt="Preview" className="mt-4 max-w-full h-auto" />}
 
             {/* Staff and Manager Comboboxes */}
             <div className="mt-10">
@@ -212,7 +212,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
       </Dialog>
         {filteredCompanies.map((company) => (
           <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
-            <img src={company.imgurl} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
+            <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
             <div className="flex">
             <h3 className="text-lg font-bold">{company.name}</h3>
             <Badge>{company.archived ? "Archived" : "Active"}</Badge>
@@ -225,7 +225,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
               <Archive/>
               {company.archived ? "Unarchive" : "Archive"}
             </Button>
-
+            <Link href={`/admin/${company.id}`}>View</Link>
             <EditCompanyDialog
               company={company}
               staffUsers={staffUsers}

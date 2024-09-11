@@ -8,76 +8,72 @@ datasource db {
 }
 
 model images {
-  id        String @id @default(cuid())
-  imageurl  String @db.LongText // Use LongText to store large base64 strings
+  id        String  @id @default(cuid())
+  imageurl  String  @db.LongText
   name      String
   companyId String
   approved  String
-  retrived  String @db.Text // This should be fine as @db.Text
+  retrived  String  @db.Text // This should be fine as @db.Text
   halal     Boolean
   healthy   Boolean
-  AI        String @db.Text
+  AI        String  @db.Text
 }
 
-
 model User {
-  id        String    @id @default(cuid())
-  username  String    @unique
-  email     String    @unique
-  password  String
-  role      String    @default("Staff")
-  otp       String?
+  id         String    @id @default(cuid())
+  username   String    @unique
+  email      String    @unique
+  password   String
+  role       String    @default("Staff")
+  otp        String?
   otpExpires DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  lastLogin DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastLogin  DateTime?
 
   // Relation to Session (One-to-Many)
-  sessions  Session[] // Add this line to relate User to Session
+  sessions Session[] // Add this line to relate User to Session
 }
 
 model Session {
   id        String   @id @default(cuid())
   userId    String
-  token     String   @db.Text   // Allow larger tokens by using the Text data type
+  token     String   @db.Text // Allow larger tokens by using the Text data type
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relation to User
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
-
-
 
 model Company {
   id        String   @id @default(cuid())
-  imgurl    String
+  img       String   @db.LongText
   name      String
   archived  Boolean  @default(false)
-  staff   String?
-  manager String?
+  staff     String?
+  manager   String?
   createdAt DateTime @default(now())
 }
 
-
-model Role{
-    id        String   @id @default(cuid())
-    companyId String
-    userId    String
-    rolename  String
-    position  Int
+model Role {
+  id        String @id @default(cuid())
+  companyId String
+  userId    String
+  rolename  String
+  position  Int
 }
 
-model Notification{
-    id        String   @id @default(cuid())
-    user_from  String
-    user_to    String
-    body       String
-    read       String
+model Notification {
+  id        String @id @default(cuid())
+  user_from String
+  user_to   String
+  body      String
+  read      String
 }
 
-model Checklist{
-  id        String   @id @default(cuid())
-  name      String
-  body      String
+model Checklist {
+  id   String @id @default(cuid())
+  name String
+  body String
 }

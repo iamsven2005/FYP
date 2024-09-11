@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   try {
     const newCompany = await db.company.create({
       data: {
-        imgurl,
+        img: imgurl,
         name,
         archived: false,
         staff:staffId,

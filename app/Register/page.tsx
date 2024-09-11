@@ -86,7 +86,7 @@ const RegisterPage = () => {
       });
 
       if (res.ok) {
-        router.push('/Login');
+        router.push('/login');
       } else {
         const data = await res.json();
         setError(data.message || 'Something went wrong.');

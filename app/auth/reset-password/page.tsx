@@ -6,7 +6,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
-import { toast } from 'react-toastify'; // Import react-toastify
+import { toast } from "sonner";
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");

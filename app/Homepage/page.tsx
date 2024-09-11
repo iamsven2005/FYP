@@ -2,24 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Company from "./companies";
-
-function parseJwt(token: string) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split('')
-      .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
-  );
-  return JSON.parse(jsonPayload);
-}
 
 const Homepage = () => {
   const [user, setUser] = useState<{ username: string; email: string } | null>(null);
-
+  const [loading, setLoading] = useState(true);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  function parseJwt(token: string) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,18 +30,56 @@ const Homepage = () => {
     } else {
       router.push("/login");
     }
+    setLoading(false);
   }, [router]);
 
+  useEffect(() => {
+    if (user) {
+      fetch(`/api/companies/${user.username}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setCompanies(data.companies);
+          }
+        })
+        .catch((err) => {
+          setError("Failed to load companies");
+        });
+    }
+  }, [user]);
 
-
-  if (!user) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
+  if (!user) return <p>No user found</p>;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
       <p className="text-xl mb-6">Email: {user.email}</p>
-      {/* <Company user={user.username}/> */}
 
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <div>
+          {companies.length > 0 ? (
+            companies.map((company) => (
+              <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
+                <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
+                <div className="flex">
+                  <h3 className="text-lg font-bold">{company.name}</h3>
+                  <p>{company.archived ? "Archived" : "Active"}</p>
+                </div>
+                <div className="flex gap-5">
+                  <a href={`/Homepage/${company.id}`}>View</a>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No companies found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

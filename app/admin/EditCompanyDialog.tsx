@@ -4,12 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { UploadButton } from "@/lib/uploadthing";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSave, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "sonner";
 import Combobox from "@/components/Combobox";
 import { Edit, Save } from "lucide-react";
+import { Company } from "@prisma/client";
 
 // Define the types for User and Company
 type User = {
@@ -18,14 +16,7 @@ type User = {
   role: string;
 };
 
-type Company = {
-  id: string;
-  name: string;
-  archived: boolean;
-  imgurl: string;
-  staffId?: string;
-  managerId?: string;
-};
+
 
 type EditCompanyDialogProps = {
   company: Company;
@@ -36,10 +27,22 @@ type EditCompanyDialogProps = {
 
 const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate }: EditCompanyDialogProps) => {
   const [companyName, setCompanyName] = useState(company.name);
-  const [companyImgUrl, setCompanyImgUrl] = useState(company.imgurl);
-  const [selectedStaff, setSelectedStaff] = useState(company.staffId || "");
-  const [selectedManager, setSelectedManager] = useState(company.managerId || "");
+  const [companyImgUrl, setCompanyImgUrl] = useState(company.img);
+  const [selectedStaff, setSelectedStaff] = useState(company.staff || "");
+  const [selectedManager, setSelectedManager] = useState(company.manager || "");
   const [loading, setLoading] = useState(false);
+
+  // Handle image change and convert to Base64
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCompanyImgUrl(reader.result as string); // Set Base64 image to state
+      };
+      reader.readAsDataURL(file); // Convert the file to Base64
+    }
+  };
 
   // Handle company update
   const updateCompany = async () => {
@@ -52,7 +55,7 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
         },
         body: JSON.stringify({
           name: companyName,
-          imgurl: companyImgUrl,
+          imgurl: companyImgUrl, // Base64 string will be sent here
           staff: selectedStaff,
           manager: selectedManager,
         }),
@@ -76,7 +79,7 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
     <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <Edit/> Edit Company
+          <Edit /> Edit Company
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -91,15 +94,10 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
           />
-          <UploadButton
-            endpoint="imageUploader"
-            onClientUploadComplete={(res: { url: string }[]) => {
-              setCompanyImgUrl(res[0]?.url || "");
-            }}
-            onUploadError={(error: Error) => {
-              alert(`ERROR! ${error.message}`);
-            }}
-          />
+
+          {/* Image upload as base64 */}
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+          {companyImgUrl && <img src={companyImgUrl} alt="Preview" className="mt-4 max-w-full h-auto" />}
 
           {/* Staff and Manager Comboboxes */}
           <div className="mt-6">
@@ -122,7 +120,7 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
         </div>
         <DialogFooter>
           <Button className="btn btn-primary" onClick={updateCompany} disabled={loading}>
-            <Save/>
+            <Save />
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>

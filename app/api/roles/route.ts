@@ -1,4 +1,4 @@
-import { db as prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
   try {
     // Update the user's role in the User table
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await db.user.update({
       where: { id: userId },
       data: { role: rolename },
     });
