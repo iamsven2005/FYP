@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const Homepage = () => {
-  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ username: string; email: string; id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,8 @@ const Homepage = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = parseJwt(token);
-      setUser({ username: decoded.username, email: decoded.email });
+      // Extract id, username, and email from the token
+      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
       router.push("/login");
     }
@@ -44,7 +45,7 @@ const Homepage = () => {
             setCompanies(data.companies);
           }
         })
-        .catch((err) => {
+        .catch(() => {
           setError("Failed to load companies");
         });
     }
@@ -56,7 +57,9 @@ const Homepage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
-      <p className="text-xl mb-6">Email: {user.email}</p>
+      <p className="text-xl mb-2">Email: {user.email}</p>
+      {/* Display user ID */}
+      <p className="text-xl mb-6">User ID: {user.id}</p>
 
       {error ? (
         <p>{error}</p>
