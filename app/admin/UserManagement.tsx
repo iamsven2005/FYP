@@ -2,11 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faSave } from "@fortawesome/free-solid-svg-icons";
-import { confirmAlert } from "react-confirm-alert";
 import { toast } from "sonner";
 import { Trash } from "lucide-react";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 type User = {
   id: string;
@@ -16,6 +15,13 @@ type User = {
 
 type UserManagementProps = {
   roles: string[];
+};
+
+const rolePriority: { [key: string]: number } = {
+  Admin: 1,
+  Manager: 2,
+  Staff: 3,
+  Client: 4,
 };
 
 const UserManagement = ({ roles }: UserManagementProps) => {
@@ -32,6 +38,10 @@ const UserManagement = ({ roles }: UserManagementProps) => {
   const [limit, setLimit] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
 
+  // Sorting state
+  const [sortField, setSortField] = useState<string>("username"); // Default sorting field is username
+  const [sortDirection, setSortDirection] = useState<string>("asc"); // Default sorting direction is ascending
+
   // Fetch users from the API
   useEffect(() => {
     const fetchUsers = async () => {
@@ -42,6 +52,7 @@ const UserManagement = ({ roles }: UserManagementProps) => {
         setUsers(data.users);
         setFilteredUsers(data.users);
         setTotalPages(data.totalPages);
+
         // Initialize previousRoles with the current roles
         const initialRoles = data.users.reduce((acc: any, user: User) => {
           acc[user.id] = user.role;
@@ -58,14 +69,36 @@ const UserManagement = ({ roles }: UserManagementProps) => {
     fetchUsers();
   }, [page, limit]);
 
-  // Filter users based on the search term
+  // Filter and sort users
   useEffect(() => {
-    const filtered = users.filter((user) =>
+    let filtered = users.filter((user) =>
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Sorting logic
+    filtered = filtered.sort((a, b) => {
+      let valueA: string | number = a[sortField as keyof User];
+      let valueB: string | number = b[sortField as keyof User];
+
+      // If sorting by role, use rolePriority for numeric sorting
+      if (sortField === "role") {
+        valueA = rolePriority[a.role] || 999;
+        valueB = rolePriority[b.role] || 999;
+      }
+
+      // Compare as strings or numbers depending on the type
+      if (typeof valueA === 'number' && typeof valueB === 'number') {
+        return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+      } else {
+        const stringA = valueA.toString().toLowerCase();
+        const stringB = valueB.toString().toLowerCase();
+        return sortDirection === "asc" ? stringA.localeCompare(stringB) : stringB.localeCompare(stringA);
+      }
+    });
+
     setFilteredUsers(filtered);
-  }, [searchTerm, users]);
+  }, [searchTerm, users, sortField, sortDirection]);
 
   const assignRole = async (userId: string, newRole: string) => {
     setLoading((prev) => ({ ...prev, [userId]: true }));
@@ -105,18 +138,14 @@ const UserManagement = ({ roles }: UserManagementProps) => {
     assignRole(userId, newRole); // Auto-save on select
   };
 
-  const handleEscapeKey = (userId: string) => {
-    if (previousRoles[userId]) {
-      setSelectedRoles((prev) => ({
-        ...prev,
-        [userId]: previousRoles[userId],
-      }));
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLSelectElement>, userId: string) => {
-    if (event.key === "Escape") {
-      handleEscapeKey(userId); // Revert to the previous role on escape
+  const handleSortChange = (field: string) => {
+    if (sortField === field) {
+      // Toggle sort direction if the field is already selected
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Set new field and default to ascending sort
+      setSortField(field);
+      setSortDirection("asc");
     }
   };
 
@@ -169,8 +198,18 @@ const UserManagement = ({ roles }: UserManagementProps) => {
       <table className="table">
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Role</th>
+            <th>
+              Username
+              <button onClick={() => handleSortChange("username")}>
+                {sortField === "username" && sortDirection === "asc" ? "↑" : "↓"}
+              </button>
+            </th>
+            <th>
+              Role
+              <button onClick={() => handleSortChange("role")}>
+                {sortField === "role" && sortDirection === "asc" ? "↑" : "↓"}
+              </button>
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -182,7 +221,6 @@ const UserManagement = ({ roles }: UserManagementProps) => {
                 <select
                   value={selectedRoles[user.id] || user.role}
                   onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, user.id)} // Handle Escape key to revert changes
                   className="select select-bordered"
                 >
                   {roles.map((role) => (
@@ -194,7 +232,7 @@ const UserManagement = ({ roles }: UserManagementProps) => {
               </td>
               <td>
                 <Button className="btn btn-error" onClick={() => deleteUser(user.id)}>
-                  <Trash/> Delete
+                  <Trash /> Delete
                 </Button>
               </td>
             </tr>
