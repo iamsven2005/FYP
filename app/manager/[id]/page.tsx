@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"; // Assuming you have this UI component
+import { Company } from "@prisma/client";
 
 const CompanyDetails = ({ params }: { params: { id: string } }) => {
-  const [company, setCompany] = useState<any>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [items, setItems] = useState<any[]>([]); // Holds uploaded items for review
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +14,7 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
 
   // Fetch company details and uploaded items (images, etc.)
   useEffect(() => {
-    fetch(`/api/companies/${params.id}`)
+    fetch(`/api/companies/${params.id}/approve`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
@@ -67,11 +68,13 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
+  if (!company) return <p>No company details found.</p>; // This handles when company is null or undefined
+
   return (
     <div className="company-details">
       <h1 className="text-3xl font-bold mb-4">{company.name}</h1>
       <p>Status: {company.archived ? "Archived" : "Active"}</p>
-      <img src={company.img} alt={company.name} className="mt-4" />
+      {company.img && <img src={company.img} alt={company.name} className="mt-4" />} {/* Only render if img exists */}
 
       {/* Display Uploaded Items */}
       <div className="uploaded-items mt-6">

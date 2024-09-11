@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button"; 
+import { Company } from "@prisma/client";
 
 const ManagerDashboard = () => {
   const [user, setUser] = useState<{ username: string; email: string; id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<any[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<any[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search query for filtering companies
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
