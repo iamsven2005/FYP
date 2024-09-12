@@ -7,37 +7,42 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import Link from 'next/link';
+import { toast } from "sonner"; // Import toast
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [userId, setUserId] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false); // State to track Terms acceptance
   const router = useRouter();
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validateForm = () => {
     if (!email) {
-      setError('Email is required.');
+      toast.error('Email is required.');
       return false;
     }
 
     if (!emailRegex.test(email)) {
-      setError('Invalid email format.');
+      toast.error('Invalid email format.');
       return false;
     }
 
     if (!password) {
-      setError('Password is required.');
+      toast.error('Password is required.');
       return false;
     }
 
-    setError('');
+    if (!termsAccepted) {
+      toast.error('You must accept the Terms of Service and Privacy Policy.');
+      return false;
+    }
+
     return true;
   };
 
@@ -62,6 +67,7 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (res.ok && data.token) {
+        toast.success("Login successful!");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
 
@@ -70,11 +76,14 @@ const LoginPage = () => {
       } else if (data.userId) {
         setUserId(data.userId);
         setIsOtpSent(true);  // If OTP is required, switch to OTP input form
+        toast.success("OTP sent to your email.");
+      } else if (res.status === 404) {
+        toast.error("User does not exist."); // Handle user not found case
       } else {
-        setError(data.message || 'Something went wrong');
+        toast.error(data.message || 'Something went wrong');
       }
     } catch {
-      setError('Something went wrong. Please try again later.');
+      toast.error('Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -84,7 +93,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     if (!otp) {
-      setError('OTP is required');
+      toast.error('OTP is required');
       return;
     }
 
@@ -100,6 +109,7 @@ const LoginPage = () => {
       const data = await res.json();
 
       if (res.ok) {
+        toast.success("OTP verified successfully.");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
         
@@ -107,10 +117,10 @@ const LoginPage = () => {
         const redirectTo = data.redirectTo || '/Homepage';
         router.push(redirectTo);
       } else {
-        setError(data.message || 'Something went wrong');
+        toast.error(data.message || 'Something went wrong');
       }
     } catch {
-      setError('Something went wrong. Please try again later.');
+      toast.error('Something went wrong. Please try again later.');
     }
   };
 
@@ -121,8 +131,25 @@ const LoginPage = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={isOtpSent ? handleOtpSubmit : handleSubmit}>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          {!isOtpSent && (
+          {isOtpSent ? (
+            <>
+              <div className="mb-4">
+                <Label htmlFor="otp">Enter OTP</Label>
+                <Input
+                  type="text"
+                  id="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  className="input input-bordered w-full"
+                  placeholder="Enter OTP sent to your email"
+                />
+              </div>
+              <Button type="submit" className="w-full bg-blue-600" disabled={loading}>
+                {loading ? 'Verifying OTP...' : 'Verify OTP'}
+              </Button>
+            </>
+          ) : (
             <>
               <div className="mb-4">
                 <Label htmlFor="email">Email</Label>
@@ -157,30 +184,30 @@ const LoginPage = () => {
                 </div>
               </div>
               <div className="mb-4">
+                <Label htmlFor="terms">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={termsAccepted}
+                    onChange={() => setTermsAccepted(!termsAccepted)}
+                    className="mr-2"
+                  />
+                  I accept the <a href="/terms" className="underline text-blue-600">Terms of Service</a> and <a href="/privacy" className="underline text-blue-600">Privacy Policy</a>.
+                </Label>
+              </div>
+              <div className="mb-4">
                 <Link href="/auth/forgot-password" className="text-blue-600 hover:underline text-sm">Forgot Password?</Link>
               </div>
               <Button type="submit" className="w-full bg-blue-600" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
-            </>
-          )}
-          {isOtpSent && (
-            <>
-              <div className="mb-4">
-                <Label htmlFor="otp">Enter OTP</Label>
-                <Input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                  className="input input-bordered w-full"
-                  placeholder="Enter OTP sent to your email"
-                />
+
+              <div className="mt-4 text-center">
+                <p className="text-sm">
+                  Don’t have an account?{" "}
+                  <Link href="/register" className="text-blue-600 hover:underline">Sign up here</Link>.
+                </p>
               </div>
-              <Button type="submit" className="w-full bg-blue-600" disabled={loading}>
-                {loading ? 'Verifying OTP...' : 'Verify OTP'}
-              </Button>
             </>
           )}
         </form>

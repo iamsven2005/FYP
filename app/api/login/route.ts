@@ -4,6 +4,7 @@ import { db as prisma } from "@/lib/db"; // Prisma client import
 import { createJWT } from "@/lib/session";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import { toast } from "sonner"; // Import toast
 
 // Nodemailer setup for OTP
 const transporter = nodemailer.createTransport({
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Check if the user exists
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+      return NextResponse.json({ message: "User does not exist" }, { status: 404 }); // Return 404 if the user doesn't exist
     }
 
     // Check if the password is valid
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "OTP sent to your email", userId: user.id }, { status: 200 });
 
   } catch (error) {
-    console.error("Login error:", error); // Handle server-side error, no need for toast here
+    toast.error("Internal server error"); // Use toast for error handling
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
