@@ -93,7 +93,7 @@ importers:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.44)
       axios:
-        specifier: ^1.7.2
+        specifier: ^1.7.7
         version: 1.7.7
       base-64:
         specifier: ^1.0.0

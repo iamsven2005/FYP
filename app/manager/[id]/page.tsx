@@ -41,7 +41,11 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
       if (response.ok) {
         console.log("Item approved successfully");
         alert("Item approved successfully!");
-        // Optionally refresh the list of items
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === itemId ? { ...item, status: "APPROVED" } : item
+          )
+        );
       } else {
         console.error("Failed to approve item");
       }
@@ -60,7 +64,11 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
       if (response.ok) {
         console.log("Item rejected successfully");
         alert("Item rejected successfully!");
-        // Optionally refresh the list of items
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === itemId ? { ...item, status: "REJECTED" } : item
+          )
+        );
       } else {
         console.error("Failed to reject item");
       }
@@ -68,7 +76,6 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
       console.error("Error rejecting item:", error);
     }
   };
-
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -79,7 +86,7 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
     <div className="company-details">
       <h1 className="text-3xl font-bold mb-4">{company.name}</h1>
       <p>Status: {company.archived ? "Archived" : "Active"}</p>
-      {company.img && <img src={company.img} alt={company.name} className="mt-4" />} {/* Only render if img exists */}
+      {company.img && <img src={company.img} alt={company.name} className="mt-4" />}
 
       {/* Display Uploaded Items */}
       <div className="uploaded-items mt-6">
