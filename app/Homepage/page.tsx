@@ -95,8 +95,8 @@ const Homepage = () => {
                   <p>{company.archived ? "Archived" : "Active"}</p>
                 </div>
                 <div className="flex gap-5">
-                  <Link href={`/Homepage/${company.id}`}>View</Link>
-                  <Link href={`/Homepage/${company.id}/upload`}>Upload</Link>
+                  <Link href={`/Homepage/${company.id}`}>View</Link> {/* View company images with status */}
+                  <Link href={`/Homepage/${company.id}/upload`}>Upload</Link> {/* Upload images for the company */}
                 </div>
               </div>
             ))

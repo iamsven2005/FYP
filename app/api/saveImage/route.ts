@@ -1,20 +1,19 @@
 import { db } from '@/lib/db';
-import { notFound } from 'next/navigation';
 import { NextResponse } from 'next/server';
 
 // Define the POST method
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { imageurl, name, companyId, approved, retrived, halal, healthy, AI } = body;
+    const { imageurl, name, companyId, retrived, halal, healthy, AI } = body;
 
-    // Save the image data to the database
+    // Save the image data to the database with status "PENDING"
     const newImage = await db.images.create({
       data: {
         imageurl,
         name,
         companyId,
-        approved,
+        status: 'PENDING', // Set status to "PENDING" when posting the image
         retrived,
         halal,
         healthy,

@@ -16,12 +16,14 @@ const fileToBase64 = (file: File): Promise<string> => {
     reader.onerror = (error) => reject(error);
   });
 };
-interface Props{
-  params:{
-    id: string
-  }
+
+interface Props {
+  params: {
+    id: string;
+  };
 }
-export default function TeachableMachineWithOCR({params}: Props) {
+
+export default function TeachableMachineWithOCR({ params }: Props) {
   const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null);
   const [healthyModel, setHealthyModel] = useState<tmImage.CustomMobileNet | null>(null);
   const [labelContainer, setLabelContainer] = useState<string[]>([]);
@@ -158,7 +160,7 @@ export default function TeachableMachineWithOCR({params}: Props) {
       imageurl: processedImageBase64, // Send base64 image
       name: itemName, // Send item name from textbox
       companyId: params.id,
-      approved: "pending",
+      status: "PENDING", // Change this to status and set it to PENDING
       retrived: texts, // Send the edited text
       halal: result.halal === "Halal",
       healthy: result.healthy === "Healthy",

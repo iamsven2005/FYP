@@ -33,11 +33,13 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
 
   // Approve item
   const handleApprove = async (itemId: string) => {
+    console.log(`Approving item with ID: ${itemId}`);  // Log item ID
     try {
       const response = await fetch(`/api/items/${itemId}/approve`, {
         method: "PATCH",
       });
       if (response.ok) {
+        console.log("Item approved successfully");
         alert("Item approved successfully!");
         // Optionally refresh the list of items
       } else {
@@ -50,11 +52,13 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
 
   // Reject item
   const handleReject = async (itemId: string) => {
+    console.log(`Rejecting item with ID: ${itemId}`);  // Log item ID
     try {
       const response = await fetch(`/api/items/${itemId}/reject`, {
         method: "PATCH",
       });
       if (response.ok) {
+        console.log("Item rejected successfully");
         alert("Item rejected successfully!");
         // Optionally refresh the list of items
       } else {
@@ -64,6 +68,7 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
       console.error("Error rejecting item:", error);
     }
   };
+
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -88,6 +93,9 @@ const CompanyDetails = ({ params }: { params: { id: string } }) => {
               <p>Healthy Status: {item.healthy ? "Healthy" : "Not Healthy"}</p>
               <p>Extracted Text: {item.retrived}</p>
               <p>AI Advisory: {item.AI}</p>
+
+              {/* Show status of each item */}
+              <p>Status: {item.status}</p>
 
               {/* Approve and Reject Buttons */}
               <div className="flex gap-4 mt-4">

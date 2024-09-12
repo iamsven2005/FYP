@@ -30,6 +30,9 @@ const Page = async ({ params }: Props) => {
             <CardDescription>
             AI Advisory: {image.AI}
             </CardDescription>
+            <CardDescription>
+            Status: {image.status} {/* Show the status of the image */}
+            </CardDescription>
             </CardContent>
           </Card>
         ))
