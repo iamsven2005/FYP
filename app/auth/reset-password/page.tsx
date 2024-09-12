@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai"; 
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
@@ -98,7 +98,7 @@ export default function ResetPassword() {
                 className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </span>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function ResetPassword() {
                 className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </span>
             </div>
           </div>

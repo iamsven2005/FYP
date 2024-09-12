@@ -10,6 +10,7 @@ import { Archive, PlusCircle, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Company } from "@prisma/client";
+import { Card, CardTitle } from "@/components/ui/card";
 
 type User = {
   id: string;
@@ -162,10 +163,10 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
               {/* Create Company Dialog */}
       <Dialog>
         <DialogTrigger asChild>
-          <div className="flex flex-col items-center justify-center gap-4 p-4 bg-base-300 hover:bg-base-200">
+          <Card className="flex flex-col items-center justify-center gap-4 p-4">
             <PlusCircle/>
-            <p>Create Company</p>
-          </div>
+            <CardTitle>Create Company</CardTitle>
+          </Card>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -211,10 +212,10 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
         </DialogContent>
       </Dialog>
         {filteredCompanies.map((company) => (
-          <div key={company.id} className="flex flex-col gap-4 px-6 py-8 bg-base-300 hover:bg-base-200">
+          <Card key={company.id} className="flex flex-col gap-4 px-6 py-8">
             <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
-            <div className="flex">
-            <h3 className="text-lg font-bold">{company.name}</h3>
+            <div className="flex justify-between">
+            <CardTitle>{company.name}</CardTitle>
             <Badge>{company.archived ? "Archived" : "Active"}</Badge>
             </div>
             <div className="flex gap-5">
@@ -225,7 +226,9 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
               <Archive/>
               {company.archived ? "Unarchive" : "Archive"}
             </Button>
+            <Button asChild>
             <Link href={`/admin/${company.id}`}>View</Link>
+            </Button>
             <EditCompanyDialog
               company={company}
               staffUsers={staffUsers}
@@ -238,7 +241,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
             />
             </div>
 
-          </div>
+          </Card>
         ))}
       </div>
 

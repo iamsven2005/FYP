@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import Link from 'next/link';
 import { toast } from "sonner"; // Import toast
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -179,7 +179,7 @@ const LoginPage = () => {
                     className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </span>
                 </div>
               </div>

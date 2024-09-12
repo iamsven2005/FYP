@@ -6,8 +6,8 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from "framer-motion";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { toast } from "sonner"; // Import the toast from Sonner
+import { Eye, EyeOff } from 'lucide-react';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -169,7 +169,7 @@ const RegisterPage = () => {
                 className="absolute inset-y-0 right-5 flex items-center cursor-pointer"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </span>
             </div>
             {/* Password strength indicator */}

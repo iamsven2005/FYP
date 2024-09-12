@@ -1,52 +1,61 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import Combobox from "@/components/Combobox";
-import { Edit, Save } from "lucide-react";
-import { Company } from "@prisma/client";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
+import Combobox from "@/components/Combobox"
+import { Edit, Save, Upload } from "lucide-react"
+import { Company } from "@prisma/client"
+import { Card, CardContent } from "@/components/ui/card"
 
-// Define the types for User and Company
 type User = {
-  id: string;
-  username: string;
-  role: string;
-};
-
-
+  id: string
+  username: string
+  role: string
+}
 
 type EditCompanyDialogProps = {
-  company: Company;
-  staffUsers: User[];
-  managerUsers: User[];
-  onCompanyUpdate: (updatedCompany: Company) => void;
-};
+  company: Company
+  staffUsers: User[]
+  managerUsers: User[]
+  onCompanyUpdate: (updatedCompany: Company) => void
+}
 
-const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate }: EditCompanyDialogProps) => {
-  const [companyName, setCompanyName] = useState(company.name);
-  const [companyImgUrl, setCompanyImgUrl] = useState(company.img);
-  const [selectedStaff, setSelectedStaff] = useState(company.staff || "");
-  const [selectedManager, setSelectedManager] = useState(company.manager || "");
-  const [loading, setLoading] = useState(false);
+export default function EditCompanyDialog({
+  company,
+  staffUsers,
+  managerUsers,
+  onCompanyUpdate,
+}: EditCompanyDialogProps) {
+  const [companyName, setCompanyName] = useState(company.name)
+  const [companyImgUrl, setCompanyImgUrl] = useState(company.img)
+  const [selectedStaff, setSelectedStaff] = useState(company.staff || "")
+  const [selectedManager, setSelectedManager] = useState(company.manager || "")
+  const [loading, setLoading] = useState(false)
 
-  // Handle image change and convert to Base64
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setCompanyImgUrl(reader.result as string); // Set Base64 image to state
-      };
-      reader.readAsDataURL(file); // Convert the file to Base64
+        setCompanyImgUrl(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
-  // Handle company update
   const updateCompany = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const res = await fetch(`/api/companies?id=${company.id}`, {
         method: "PATCH",
@@ -55,60 +64,95 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
         },
         body: JSON.stringify({
           name: companyName,
-          imgurl: companyImgUrl, // Base64 string will be sent here
+          imgurl: companyImgUrl,
           staff: selectedStaff,
           manager: selectedManager,
         }),
-      });
+      })
 
       if (res.ok) {
-        const updatedCompany = await res.json();
-        toast.success("Company updated successfully");
-        onCompanyUpdate(updatedCompany); // Trigger the callback to update the parent component
+        const updatedCompany = await res.json()
+        toast.success("Company updated successfully")
+        onCompanyUpdate(updatedCompany)
       } else {
-        toast.error("Failed to update company");
+        toast.error("Failed to update company")
       }
     } catch (error) {
-      toast.error("An error occurred while updating the company");
+      toast.error("An error occurred while updating the company")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button>
-          <Edit /> Edit Company
+          <Edit className="mr-2 h-4 w-4" /> Edit Company
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Company</DialogTitle>
         </DialogHeader>
-        <div className="mt-4">
-          <Input
-            type="text"
-            placeholder="Company Name"
-            className="input input-bordered w-full mb-4"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-          />
-
-          {/* Image upload as base64 */}
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-          {companyImgUrl && <img src={companyImgUrl} alt="Preview" className="mt-4 max-w-full h-auto" />}
-
-          {/* Staff and Manager Comboboxes */}
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Assign Staff and Manager</h3>
-            <div className="flex space-x-4">
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="name"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="image" className="text-right">
+              Image
+            </Label>
+            <div className="col-span-3">
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              <Label htmlFor="image" className="cursor-pointer">
+                <Card>
+                  <CardContent className="flex items-center justify-center p-6">
+                    {companyImgUrl ? (
+                      <img src={companyImgUrl} alt="Preview" className="max-w-full h-auto" />
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Upload className="h-8 w-8 mb-2" />
+                        <span>Upload Image</span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Label>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="staff" className="text-right">
+              Staff
+            </Label>
+            <div className="col-span-3">
               <Combobox
                 items={staffUsers}
                 selectedValue={selectedStaff}
                 onSelect={setSelectedStaff}
                 placeholder="Select Staff"
               />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="manager" className="text-right">
+              Manager
+            </Label>
+            <div className="col-span-3">
               <Combobox
                 items={managerUsers}
                 selectedValue={selectedManager}
@@ -119,14 +163,12 @@ const EditCompanyDialog = ({ company, staffUsers, managerUsers, onCompanyUpdate 
           </div>
         </div>
         <DialogFooter>
-          <Button className="btn btn-primary" onClick={updateCompany} disabled={loading}>
-            <Save />
+          <Button onClick={updateCompany} disabled={loading}>
+            <Save className="mr-2 h-4 w-4" />
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
-
-export default EditCompanyDialog;
+  )
+}

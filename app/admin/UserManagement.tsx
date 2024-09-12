@@ -1,249 +1,227 @@
-"use client";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { Trash } from "lucide-react";
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
+//@ts-nocheck
+'use client'
+
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
+import { Trash, ChevronUp, ChevronDown } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { ComboboxDemo } from "@/components/ComboboxDemo"
 
 type User = {
-  id: string;
-  username: string;
-  role: string;
-};
+  id: string
+  username: string
+  role: string
+}
 
 type UserManagementProps = {
-  roles: string[];
-};
+  roles: string[]
+}
 
 const rolePriority: { [key: string]: number } = {
   Admin: 1,
   Manager: 2,
   Staff: 3,
   Client: 4,
-};
+}
 
-const UserManagement = ({ roles }: UserManagementProps) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({});
-  const [previousRoles, setPreviousRoles] = useState<{ [key: string]: string }>({});
-  const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+export default function UserManagement({ roles }: UserManagementProps) {
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [selectedRoles, setSelectedRoles] = useState<{ [key: string]: string }>({})
+  const [loading, setLoading] = useState<{ [key: string]: boolean }>({})
+  const [isFetching, setIsFetching] = useState<boolean>(false)
+  const [page, setPage] = useState<number>(1)
+  const [limit, setLimit] = useState<number>(10)
+  const [totalPages, setTotalPages] = useState<number>(1)
+  const [sortField, setSortField] = useState<string>("username")
+  const [sortDirection, setSortDirection] = useState<string>("asc")
 
-  // Pagination state
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
-  const [totalPages, setTotalPages] = useState<number>(1);
-
-  // Sorting state
-  const [sortField, setSortField] = useState<string>("username"); // Default sorting field is username
-  const [sortDirection, setSortDirection] = useState<string>("asc"); // Default sorting direction is ascending
-
-  // Fetch users from the API
   useEffect(() => {
     const fetchUsers = async () => {
-      setIsFetching(true);
+      setIsFetching(true)
       try {
-        const res = await fetch(`/api/users?page=${page}&limit=${limit}`);
-        const data = await res.json();
-        setUsers(data.users);
-        setFilteredUsers(data.users);
-        setTotalPages(data.totalPages);
-
-        // Initialize previousRoles with the current roles
-        const initialRoles = data.users.reduce((acc: any, user: User) => {
-          acc[user.id] = user.role;
-          return acc;
-        }, {});
-        setPreviousRoles(initialRoles);
+        const res = await fetch(`/api/users?page=${page}&limit=${limit}`)
+        const data = await res.json()
+        setUsers(data.users)
+        setFilteredUsers(data.users)
+        setTotalPages(data.totalPages)
+        setSelectedRoles(data.users.reduce((acc: any, user: User) => {
+          acc[user.id] = user.role
+          return acc
+        }, {}))
       } catch (error) {
-        toast.error("Failed to fetch users");
+        toast.error("Failed to fetch users")
       } finally {
-        setIsFetching(false);
+        setIsFetching(false)
       }
-    };
+    }
 
-    fetchUsers();
-  }, [page, limit]);
+    fetchUsers()
+  }, [page, limit])
 
-  // Filter and sort users
   useEffect(() => {
     let filtered = users.filter((user) =>
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    )
 
-    // Sorting logic
     filtered = filtered.sort((a, b) => {
-      let valueA: string | number = a[sortField as keyof User];
-      let valueB: string | number = b[sortField as keyof User];
+      let valueA: string | number = a[sortField as keyof User]
+      let valueB: string | number = b[sortField as keyof User]
 
-      // If sorting by role, use rolePriority for numeric sorting
       if (sortField === "role") {
-        valueA = rolePriority[a.role] || 999;
-        valueB = rolePriority[b.role] || 999;
+        valueA = rolePriority[a.role] || 999
+        valueB = rolePriority[b.role] || 999
       }
 
-      // Compare as strings or numbers depending on the type
       if (typeof valueA === 'number' && typeof valueB === 'number') {
-        return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+        return sortDirection === "asc" ? valueA - valueB : valueB - valueA
       } else {
-        const stringA = valueA.toString().toLowerCase();
-        const stringB = valueB.toString().toLowerCase();
-        return sortDirection === "asc" ? stringA.localeCompare(stringB) : stringB.localeCompare(stringA);
+        const stringA = valueA.toString().toLowerCase()
+        const stringB = valueB.toString().toLowerCase()
+        return sortDirection === "asc" ? stringA.localeCompare(stringB) : stringB.localeCompare(stringA)
       }
-    });
+    })
 
-    setFilteredUsers(filtered);
-  }, [searchTerm, users, sortField, sortDirection]);
+    setFilteredUsers(filtered)
+  }, [searchTerm, users, sortField, sortDirection])
 
   const assignRole = async (userId: string, newRole: string) => {
-    setLoading((prev) => ({ ...prev, [userId]: true }));
+    setLoading((prev) => ({ ...prev, [userId]: true }))
     try {
       const res = await fetch("/api/roles", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, rolename: newRole }),
-      });
+      })
 
       if (res.ok) {
-        toast.success("Role assigned successfully");
+        toast.success("Role assigned successfully")
         setUsers((prevUsers) =>
           prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
-        );
-        setPreviousRoles((prev) => ({
-          ...prev,
-          [userId]: newRole,
-        }));
+        )
+        setSelectedRoles((prev) => ({ ...prev, [userId]: newRole }))
       } else {
-        toast.error("Failed to assign role");
+        toast.error("Failed to assign role")
       }
     } catch (error) {
-      toast.error("An error occurred while assigning the role");
+      toast.error("An error occurred while assigning the role")
     } finally {
-      setLoading((prev) => ({ ...prev, [userId]: false }));
+      setLoading((prev) => ({ ...prev, [userId]: false }))
     }
-  };
+  }
 
   const handleRoleChange = (userId: string, newRole: string) => {
-    setSelectedRoles((prevRoles) => ({
-      ...prevRoles,
-      [userId]: newRole,
-    }));
-    assignRole(userId, newRole); // Auto-save on select
-  };
+    setSelectedRoles((prevRoles) => ({ ...prevRoles, [userId]: newRole }))
+    assignRole(userId, newRole)
+  }
 
   const handleSortChange = (field: string) => {
     if (sortField === field) {
-      // Toggle sort direction if the field is already selected
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
-      // Set new field and default to ascending sort
-      setSortField(field);
-      setSortDirection("asc");
+      setSortField(field)
+      setSortDirection("asc")
     }
-  };
+  }
 
   const deleteUser = async (userId: string) => {
-    confirmAlert({
-      title: "Confirm Deletion",
-      message: "Are you sure you want to delete this user?",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: async () => {
-            try {
-              const res = await fetch(`/api/users/${userId}`, {
-                method: "DELETE",
-              });
-              if (res.ok) {
-                toast.success("User deleted successfully");
-                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-              } else {
-                toast.error("Failed to delete user");
-              }
-            } catch (error) {
-              toast.error("An error occurred while deleting the user");
-            }
-          },
-        },
-        {
-          label: "No",
-        },
-      ],
-    });
-  };
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" })
+      if (res.ok) {
+        toast.success("User deleted successfully")
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId))
+      } else {
+        toast.error("Failed to delete user")
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting the user")
+    }
+  }
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">User Management</h2>
-
-      {/* Search Input */}
-      <div className="flex justify-end mb-4">
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">User Management</h2>
+      <div className="flex justify-end">
         <Input
           type="text"
           placeholder="Search by username or role..."
-          className="input input-bordered w-full max-w-xs"
+          className="max-w-xs"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-
-      {/* User Table */}
-      <table className="table">
-        <thead>
-          <tr>
-            <th>
-              Username
-              <button onClick={() => handleSortChange("username")}>
-                {sortField === "username" && sortDirection === "asc" ? "↑" : "↓"}
-              </button>
-            </th>
-            <th>
-              Role
-              <button onClick={() => handleSortChange("role")}>
-                {sortField === "role" && sortDirection === "asc" ? "↑" : "↓"}
-              </button>
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead onClick={() => handleSortChange("username")} className="cursor-pointer">
+              Username {sortField === "username" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
+            </TableHead>
+            <TableHead onClick={() => handleSortChange("role")} className="cursor-pointer">
+              Role {sortField === "role" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
+            </TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {filteredUsers.map((user) => (
-            <tr key={user.id}>
-              <td>{user.username}</td>
-              <td>
-                <select
+            <TableRow key={user.id}>
+              <TableCell>{user.username}</TableCell>
+              <TableCell>
+                <ComboboxDemo
+                  items={roles.map(role => ({ label: role, value: role }))}
                   value={selectedRoles[user.id] || user.role}
-                  onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  className="select select-bordered"
-                >
-                  {roles.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>
-                <Button className="btn btn-error" onClick={() => deleteUser(user.id)}>
-                  <Trash /> Delete
-                </Button>
-              </td>
-            </tr>
+                  onChange={(value) => handleRoleChange(user.id, value)}
+                />
+              </TableCell>
+              <TableCell>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash className="mr-2 h-4 w-4" /> Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the user account.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteUser(user.id)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-between mt-4">
+        </TableBody>
+      </Table>
+      <div className="flex justify-between items-center">
         <Button
-          className="btn"
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           disabled={page === 1 || isFetching}
         >
@@ -251,26 +229,21 @@ const UserManagement = ({ roles }: UserManagementProps) => {
         </Button>
         <span>Page {page} of {totalPages}</span>
         <Button
-          className="btn"
           onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={page === totalPages || isFetching}
         >
           Next
         </Button>
-      </div>
-      <div className="flex justify-end mt-2">
-        <select
-          className="select select-bordered w-32"
-          value={limit}
-          onChange={(e) => setLimit(parseInt(e.target.value))}
-        >
-          <option value={10}>10 per page</option>
-          <option value={15}>15 per page</option>
-          <option value={20}>20 per page</option>
-        </select>
+        <ComboboxDemo
+          items={[
+            { label: "10 per page", value: "10" },
+            { label: "15 per page", value: "15" },
+            { label: "20 per page", value: "20" },
+          ]}
+          value={limit.toString()}
+          onChange={(value) => setLimit(parseInt(value))}
+        />
       </div>
     </div>
-  );
-};
-
-export default UserManagement;
+  )
+}

@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss"
-import { withUt } from "uploadthing/tw";
  
-export default withUt({
+export default ({
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,ts,jsx,tsx}',
@@ -10,15 +9,6 @@ export default withUt({
     './src/**/*.{js,ts,jsx,tsx}',
 	],
   prefix: "",
-  daisyui: { themes: [ "light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter", "dim", "nord", "sunset",],
-  darkTheme: "dark",
-  base: true, 
-  styled: true,
-  utils: true, 
-  prefix: "",
-  logs: true,
-  themeRoot: ":root",
-   },
   theme: {
     container: {
       center: true,
@@ -89,5 +79,5 @@ export default withUt({
       },
     },
   },
-  plugins: [require("tailwindcss-animate"),require('daisyui'),require('@tailwindcss/typography'),],
+  plugins: [require("tailwindcss-animate"),require('@tailwindcss/typography'),],
 } satisfies Config);
