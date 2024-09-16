@@ -1,55 +1,56 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner"; // Import toast for notifications
 
 interface User {
-  username: string
-  email: string
-  id: string
+  username: string;
+  email: string;
+  id: string;
 }
 
 interface Company {
-  id: string
-  name: string
-  img: string
-  archived: boolean
+  id: string;
+  name: string;
+  img: string;
+  archived: boolean;
 }
 
 export default function Homepage() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [companies, setCompanies] = useState<Company[]>([])
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   function parseJwt(token: string) {
-    const base64Url = token.split(".")[1]
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
         .join("")
-    )
-    return JSON.parse(jsonPayload)
+    );
+    return JSON.parse(jsonPayload);
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     if (token) {
-      const decoded = parseJwt(token)
-      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email })
+      const decoded = parseJwt(token);
+      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      router.push("/login")
+      router.push("/login");
     }
-    setLoading(false)
-  }, [router])
+    setLoading(false);
+  }, [router]);
 
   useEffect(() => {
     if (user) {
@@ -57,31 +58,31 @@ export default function Homepage() {
         .then((response) => response.json())
         .then((data) => {
           if (data.error) {
-            setError(data.error)
+            toast.error(data.error); // Replaced setError with toast.error
           } else {
-            setCompanies(data.companies)
-            setFilteredCompanies(data.companies)
+            setCompanies(data.companies);
+            setFilteredCompanies(data.companies);
           }
         })
         .catch(() => {
-          setError("Failed to load companies")
-        })
+          toast.error("Failed to load companies"); // Replaced setError with toast.error
+        });
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     if (searchQuery) {
       const filtered = companies.filter((company) =>
         company.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      setFilteredCompanies(filtered)
+      );
+      setFilteredCompanies(filtered);
     } else {
-      setFilteredCompanies(companies)
+      setFilteredCompanies(companies);
     }
-  }, [searchQuery, companies])
+  }, [searchQuery, companies]);
 
-  if (loading) return <p className="text-center p-8">Loading...</p>
-  if (!user) return <p className="text-center p-8">No user found</p>
+  if (loading) return <p className="text-center p-8">Loading...</p>;
+  if (!user) return <p className="text-center p-8">No user found</p>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -149,5 +150,5 @@ export default function Homepage() {
         </div>
       )}
     </div>
-  )
+  );
 }

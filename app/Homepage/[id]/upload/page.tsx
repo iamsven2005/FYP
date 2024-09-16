@@ -1,132 +1,133 @@
-"use client"
+"use client";
 
-import React, { useState, useRef, useEffect } from "react"
-import * as tmImage from "@teachablemachine/image"
-import "@tensorflow/tfjs"
-import Tesseract from "tesseract.js"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { ImageIcon } from "lucide-react"
+import React, { useState, useRef, useEffect } from "react";
+import * as tmImage from "@teachablemachine/image";
+import "@tensorflow/tfjs";
+import Tesseract from "tesseract.js";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { ImageIcon } from "lucide-react";
+import { toast } from "sonner"; // Importing toast for notifications
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = (error) => reject(error)
-  })
-}
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 interface Props {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 export default function TeachableMachineWithOCR({ params }: Props) {
-  const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null)
-  const [healthyModel, setHealthyModel] = useState<tmImage.CustomMobileNet | null>(null)
-  const [labelContainer, setLabelContainer] = useState<string[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
+  const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null);
+  const [healthyModel, setHealthyModel] = useState<tmImage.CustomMobileNet | null>(null);
+  const [labelContainer, setLabelContainer] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<{ halal: string; healthy: string }>({
     halal: "",
     healthy: "",
-  })
-  const [texts, setTexts] = useState<string>("")
-  const [processing, setProcessing] = useState<boolean>(false)
-  const [itemName, setItemName] = useState<string>("")
-  const imageInputRef = useRef<HTMLInputElement | null>(null)
-  const [processedImageBase64, setProcessedImageBase64] = useState<string | null>(null)
-  const [openAIResult, setOpenAIResult] = useState<string>("")
+  });
+  const [texts, setTexts] = useState<string>("");
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [itemName, setItemName] = useState<string>("");
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const [processedImageBase64, setProcessedImageBase64] = useState<string | null>(null);
+  const [openAIResult, setOpenAIResult] = useState<string>("");
 
   useEffect(() => {
     const loadModels = async () => {
-      const halalModelURL = "/halal/model.json"
-      const halalMetadataURL = "/halal/metadata.json"
-      const healthyModelURL = "/healthy/model.json"
-      const healthyMetadataURL = "/healthy/metadata.json"
+      const halalModelURL = "/halal/model.json";
+      const halalMetadataURL = "/halal/metadata.json";
+      const healthyModelURL = "/healthy/model.json";
+      const healthyMetadataURL = "/healthy/metadata.json";
 
-      const loadedHalalModel = await tmImage.load(halalModelURL, halalMetadataURL)
-      const loadedHealthyModel = await tmImage.load(healthyModelURL, healthyMetadataURL)
+      const loadedHalalModel = await tmImage.load(halalModelURL, halalMetadataURL);
+      const loadedHealthyModel = await tmImage.load(healthyModelURL, healthyMetadataURL);
 
-      setHalalModel(loadedHalalModel)
-      setHealthyModel(loadedHealthyModel)
-    }
+      setHalalModel(loadedHalalModel);
+      setHealthyModel(loadedHealthyModel);
+    };
 
-    loadModels()
-  }, [])
+    loadModels();
+  }, []);
 
   const openBrowseImage = async () => {
-    await imageInputRef.current?.click()
-  }
+    await imageInputRef.current?.click();
+  };
 
   const convert = async (url: string): Promise<void> => {
     if (url.length) {
-      setProcessing(true)
+      setProcessing(true);
       try {
-        const { data: { text } } = await Tesseract.recognize(url, 'eng')
-        setTexts(text)
-        await handleOpenAICheck(text)
+        const { data: { text } } = await Tesseract.recognize(url, 'eng');
+        setTexts(text);
+        await handleOpenAICheck(text);
       } catch (error) {
-        console.error("Error during conversion", error)
+        toast.error("Error during OCR processing");
       } finally {
-        setProcessing(false)
+        setProcessing(false);
       }
     }
-  }
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !halalModel || !healthyModel) return
+    const file = event.target.files?.[0];
+    if (!file || !halalModel || !healthyModel) return;
 
-    setLoading(true)
+    setLoading(true);
 
-    const base64Image = await fileToBase64(file)
-    setProcessedImageBase64(base64Image)
+    const base64Image = await fileToBase64(file);
+    setProcessedImageBase64(base64Image);
 
-    const imageUrl = URL.createObjectURL(file)
-    const imgElement = new Image()
-    imgElement.src = imageUrl
+    const imageUrl = URL.createObjectURL(file);
+    const imgElement = new Image();
+    imgElement.src = imageUrl;
 
     imgElement.onload = async () => {
-      await convert(imageUrl)
+      await convert(imageUrl);
 
-      const halalPrediction = await halalModel.predict(imgElement)
+      const halalPrediction = await halalModel.predict(imgElement);
       const halalResult =
         halalPrediction.length >= 2 && halalPrediction[0].probability > halalPrediction[1].probability
           ? "Not Halal"
-          : "Halal"
+          : "Halal";
 
-      const healthyPrediction = await healthyModel.predict(imgElement)
+      const healthyPrediction = await healthyModel.predict(imgElement);
       const healthyResult =
         healthyPrediction.length >= 2 && healthyPrediction[0].probability > healthyPrediction[1].probability
           ? "Not Healthy"
-          : "Healthy"
+          : "Healthy";
 
-      setResult({ halal: halalResult, healthy: healthyResult })
+      setResult({ halal: halalResult, healthy: healthyResult });
 
       const halalResults = halalPrediction.map(
         (pred) => `Halal Model - ${pred.className}: ${pred.probability.toFixed(2)}`
-      )
+      );
       const healthyResults = healthyPrediction.map(
         (pred) => `Healthy Model - ${pred.className}: ${pred.probability.toFixed(2)}`
-      )
-      setLabelContainer([...halalResults, ...healthyResults])
+      );
+      setLabelContainer([...halalResults, ...healthyResults]);
 
-      setLoading(false)
-    }
-  }
+      setLoading(false);
+    };
+  };
 
   const handleOpenAICheck = async (inputText: string = texts) => {
     if (!inputText) {
-      alert("No text extracted from the image.")
-      return
+      toast.error("No text extracted from the image.");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch('/api/openaiCheck', {
         method: 'POST',
@@ -134,28 +135,29 @@ export default function TeachableMachineWithOCR({ params }: Props) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ text: inputText }),
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setOpenAIResult(data.classification)
+        const data = await response.json();
+        setOpenAIResult(data.classification);
+        toast.success("OpenAI classification completed.");
       } else {
-        console.error("Failed to get OpenAI classification.")
+        toast.error("Failed to get OpenAI classification.");
       }
     } catch (error) {
-      console.error("Error in OpenAI request:", error)
+      toast.error("Error in OpenAI request");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePost = async () => {
     if (!processedImageBase64 || !itemName.trim()) {
-      alert("Please provide both an image and the item name.")
-      return
+      toast.error("Please provide both an image and the item name.");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     const dataToSend = {
       imageurl: processedImageBase64,
@@ -166,7 +168,7 @@ export default function TeachableMachineWithOCR({ params }: Props) {
       halal: result.halal === "Halal",
       healthy: result.healthy === "Healthy",
       AI: openAIResult || "TeachableMachine & Tesseract.js",
-    }
+    };
 
     try {
       const response = await fetch("/api/saveImage", {
@@ -175,21 +177,20 @@ export default function TeachableMachineWithOCR({ params }: Props) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(dataToSend),
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        alert("Image processed and saved successfully!")
-        console.log("API response:", data)
+        const data = await response.json();
+        toast.success("Image processed and saved successfully!");
       } else {
-        console.error("API request failed.")
+        toast.error("Failed to save the image.");
       }
     } catch (error) {
-      console.error("Error sending image to API:", error)
+      toast.error("Error sending image to API.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -282,5 +283,5 @@ export default function TeachableMachineWithOCR({ params }: Props) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
