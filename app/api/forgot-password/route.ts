@@ -4,19 +4,15 @@ import crypto from "crypto";
 import { db } from "@/lib/db"; // Import the Prisma client
 
 export async function POST(req: Request) {
-  console.log("Forgot password request received");
 
   const { email } = await req.json();
-  console.log(`Received email: ${email}`);
 
   // Check if the email exists in the database
   const user = await db.user.findUnique({ where: { email } });
   if (!user) {
-    console.log(`User not found: ${email}`);
     return NextResponse.json({ message: "User not found" }, { status: 404 });
   }
 
-  console.log(`User found: ${email}`);
 
   // Generate 6-digit OTP
   const otp = crypto.randomInt(100000, 999999).toString();
@@ -32,7 +28,6 @@ export async function POST(req: Request) {
     },
   });
 
-  console.log(`Generated OTP: ${otp}`);
 
   // Send OTP via email with the same styling as login
   const transporter = nodemailer.createTransport({
@@ -86,12 +81,10 @@ export async function POST(req: Request) {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`OTP sent to email: ${email}`);
 
     // Return the userId along with the success message
     return NextResponse.json({ message: "OTP sent successfully", userId: user.id }, { status: 200 });
   } catch (error) {
-    console.error(`Failed to send OTP to email: ${email}`, error);
     return NextResponse.json({ message: "Failed to send OTP" }, { status: 500 });
   }
 }
