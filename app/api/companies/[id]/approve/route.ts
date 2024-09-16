@@ -21,7 +21,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     return NextResponse.json({ company, items: images });
   } catch (error) {
-    console.error("Error fetching company details:", error);
     return NextResponse.json({ error: "Failed to fetch company details" }, { status: 500 });
   }
 }

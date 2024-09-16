@@ -2,26 +2,22 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  
-    try {
-      const updatedCompany = await db.company.update({
-        where: { id: params.id },
-        data: { archived: true },
-      });
-      return NextResponse.json(updatedCompany, { status: 200 });
-    } catch (error) {
-      return NextResponse.json({ error: "Failed to archive company" }, { status: 500 });
-    }
+  try {
+    const updatedCompany = await db.company.update({
+      where: { id: params.id },
+      data: { archived: true },
+    });
+    return NextResponse.json(updatedCompany, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to archive company" }, { status: 500 });
   }
-  export async function GET(req: Request, { params }: { params: { id: string } }) {
+}
 
+export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
     const companies = await db.company.findMany({
       where: {
-        OR: [
-          { staff: params.id }, 
-          { manager: params.id },
-        ],
+        OR: [{ staff: params.id }, { manager: params.id }],
         archived: false,
       },
     });
@@ -32,7 +28,6 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     return NextResponse.json({ companies });
   } catch (error) {
-    console.error("Error fetching companies:", error);
     return NextResponse.json({ error: "Failed to fetch companies" }, { status: 500 });
   }
 }

@@ -65,7 +65,6 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json(updatedCompany, { status: 200 });
   } catch (error) {
-    console.error("Error updating company:", error);
     return NextResponse.json({ error: "Failed to update company" }, { status: 500 });
   }
 }
