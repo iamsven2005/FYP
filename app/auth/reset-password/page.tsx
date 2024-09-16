@@ -13,34 +13,25 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState(""); 
   const [showPassword, setShowPassword] = useState(false); 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
-      console.log('No token found, redirecting to forgot-password page');
+      toast.error('No token found, redirecting to forgot-password page');
       router.push("/auth/forgot-password");
     }
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
-
-    console.log('New password:', newPassword);
-    console.log('Confirm password:', confirmPassword);
 
     if (newPassword !== confirmPassword) {
-      console.log('Passwords do not match');
-      setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
-      console.log('Sending password reset request...');
       const res = await fetch("/api/reset-password", {
         method: "POST",
         headers: {
@@ -51,25 +42,18 @@ export default function ResetPassword() {
       });
 
       const data = await res.json();
-      console.log('Response status:', res.status);
-      console.log('Response data:', data);
 
       if (res.status === 400) {
-        console.log('New password cannot be the same as the old password');
         toast.error("New password cannot be the same as the old password");
       } else if (res.ok) {
-        console.log('Password reset successful');
-        setMessage("Password reset successfully");
+        toast.success("Password reset successfully");
         localStorage.removeItem('authToken');
         router.push("/login");
       } else {
-        console.log('Error from API:', data.message);
-        setError(data.message);
-        setMessage("");
+        toast.error(data.message);
       }
     } catch (error) {
-      console.log('Failed to reset password:', error);
-      setError("Failed to reset password");
+      toast.error("Failed to reset password");
     }
   };
 
@@ -80,9 +64,6 @@ export default function ResetPassword() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          {message && <p className="text-green-500 mb-4">{message}</p>}
-
           <div className="mb-4 relative">
             <Label htmlFor="newPassword">New Password</Label>
             <div className="relative w-full">
