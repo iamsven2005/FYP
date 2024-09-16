@@ -20,7 +20,6 @@ export async function PATCH(req: Request, { params }: { params: { userId: string
 
     return NextResponse.json({ message: "Username updated successfully", updatedUser }, { status: 200 });
   } catch (error) {
-    console.error("Failed to update username:", error);
     return NextResponse.json({ error: "Failed to update username" }, { status: 500 });
   }
 }
@@ -36,7 +35,6 @@ export async function DELETE(req: Request, { params }: { params: { userId: strin
 
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error) {
-    console.error("Failed to delete user:", error);
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

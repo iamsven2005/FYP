@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: 'OTP verified', token, role: user.role, redirectTo }, { status: 200 });
   } catch (error) {
-    console.error('OTP verification error:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
