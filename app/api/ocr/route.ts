@@ -23,7 +23,6 @@ export const POST = async (req: any): Promise<Response> => {
 
           try {
             const result = await Tesseract.recognize(buffer, 'eng', {
-              logger: (m) => console.log(m), // Optional logging
             });
 
             resolve(
@@ -41,7 +40,6 @@ export const POST = async (req: any): Promise<Response> => {
       });
 
       busboy.on('finish', () => {
-        console.log('Upload complete');
       });
 
       busboy.on('error', (err) => {
@@ -56,7 +54,6 @@ export const POST = async (req: any): Promise<Response> => {
       req.pipe(busboy);
     });
   } catch (error) {
-    console.error(error);
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
 };

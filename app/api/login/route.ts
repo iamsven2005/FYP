@@ -106,7 +106,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "OTP sent to your email", userId: user.id }, { status: 200 });
 
   } catch (error) {
-    toast.error("Internal server error"); // Use toast for error handling
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }

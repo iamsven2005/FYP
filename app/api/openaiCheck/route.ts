@@ -30,7 +30,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ classification });
   } catch (error) {
-    console.error('OpenAI API error:', error);
     return NextResponse.json({ success: false, message: 'OpenAI request failed' }, { status: 500 });
   }
 }
