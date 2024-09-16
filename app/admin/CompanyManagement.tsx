@@ -18,7 +18,6 @@ type User = {
   role: string;
 };
 
-
 const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], managerUsers: User[] }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
@@ -96,6 +95,12 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
   };
 
   const createCompany = async () => {
+    // Added validation checks for empty fields
+    if (!companyName || !companyImgUrl || !selectedStaff || !selectedManager) {
+      toast.error("Please fill out all fields before creating the company");
+      return;
+    }
+
     try {
       const res = await fetch("/api/companies", {
         method: "POST",
@@ -160,92 +165,89 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
 
       {/* Company Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Create Company Dialog */}
-      <Dialog>
-        <DialogTrigger asChild>
-          <Card className="flex flex-col items-center justify-center gap-4 p-4">
-            <PlusCircle/>
-            <CardTitle>Create Company</CardTitle>
-          </Card>
-        </DialogTrigger>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create a Company</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <Input
-              type="text"
-              placeholder="Company Name"
-              className="input input-bordered w-full mb-4"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
+        {/* Create Company Dialog */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Card className="flex flex-col items-center justify-center gap-4 p-4">
+              <PlusCircle/>
+              <CardTitle>Create Company</CardTitle>
+            </Card>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create a Company</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <Input
+                type="text"
+                placeholder="Company Name"
+                className="input input-bordered w-full mb-4"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
 
-            {/* Image upload as base64 */}
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            {companyImgUrl && <img src={companyImgUrl} alt="Preview" className="mt-4 max-w-full h-auto" />}
+              {/* Image upload as base64 */}
+              <input type="file" accept="image/*" onChange={handleImageChange} />
+              {companyImgUrl && <img src={companyImgUrl} alt="Preview" className="mt-4 max-w-full h-auto" />}
 
-            {/* Staff and Manager Comboboxes */}
-            <div className="mt-10">
-              <h2 className="text-xl font-bold mb-4">Select Staff and Manager</h2>
-              <div className="flex space-x-4">
-                <Combobox
-                  items={staffUsers}
-                  selectedValue={selectedStaff}
-                  onSelect={setSelectedStaff}
-                  placeholder="Select Staff"
-                />
-                <Combobox
-                  items={managerUsers}
-                  selectedValue={selectedManager}
-                  onSelect={setSelectedManager}
-                  placeholder="Select Manager"
-                />
+              {/* Staff and Manager Comboboxes */}
+              <div className="mt-10">
+                <h2 className="text-xl font-bold mb-4">Select Staff and Manager</h2>
+                <div className="flex space-x-4">
+                  <Combobox
+                    items={staffUsers}
+                    selectedValue={selectedStaff}
+                    onSelect={setSelectedStaff}
+                    placeholder="Select Staff"
+                  />
+                  <Combobox
+                    items={managerUsers}
+                    selectedValue={selectedManager}
+                    onSelect={setSelectedManager}
+                    placeholder="Select Manager"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button className="btn btn-primary" onClick={createCompany}>
-              <Save/>Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button className="btn btn-primary" onClick={createCompany}>
+                <Save/>Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         {filteredCompanies.map((company) => (
           <Card key={company.id} className="flex flex-col gap-4 px-6 py-8">
             <img src={company.img} alt={company.name} className="w-full m-5 rounded-sm mx-auto" />
             <div className="flex justify-between">
-            <CardTitle>{company.name}</CardTitle>
-            <Badge>{company.archived ? "Archived" : "Active"}</Badge>
+              <CardTitle>{company.name}</CardTitle>
+              <Badge>{company.archived ? "Archived" : "Active"}</Badge>
             </div>
             <div className="flex gap-5">
-            <Button
-              className={`${company.archived ? "btn-secondary" : "btn-primary"}`}
-              onClick={() => toggleArchiveCompany(company.id, !company.archived)}
-            >
-              <Archive/>
-              {company.archived ? "Unarchive" : "Archive"}
-            </Button>
-            <Button asChild>
-            <Link href={`/admin/${company.id}`}>View</Link>
-            </Button>
-            <EditCompanyDialog
-              company={company}
-              staffUsers={staffUsers}
-              managerUsers={managerUsers}
-              onCompanyUpdate={(updatedCompany) => {
-                setCompanies((prevCompanies) =>
-                  prevCompanies.map((comp) => (comp.id === updatedCompany.id ? updatedCompany : comp))
-                );
-              }}
-            />
+              <Button
+                className={`${company.archived ? "btn-secondary" : "btn-primary"}`}
+                onClick={() => toggleArchiveCompany(company.id, !company.archived)}
+              >
+                <Archive/>
+                {company.archived ? "Unarchive" : "Archive"}
+              </Button>
+              <Button asChild>
+                <Link href={`/admin/${company.id}`}>View</Link>
+              </Button>
+              <EditCompanyDialog
+                company={company}
+                staffUsers={staffUsers}
+                managerUsers={managerUsers}
+                onCompanyUpdate={(updatedCompany) => {
+                  setCompanies((prevCompanies) =>
+                    prevCompanies.map((comp) => (comp.id === updatedCompany.id ? updatedCompany : comp))
+                  );
+                }}
+              />
             </div>
-
           </Card>
         ))}
       </div>
-
-
     </div>
   );
 };

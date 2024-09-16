@@ -4,15 +4,16 @@ import { User } from "@prisma/client";
 import CompanyManagement from "./CompanyManagement";
 import UserManagement from "./UserManagement";
 import { useEffect, useState } from "react";
-
+import { toast } from "sonner"; // Importing toast for error handling
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
-interface Props{
-  params:{
-    id: string
-  }
+interface Props {
+  params: {
+    id: string;
+  };
 }
-const Admin = ({params}: Props) => {
+
+const Admin = ({ params }: Props) => {
   const [staffUsers, setStaffUsers] = useState<User[]>([]);
   const [managerUsers, setManagerUsers] = useState<User[]>([]);
 
@@ -25,7 +26,7 @@ const Admin = ({params}: Props) => {
         setStaffUsers(data.users.filter((user: User) => user.role === "Staff"));
         setManagerUsers(data.users.filter((user: User) => user.role === "Manager"));
       } catch (error) {
-        console.error("Failed to fetch users", error);
+        toast.error("Failed to fetch users"); // Replacing console.error with toast error
       }
     };
     fetchUsers();

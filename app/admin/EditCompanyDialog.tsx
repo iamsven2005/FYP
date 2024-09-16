@@ -55,6 +55,12 @@ export default function EditCompanyDialog({
   }
 
   const updateCompany = async () => {
+    // Validation checks before updating
+    if (!companyName || !companyImgUrl || !selectedStaff || !selectedManager) {
+      toast.error("Please fill out all fields before updating the company")
+      return
+    }
+
     setLoading(true)
     try {
       const res = await fetch(`/api/companies?id=${company.id}`, {
