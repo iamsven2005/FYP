@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import * as tmImage from "@teachablemachine/image";
 import "@tensorflow/tfjs";
+import { toast } from "sonner"; // Import toast
 
 export default function TeachableMachineImage() {
     const [halalModel, setHalalModel] = useState<tmImage.CustomMobileNet | null>(null);
@@ -16,58 +17,73 @@ export default function TeachableMachineImage() {
 
     // Load both models (Halal and Healthy)
     const init = async () => {
-        const halalModelURL = "/halal/model.json"; // Path to your Halal model.json file
-        const halalMetadataURL = "/halal/metadata.json"; // Path to your Halal metadata.json file
+        try {
+            const halalModelURL = "/halal/model.json"; // Path to your Halal model.json file
+            const halalMetadataURL = "/halal/metadata.json"; // Path to your Halal metadata.json file
 
-        const healthyModelURL = "/healthy/model.json"; // Path to your Healthy model.json file
-        const healthyMetadataURL = "/healthy/metadata.json"; // Path to your Healthy metadata.json file
+            const healthyModelURL = "/healthy/model.json"; // Path to your Healthy model.json file
+            const healthyMetadataURL = "/healthy/metadata.json"; // Path to your Healthy metadata.json file
 
-        const loadedHalalModel = await tmImage.load(halalModelURL, halalMetadataURL);
-        const loadedHealthyModel = await tmImage.load(healthyModelURL, healthyMetadataURL);
+            const loadedHalalModel = await tmImage.load(halalModelURL, halalMetadataURL);
+            const loadedHealthyModel = await tmImage.load(healthyModelURL, healthyMetadataURL);
 
-        setHalalModel(loadedHalalModel);
-        setHealthyModel(loadedHealthyModel);
+            setHalalModel(loadedHalalModel);
+            setHealthyModel(loadedHealthyModel);
+
+            toast.success("Models loaded successfully");
+        } catch (error) {
+            toast.error("Failed to load models. Please try again.");
+        }
     };
 
     // Handle Image Upload and Prediction for both models
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !halalModel || !healthyModel) return;
+        if (!file || !halalModel || !healthyModel) {
+            toast.error("Please load models first.");
+            return;
+        }
 
         setLoading(true);
 
-        // Load the uploaded image into an HTML image element
-        const imgElement = new Image();
-        imgElement.src = URL.createObjectURL(file);
-        imgElement.onload = async () => {
-            // Run predictions on the Halal model
-            const halalPrediction = await halalModel.predict(imgElement);
-            const halalResult =
-                halalPrediction.length >= 2 && halalPrediction[0].probability > halalPrediction[1].probability
-                    ? "Not Halal"
-                    : " Halal";
+        try {
+            // Load the uploaded image into an HTML image element
+            const imgElement = new Image();
+            imgElement.src = URL.createObjectURL(file);
+            imgElement.onload = async () => {
+                // Run predictions on the Halal model
+                const halalPrediction = await halalModel.predict(imgElement);
+                const halalResult =
+                    halalPrediction.length >= 2 && halalPrediction[0].probability > halalPrediction[1].probability
+                        ? "Not Halal"
+                        : "Halal";
 
-            // Run predictions on the Healthy model
-            const healthyPrediction = await healthyModel.predict(imgElement);
-            const healthyResult =
-                healthyPrediction.length >= 2 && healthyPrediction[0].probability > healthyPrediction[1].probability
-                    ? "Not Healthy"
-                    : "Healthy";
+                // Run predictions on the Healthy model
+                const healthyPrediction = await healthyModel.predict(imgElement);
+                const healthyResult =
+                    healthyPrediction.length >= 2 && healthyPrediction[0].probability > healthyPrediction[1].probability
+                        ? "Not Healthy"
+                        : "Healthy";
 
-            // Update the result for both models
-            setResult({ halal: halalResult, healthy: healthyResult });
+                // Update the result for both models
+                setResult({ halal: halalResult, healthy: healthyResult });
 
-            // Update the label container with all results from both models
-            const halalResults = halalPrediction.map(
-                (pred) => `Halal Model - ${pred.className}: ${pred.probability.toFixed(2)}`
-            );
-            const healthyResults = healthyPrediction.map(
-                (pred) => `Healthy Model - ${pred.className}: ${pred.probability.toFixed(2)}`
-            );
-            setLabelContainer([...halalResults, ...healthyResults]);
+                // Update the label container with all results from both models
+                const halalResults = halalPrediction.map(
+                    (pred) => `Halal Model - ${pred.className}: ${pred.probability.toFixed(2)}`
+                );
+                const healthyResults = healthyPrediction.map(
+                    (pred) => `Healthy Model - ${pred.className}: ${pred.probability.toFixed(2)}`
+                );
+                setLabelContainer([...halalResults, ...healthyResults]);
 
+                toast.success("Image processed successfully!");
+                setLoading(false);
+            };
+        } catch (error) {
+            toast.error("Failed to process image. Please try again.");
             setLoading(false);
-        };
+        }
     };
 
     return (
