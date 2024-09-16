@@ -135,7 +135,7 @@ export default function Homepage() {
                       View
                     </Link>
                     <Link
-                      href={`/Homepage/${company.id}/upload`}
+                      href={`/Homepage/${company.id}/upload2`}
                       className="text-blue-600 hover:underline"
                     >
                       Upload

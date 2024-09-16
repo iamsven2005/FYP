@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         imageurl,
         name,
         companyId,
-        status: 'PENDING', // Set status to "PENDING" when posting the image
+        status: 'PENDING',
         retrived,
         halal,
         healthy,
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: newImage });
   } catch (error) {
-    return NextResponse.json({ success: false, message: "Failed to save image data" }, { status: 500 });
+    console.log(error)
+    return NextResponse.json({ success: false, message: error }, { status: 500 });
   }
 }
