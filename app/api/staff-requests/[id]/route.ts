@@ -21,7 +21,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     return NextResponse.json({ message: `Request ${status} successfully`, updatedUser }, { status: 200 });
   } catch (error) {
-    console.error(`Failed to update status for staff with ID ${id}:`, error);
     return NextResponse.json({ message: 'Failed to update staff status' }, { status: 500 });
   }
 }

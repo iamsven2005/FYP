@@ -20,7 +20,6 @@ export async function DELETE(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Failed to terminate session:', error);
     return NextResponse.json({ message: 'Failed to terminate session' }, { status: 500 });
   }
 }

@@ -19,7 +19,6 @@ export async function GET() {
 
     return NextResponse.json(pendingRequests, { status: 200 });
   } catch (error) {
-    console.error('Failed to fetch staff requests:', error);
     return NextResponse.json({ message: 'Failed to fetch staff requests' }, { status: 500 });
   }
 }

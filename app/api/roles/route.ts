@@ -19,7 +19,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "Role updated successfully", updatedUser }, { status: 200 });
   } catch (error) {
-    console.error("Failed to update role:", error);
     return NextResponse.json({ error: "Failed to assign role" }, { status: 500 });
   }
 }

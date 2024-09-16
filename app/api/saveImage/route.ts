@@ -23,7 +23,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data: newImage });
   } catch (error) {
-    console.error("Error saving image data", error);
     return NextResponse.json({ success: false, message: "Failed to save image data" }, { status: 500 });
   }
 }
