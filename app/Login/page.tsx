@@ -82,8 +82,8 @@ const LoginPage = () => {
       } else {
         toast.error(data.message || 'Something went wrong');
       }
-    } catch {
-      toast.error('Something went wrong. Please try again later.');
+    } catch (error) {
+      toast.error('Something went wrong. Please try again later.'); // Error handling
     } finally {
       setLoading(false);
     }
@@ -119,8 +119,8 @@ const LoginPage = () => {
       } else {
         toast.error(data.message || 'Something went wrong');
       }
-    } catch {
-      toast.error('Something went wrong. Please try again later.');
+    } catch (error) {
+      toast.error('Something went wrong. Please try again later.'); // Error handling
     }
   };
 

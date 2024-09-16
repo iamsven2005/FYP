@@ -1,97 +1,98 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner"; // Import toast for notifications
 
 interface Company {
-  id: string
-  name: string
-  archived: boolean
-  img: string | null
+  id: string;
+  name: string;
+  archived: boolean;
+  img: string | null;
 }
 
 interface Item {
-  id: string
-  name: string
-  imageurl: string
-  halal: boolean
-  healthy: boolean
-  retrived: string
-  AI: string
-  status: string
+  id: string;
+  name: string;
+  imageurl: string;
+  halal: boolean;
+  healthy: boolean;
+  retrived: string;
+  AI: string;
+  status: string;
 }
 
 export default function CompanyDetails({ params }: { params: { id: string } }) {
-  const [company, setCompany] = useState<Company | null>(null)
-  const [items, setItems] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [company, setCompany] = useState<Company | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetch(`/api/companies/${params.id}/approve`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          setError(data.error)
+          toast.error(data.error); // Use toast for errors
         } else {
-          setCompany(data.company)
-          setItems(data.items)
+          setCompany(data.company);
+          setItems(data.items);
         }
-        setLoading(false)
+        setLoading(false);
       })
       .catch(() => {
-        setError("Failed to fetch company details")
-        setLoading(false)
-      })
-  }, [params.id])
+        toast.error("Failed to fetch company details"); // Use toast for errors
+        setLoading(false);
+      });
+  }, [params.id]);
 
   const handleApprove = async (itemId: string) => {
     try {
       const response = await fetch(`/api/items/${itemId}/approve`, {
         method: "PATCH",
-      })
+      });
       if (response.ok) {
-        alert("Item approved successfully!")
+        toast.success("Item approved successfully!"); // Use toast for success message
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.id === itemId ? { ...item, status: "APPROVED" } : item
           )
-        )
+        );
       } else {
-        console.error("Failed to approve item")
+        toast.error("Failed to approve item"); // Use toast for error
       }
     } catch (error) {
-      console.error("Error approving item:", error)
+      toast.error("Error approving item"); // Use toast for error
     }
-  }
+  };
 
   const handleReject = async (itemId: string) => {
     try {
       const response = await fetch(`/api/items/${itemId}/reject`, {
         method: "PATCH",
-      })
+      });
       if (response.ok) {
-        alert("Item rejected successfully!")
+        toast.success("Item rejected successfully!"); // Use toast for success message
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.id === itemId ? { ...item, status: "REJECTED" } : item
           )
-        )
+        );
       } else {
-        console.error("Failed to reject item")
+        toast.error("Failed to reject item"); // Use toast for error
       }
     } catch (error) {
-      console.error("Error rejecting item:", error)
+      toast.error("Error rejecting item"); // Use toast for error
     }
-  }
+  };
 
-  if (loading) return <p className="text-center p-8">Loading...</p>
-  if (error) return <p className="text-center p-8 text-red-500">{error}</p>
-  if (!company) return <p className="text-center p-8">No company details found.</p>
+  if (loading) return <p className="text-center p-8">Loading...</p>;
+  if (error) return <p className="text-center p-8 text-red-500">{error}</p>;
+  if (!company) return <p className="text-center p-8">No company details found.</p>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -150,5 +151,5 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
