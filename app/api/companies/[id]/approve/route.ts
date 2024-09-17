@@ -17,6 +17,17 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       where: {
         companyId: params.id,
       },
+      select: {
+        id: true,
+        name: true,
+        imageurl: true,
+        halal: true,
+        healthy: true,
+        retrived: true,
+        AI: true,
+        status: true,
+        ingredients: true, // Include the ingredients field
+      },
     });
 
     return NextResponse.json({ company, items: images });

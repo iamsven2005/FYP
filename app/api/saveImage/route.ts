@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { imageurl, name, companyId, retrived, halal, healthy, AI } = body;
+    const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients } = body;
 
     // Save the image data to the database with status "PENDING"
     const newImage = await db.images.create({
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
         halal,
         healthy,
         AI,
+        ingredients, // Include the ingredients data
       },
     });
 

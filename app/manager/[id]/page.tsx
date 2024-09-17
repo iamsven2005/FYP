@@ -7,6 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner"; // Import toast for notifications
 
+// Import the IngredientList component
+import IngredientList from '@/components/IngredientList';
+
+// Define the IngredientStatus interface
+interface IngredientStatus {
+  name: string;
+  status: 'Approved' | 'Not Approved' | 'Not Safe';
+}
+
 interface Company {
   id: string;
   name: string;
@@ -23,6 +32,7 @@ interface Item {
   retrived: string;
   AI: string;
   status: string;
+  ingredients: IngredientStatus[]; // Added ingredients field
 }
 
 export default function CompanyDetails({ params }: { params: { id: string } }) {
@@ -133,6 +143,15 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                     </div>
                     <p className="text-sm mb-2">Extracted Text: {item.retrived}</p>
                     <p className="text-sm mb-4">AI Advisory: {item.AI}</p>
+
+                    {/* Display Ingredients with Highlights */}
+                    {item.ingredients && item.ingredients.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="font-semibold">Ingredients:</h4>
+                        <IngredientList ingredients={item.ingredients} />
+                      </div>
+                    )}
+
                     <div className="flex gap-2">
                       <Button onClick={() => handleApprove(item.id)} size="sm" className="flex-1">
                         Approve
