@@ -39,7 +39,6 @@ export async function POST(req: Request) {
     },
   });
 
-  // Email content with the same styling from login
   const htmlContent = `
   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
     <!-- Header without NTUC Logo -->
