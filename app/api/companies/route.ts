@@ -58,8 +58,7 @@ export async function PATCH(req: Request) {
     }
 
     const { name, img, staff, manager, id } = await req.json();
-
-    // Check if at least one field to update is provided
+    console.log(req.json())
     if (!name && !img && !staff && !manager) {
       return NextResponse.json({ error: "No data provided for update" }, { status: 400 });
     }

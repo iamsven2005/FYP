@@ -60,29 +60,29 @@ export default function EditCompanyDialog({
   const updateCompany = async () => {
     // Validation checks before updating
     if (!companyName || !companyImgUrl || !selectedStaff || !selectedManager) {
-      toast.error("Please fill out all fields before updating the company")
-      return
+      toast.error("Please fill out all fields before updating the company");
+      return;
     }
-
-    setLoading(true)
+  
+    setLoading(true);
     try {
       const res = await axios.patch(`/api/companies?id=${company.id}`, {
-        data:{
-          name: companyName,
-          img: companyImgUrl,
-          staff: selectedStaff,
-          manager: selectedManager,
-          id
-        },
-      })
-        toast.success("Company updated successfully")
-        onCompanyUpdate(res.data)
+        name: companyName,
+        img: companyImgUrl,
+        staff: selectedStaff,
+        manager: selectedManager,
+        id
+      });
+      toast.success("Company updated successfully");
+      onCompanyUpdate(res.data);
     } catch (error) {
-      toast.error("An error occurred while updating the company")
+      console.error("Error updating company:", error);  // Log error for debugging
+      toast.error("An error occurred while updating the company");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+  
 
   return (
     <Dialog>

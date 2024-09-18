@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner"; // Import the toast from Sonner
 import { Eye, EyeOff } from 'lucide-react';
+import axios from 'axios';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -94,21 +95,10 @@ const RegisterPage = () => {
     }
 
     try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
+      const res = await axios.post('/api/register', {data:{ username, email, password },
       });
-
-      if (res.ok) {
         toast.success('Registration successful! Redirecting to login...');
         router.push('/login');
-      } else {
-        const data = await res.json();
-        toast.error(data.message || 'Something went wrong.');
-      }
     } catch (err) {
       toast.error('Failed to register. Please try again later.');
     } finally {

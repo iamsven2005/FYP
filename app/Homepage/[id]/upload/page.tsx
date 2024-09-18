@@ -182,6 +182,7 @@ export default function TeachableMachineWithOCR({ params }: Props) {
       if (response.ok) {
         const data = await response.json();
         toast.success("Image processed and saved successfully!");
+        window.location.reload()
       } else {
         toast.error("Failed to save the image.");
       }

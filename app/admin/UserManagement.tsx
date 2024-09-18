@@ -62,8 +62,8 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
     const fetchUsers = async () => {
       setIsFetching(true)
       try {
-        const res = await fetch(`/api/users?page=${page}&limit=${limit}`)
-        const data = await res.json()
+        const res = await axios.get(`/api/users?page=${page}&limit=${limit}`)
+        const data = await res.data
         setUsers(data.users)
         setFilteredUsers(data.users)
         setTotalPages(data.totalPages)
@@ -111,21 +111,25 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
   const assignRole = async (userId: string, newRole: string) => {
     setLoading((prev) => ({ ...prev, [userId]: true }))
     try {
-      const res = await axios.post("/api/roles", {data: { userId, rolename: newRole, id },
+      const res = await axios.post("/api/roles", {
+        userId, 
+        rolename: newRole, 
+        id,  // This is the ID of the admin or the person assigning the role
       })
-        toast.success("Role assigned successfully")
-        setUsers((prevUsers) =>
-          prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
-        )
-        setSelectedRoles((prev) => ({ ...prev, [userId]: newRole }))
+      toast.success("Role assigned successfully")
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
+      )
+      setSelectedRoles((prev) => ({ ...prev, [userId]: newRole }))
     } catch (error) {
       toast.error("An error occurred while assigning the role")
     } finally {
       setLoading((prev) => ({ ...prev, [userId]: false }))
     }
   }
+  
 
-  const handleRoleChange = (userId: string, newRole: string) => {
+  const handleRoleChange = (userId: string, newRole: string ) => {
     setSelectedRoles((prevRoles) => ({ ...prevRoles, [userId]: newRole }))
     assignRole(userId, newRole)
   }
@@ -181,7 +185,7 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
                 <ComboboxDemo
                   items={roles.map(role => ({ label: role, value: role }))}
                   value={selectedRoles[user.id] || user.role}
-                  onChange={(value) => handleRoleChange(user.id, value)}
+                  onChange={(value) => handleRoleChange(user.id, value || "staff")}
                 />
               </TableCell>
               <TableCell>
@@ -230,7 +234,7 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
             { label: "20 per page", value: "20" },
           ]}
           value={limit.toString()}
-          onChange={(value) => setLimit(parseInt(value))}
+          onChange={(value) => setLimit(parseInt(value || "10"))}
         />
       </div>
     </div>

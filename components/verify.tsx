@@ -26,20 +26,20 @@ const Verify = ({ id }: Props) => {
         } else if (response.data === "manager") {
           router.push("/manager");
         } else if (response.data === "admin") {
-          router.push("/Admin");
+          router.push("/admin");
         } else {
           router.push("/Login");
         }
       } catch (error) {
         console.error("Verification failed:", error);
-        router.push("/login"); // Redirect to login on failure
+        router.push("/login"); 
       }
     };
 
     verifyUser();
   }, [id, router]);
 
-  return <div>Verifying user with ID: {id}</div>;
+  return <></>;
 };
 
 export default Verify;

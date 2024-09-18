@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if(company){
       const notify = await db.notification.create({
         data:{
-          user_from: id,
+          user_from: params.id,
           user_to: company.staff,
           body: `Admin archived ${company.name} you can no longer access it.`,
           read: "Unread"
@@ -21,7 +21,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       })
       const notify2 = await db.notification.create({
         data:{
-          user_from: id,
+          user_from: params.id,
           user_to: company.manager,
           body: `Admin archived ${company.name} you can no longer access it.`,
           read: "Unread"
@@ -36,6 +36,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     });
     return NextResponse.json(updatedCompany, { status: 200 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ error: "Failed to archive company" }, { status: 500 });
   }
 }

@@ -52,19 +52,21 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
 
   const toggleArchiveCompany = async (companyId: string, archived: boolean) => {
     try {
-      const res = await axios.patch(`/api/companies/${companyId}`, {data:{ archived },
+      const res = await axios.patch(`/api/companies/${companyId}`, {
+        archived, // No need for `data` wrapper
       });
-        setCompanies((prevCompanies) =>
-          prevCompanies.map((company) =>
-            company.id === companyId ? { ...company, archived } : company
-          )
-        );
-        toast.success(`Company ${archived ? "archived" : "unarchived"} successfully`);
       
+      setCompanies((prevCompanies) =>
+        prevCompanies.map((company) =>
+          company.id === companyId ? { ...company, archived } : company
+        )
+      );
+      toast.success(`Company ${archived ? "archived" : "unarchived"} successfully`);
     } catch (error) {
       toast.error("An error occurred while updating company status");
     }
   };
+  
 
   // Convert image to base64
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
