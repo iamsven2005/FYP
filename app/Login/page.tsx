@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { toast } from "sonner"; // Import toast
 import { Eye, EyeOff } from 'lucide-react';
+import Verify from '@/components/verify';
+import axios from 'axios';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -98,27 +100,15 @@ const LoginPage = () => {
     }
 
     try {
-      const res = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, otp }),
-      });
+      const res = await axios.post('/api/verify-otp', {data:{ userId, otp }});
 
-      const data = await res.json();
+      const data = await res.data;
 
-      if (res.ok) {
         toast.success("OTP verified successfully.");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
-        
-        // Redirect after OTP verification
         const redirectTo = data.redirectTo || '/Homepage';
         router.push(redirectTo);
-      } else {
-        toast.error(data.message || 'Something went wrong');
-      }
     } catch (error) {
       toast.error('Something went wrong. Please try again later.'); // Error handling
     }

@@ -1,4 +1,3 @@
-//@ts-nocheck
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import * as XLSX from "xlsx"; 
 import { redirect, useRouter } from "next/navigation";
 import axios from "axios";
+import Verify from "@/components/verify";
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
 interface Props {
@@ -61,18 +61,15 @@ const Admin = ({ params }: Props) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const companies = await fetch("/api/companies");
-        const res = await fetch("/api/users");
-        const items = await fetch("/api/items");
-        const data = await res.json();
-        const item = await items.json();
-        const list = await companies.json();
-        setlist(list)
-        setImages(item); // Setting images
-        setFilteredImages(item);
-        setUsers(data.users)
-        setStaffUsers(data.users.filter((user: User) => user.role === "Staff"));
-        setManagerUsers(data.users.filter((user: User) => user.role === "Manager"));
+        const companies = await axios.get("/api/companies");
+        const res = await axios.get("/api/users");
+        const items = await axios.get("/api/items");
+        setlist(companies.data)
+        setImages(items.data);
+        setFilteredImages(items.data);
+        setUsers(res.data.users)
+        setStaffUsers(res.data.users.filter((user: User) => user.role === "Staff"));
+        setManagerUsers(res.data.users.filter((user: User) => user.role === "Manager"));
       } catch (error) {
         toast.error("Failed to fetch users");
       }
@@ -150,25 +147,31 @@ const Admin = ({ params }: Props) => {
     // Export the workbook
     XLSX.writeFile(wb, "data_export.xlsx");
   };
-  if(!user){
-    return redirect("/")
-  }
+
   return (
     <div className="container mx-auto mt-10">
       <h1 className="text-3xl font-bold text-base-content">Admin Dashboard</h1>
-
+      {user && (
+      <Verify id={user.id}/>
+      )}
       {/* Export to Excel Button */}
       <div className="mb-4">
         <button onClick={exportToExcel} className="bg-green-500 text-white p-2 rounded">
           Export to Excel
         </button>
       </div>
-      Logged In as: {user.username}
+      Logged In as: {user?.username}
       {/* User Management */}
-      <UserManagement roles={roles} id={user.id}/>
 
       {/* Company Management */}
+      {user && (
+        <div>
+      <UserManagement roles={roles} id={user.id}/>
       <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist} id={user.id}/>
+        </div>
+
+
+      )}
 
       {/* Images Table */}
       <div className="mt-8">

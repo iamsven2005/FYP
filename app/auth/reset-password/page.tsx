@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
@@ -32,20 +33,14 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await fetch("/api/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('authToken')}`,
-        },
-        body: JSON.stringify({ newPassword }),
+      const res = await axios.post("/api/reset-password", {data:{ newPassword },
       });
 
-      const data = await res.json();
+      const data = await res.data
 
       if (res.status === 400) {
         toast.error("New password cannot be the same as the old password");
-      } else if (res.ok) {
+      } else if (res.status === 200 ) {
         toast.success("Password reset successfully");
         localStorage.removeItem('authToken');
         router.push("/login");

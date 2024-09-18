@@ -9,6 +9,7 @@ import { toast } from "sonner"; // Import toast for notifications
 
 // Import the IngredientList component
 import IngredientList from '@/components/IngredientList';
+import axios from "axios";
 
 // Define the IngredientStatus interface
 interface IngredientStatus {
@@ -89,47 +90,33 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
 
   const handleApprove = async (itemId: string) => {
     try {
-      const response = await fetch(`/api/items/${itemId}/approve`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await axios.patch(`/api/items/${itemId}/approve`, {data:{
           userFrom: user?.id
-        }),
+        },
       });
-      if (response.ok) {
         toast.success("Item approved successfully!"); // Use toast for success message
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.id === itemId ? { ...item, status: "APPROVED" } : item
           )
         );
-      } else {
-        toast.error("Failed to approve item"); // Use toast for error
-      }
-    } catch (error) {
+      }catch (error) {
       toast.error("Error approving item"); // Use toast for error
     }
   };
 
   const handleReject = async (itemId: string) => {
     try {
-      const response = await fetch(`/api/items/${itemId}/reject`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const response = await axios.patch(`/api/items/${itemId}/reject`, {data:{
           userFrom: user?.id
-        }),
+        },
       });
-      if (response.ok) {
         toast.success("Item rejected successfully!"); // Use toast for success message
         setItems((prevItems) =>
           prevItems.map((item) =>
             item.id === itemId ? { ...item, status: "REJECTED" } : item
           )
         );
-      } else {
-        toast.error("Failed to reject item"); // Use toast for error
-      }
     } catch (error) {
       toast.error("Error rejecting item"); // Use toast for error
     }

@@ -17,6 +17,7 @@ import Combobox from "@/components/Combobox"
 import { Edit, Save, Upload } from "lucide-react"
 import { Company } from "@prisma/client"
 import { Card, CardContent } from "@/components/ui/card"
+import axios from "axios"
 
 type User = {
   id: string
@@ -65,27 +66,17 @@ export default function EditCompanyDialog({
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/companies?id=${company.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const res = await axios.patch(`/api/companies?id=${company.id}`, {
+        data:{
           name: companyName,
           img: companyImgUrl,
           staff: selectedStaff,
           manager: selectedManager,
           id
-        }),
+        },
       })
-
-      if (res.ok) {
-        const updatedCompany = await res.json()
         toast.success("Company updated successfully")
-        onCompanyUpdate(updatedCompany)
-      } else {
-        toast.error("Failed to update company")
-      }
+        onCompanyUpdate(res.data)
     } catch (error) {
       toast.error("An error occurred while updating the company")
     } finally {

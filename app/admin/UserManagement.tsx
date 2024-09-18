@@ -1,4 +1,3 @@
-//@ts-nocheck
 'use client'
 
 import { useState, useEffect } from "react"
@@ -26,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { ComboboxDemo } from "@/components/ComboboxDemo"
+import axios from "axios"
 
 type User = {
   id: string
@@ -111,21 +111,13 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
   const assignRole = async (userId: string, newRole: string) => {
     setLoading((prev) => ({ ...prev, [userId]: true }))
     try {
-      const res = await fetch("/api/roles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, rolename: newRole, id }),
+      const res = await axios.post("/api/roles", {data: { userId, rolename: newRole, id },
       })
-
-      if (res.ok) {
         toast.success("Role assigned successfully")
         setUsers((prevUsers) =>
           prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
         )
         setSelectedRoles((prev) => ({ ...prev, [userId]: newRole }))
-      } else {
-        toast.error("Failed to assign role")
-      }
     } catch (error) {
       toast.error("An error occurred while assigning the role")
     } finally {
@@ -149,13 +141,9 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
 
   const deleteUser = async (userId: string) => {
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" })
-      if (res.ok) {
+      const res = await axios.delete(`/api/users/${userId}`)
         toast.success("User deleted successfully")
         setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId))
-      } else {
-        toast.error("Failed to delete user")
-      }
     } catch (error) {
       toast.error("An error occurred while deleting the user")
     }

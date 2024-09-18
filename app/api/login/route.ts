@@ -5,6 +5,7 @@ import { createJWT } from "@/lib/session";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 import { toast } from "sonner"; // Import toast
+import { redirect } from "next/dist/server/api-utils";
 
 // Nodemailer setup for OTP
 const transporter = nodemailer.createTransport({
@@ -117,26 +118,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: error }, { status: 500 });
   }
 }
-export async function GET(req: NextRequest){
-  try{
-    const {id, role} = await req.json()
-    const user = await db.user.findFirst({
-      where:{
-        id,
-      }
-    })
-    if (user?.role === "admin") {
-      return NextResponse.redirect('/admin'); // Adjust the redirect path as needed
-    } else if (user?.role === "staff"){
-      return NextResponse.redirect("/Homepage")
-    } else if (user?.role === "manager"){
-      return NextResponse.redirect("/manager")
-    } else{
-      return NextResponse.redirect("/ogin")
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id'); 
+    if(!id){
+      return NextResponse.redirect("/")
     }
+    const user = await db.user.findFirst({
+      where: { id },
+    });
+    if (user?.role == 'Admin') {
+      var role = "admin"
+    } else if (user?.role == 'Staff') {
+      var role = "staff"
+    } else if (user?.role == 'Manager') {
+      var role = "manager"
+    } else {
+      var role = "others"
+    }
+    console.log(role)
+    return NextResponse.json(role, { status: 200 });
 
-  }catch(error){
-    console.log("Verify", error)
-    return NextResponse.json({ message: error }, { status: 500 });
+  } catch (error) {
+    console.log('Verify error:', error);
+    return NextResponse.json({ message: 'Failed to verify user' }, { status: 500 });
   }
 }

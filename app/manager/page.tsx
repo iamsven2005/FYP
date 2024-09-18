@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner"; // Import toast for notifications
+import Verify from "@/components/verify";
 
 interface User {
   username: string;
@@ -87,10 +88,11 @@ export default function ManagerDashboard() {
   }, [searchQuery, companies]);
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
-  if (!user) return <p className="text-center p-8">No user found</p>;
+  if (!user) return redirect("/")
 
   return (
     <div className="container mx-auto px-4 py-8">
+            <Verify id={user.id}/>
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-3xl">Welcome, {user.username}</CardTitle>

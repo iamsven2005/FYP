@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Company, User } from "@prisma/client";
 import { Card, CardTitle } from "@/components/ui/card";
+import axios from "axios";
 
 const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers: User[], managerUsers: User[], list: Company[], id: string }) => {
   const [companies, setCompanies] = useState<Company[]>(list);
@@ -51,21 +52,15 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
 
   const toggleArchiveCompany = async (companyId: string, archived: boolean) => {
     try {
-      const res = await fetch(`/api/companies/${companyId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ archived }),
+      const res = await axios.patch(`/api/companies/${companyId}`, {data:{ archived },
       });
-      if (res.ok) {
         setCompanies((prevCompanies) =>
           prevCompanies.map((company) =>
             company.id === companyId ? { ...company, archived } : company
           )
         );
         toast.success(`Company ${archived ? "archived" : "unarchived"} successfully`);
-      } else {
-        toast.error("Failed to update company status");
-      }
+      
     } catch (error) {
       toast.error("An error occurred while updating company status");
     }
@@ -91,28 +86,21 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
     }
 
     try {
-      const res = await fetch("/api/companies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const res = await axios.post("/api/companies", {data:{
           name: companyName,
           imgurl: companyImgUrl, // Now a base64 string
           staffId: selectedStaff,
           managerId: selectedManager,
           id
-        }),
+        },
       });
-      if (res.ok) {
         toast.success("Company created successfully");
-        const newCompany = await res.json();
+        const newCompany = await res.data;
         setCompanies((prevCompanies) => [...prevCompanies, newCompany]); // Update companies state
         setCompanyName("");
         setCompanyImgUrl("");
         setSelectedStaff("");
         setSelectedManager("");
-      } else {
-        toast.error("Failed to create company");
-      }
     } catch (error) {
       toast.error("An error occurred while creating the company");
     }

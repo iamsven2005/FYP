@@ -6,6 +6,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner'; // Importing toast for notifications
+import axios from "axios";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -19,14 +20,11 @@ export default function ForgotPassword() {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+      const res = await axios.post("/api/forgot-password", {data:{ email },
       });
-      const data = await res.json();
+      const data = await res.data
 
-      if (res.ok) {
+      
         toast.success("OTP sent successfully");
         setIsOtpSent(true);
 
@@ -35,9 +33,6 @@ export default function ForgotPassword() {
         } else {
           toast.error("Failed to retrieve user ID");
         }
-      } else {
-        toast.error(data.message);
-      }
     } catch (error) {
       toast.error("Something went wrong");
     }
@@ -53,21 +48,13 @@ export default function ForgotPassword() {
     }
 
     try {
-      const res = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, otp }), // Pass userId along with OTP
+      const res = await axios.post("/api/verify-otp", {data:{ userId, otp }, // Pass userId along with OTP
       });
-      const data = await res.json();
+      const data = await res.data;
 
-      if (res.ok) {
-        // Save user authentication token (or session) in localStorage or cookies
         localStorage.setItem('authToken', data.token);
         toast.success("OTP verified successfully");
-        router.push("/auth/reset-password"); // Redirect to reset password page
-      } else {
-        toast.error(data.message);
-      }
+        router.push("/auth/reset-password");
     } catch (error) {
       toast.error("Invalid OTP or something went wrong");
     }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner"; // Import toast for notifications
+import Verify from "@/components/verify";
 
 interface User {
   username: string;
@@ -83,10 +84,11 @@ export default function Homepage() {
   }, [searchQuery, companies]);
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
-  if (!user) return <p className="text-center p-8">No user found</p>;
+  if (!user) return redirect("/")
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Verify id={user.id}/>
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
         <p className="text-xl mb-2">Email: {user.email}</p>

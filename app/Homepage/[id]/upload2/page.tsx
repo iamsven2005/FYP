@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import ingredientList from '@/data/ingredients.json'
 // Import the IngredientList component
 import IngredientList from '@/components/IngredientList'
+import axios from "axios"
 
 interface IngredientStatus {
   name: string;
@@ -64,21 +65,12 @@ export default function Component({ params }: Props) {
 
     setLoading(true)
     try {
-      const response = await fetch("/api/openaiCheck", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ imagePath: inputText }),
+      const response = await axios.patch("/api/openaiCheck", {
+        data:{ imagePath: inputText },
       })
-
-      if (response.ok) {
-        const data = await response.json()
+        const data = await response.data
         setOpenAIResult(data.result.choices[0].message.content)
         toast.success("OpenAI classification completed.")
-      } else {
-        toast.error("Failed to get OpenAI classification.")
-      }
     } catch (error) {
       toast.error("Error in OpenAI request")
     } finally {
