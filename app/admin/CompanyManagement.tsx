@@ -86,27 +86,37 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
       toast.error("Please fill out all fields before creating the company");
       return;
     }
-
+  
     try {
-      const res = await axios.post("/api/companies", {data:{
-          name: companyName,
-          imgurl: companyImgUrl, // Now a base64 string
-          staffId: selectedStaff,
-          managerId: selectedManager,
-          id
-        },
+      // Log the payload for debugging
+      console.log({
+        name: companyName,
+        imgurl: companyImgUrl,  // Image is passed here
+        staffId: selectedStaff,
+        managerId: selectedManager,
+        id
       });
-        toast.success("Company created successfully");
-        const newCompany = await res.data;
-        setCompanies((prevCompanies) => [...prevCompanies, newCompany]); // Update companies state
-        setCompanyName("");
-        setCompanyImgUrl("");
-        setSelectedStaff("");
-        setSelectedManager("");
+  
+      const res = await axios.post("/api/companies", {
+        name: companyName,
+        imgurl: companyImgUrl,
+        staffId: selectedStaff,
+        managerId: selectedManager,
+        id
+      });
+  
+      toast.success("Company created successfully");
+      const newCompany = await res.data;
+      setCompanies((prevCompanies) => [...prevCompanies, newCompany]); // Update companies state
+      setCompanyName("");
+      setCompanyImgUrl("");
+      setSelectedStaff("");
+      setSelectedManager("");
     } catch (error) {
       toast.error("An error occurred while creating the company");
     }
   };
+  
 
   return (
     <div>

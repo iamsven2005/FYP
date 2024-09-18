@@ -28,7 +28,7 @@ const Verify = ({ id }: Props) => {
         } else if (response.data === "admin") {
           router.push("/admin");
         } else {
-          router.push("/Login");
+          router.push("/login");
         }
       } catch (error) {
         console.error("Verification failed:", error);
