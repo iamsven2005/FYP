@@ -15,7 +15,11 @@ interface IngredientStatus {
   name: string;
   status: 'Approved' | 'Not Approved' | 'Not Safe';
 }
-
+interface User {
+  username: string;
+  email: string;
+  id: string;
+}
 interface Company {
   id: string;
   name: string;
@@ -41,7 +45,30 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
+  function parseJwt(token: string) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
+    } else {
+      router.push("/login");
+    }
+    setLoading(false);
+  }, [router]);
   useEffect(() => {
     fetch(`/api/companies/${params.id}/approve`)
       .then((res) => res.json())
@@ -64,6 +91,10 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     try {
       const response = await fetch(`/api/items/${itemId}/approve`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userFrom: user?.id
+        }),
       });
       if (response.ok) {
         toast.success("Item approved successfully!"); // Use toast for success message
@@ -84,6 +115,10 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     try {
       const response = await fetch(`/api/items/${itemId}/reject`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userFrom: user?.id
+        }),
       });
       if (response.ok) {
         toast.success("Item rejected successfully!"); // Use toast for success message

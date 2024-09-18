@@ -9,6 +9,7 @@ import UserManagement from "./UserManagement";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // shadcn table components
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"; // shadcn dialog components
 import * as XLSX from "xlsx"; 
+import { useRouter } from "next/navigation";
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
 interface Props {
@@ -16,8 +17,13 @@ interface Props {
     id: string;
   };
 }
-
+interface User {
+  username: string;
+  email: string;
+  id: string;
+}
 const Admin = ({ params }: Props) => {
+  const router = useRouter()
   const [staffUsers, setStaffUsers] = useState<User[]>([]);
   const [managerUsers, setManagerUsers] = useState<User[]>([]);
   const [images, setImages] = useState<images[]>([]);
@@ -25,7 +31,31 @@ const Admin = ({ params }: Props) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [clist, setlist] = useState<Company[]>([]);
   const [AUsers, setUsers] = useState<User[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  function parseJwt(token: string) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
+    } else {
+      router.push("/login");
+    }
+    setLoading(false);
+  }, [router]);
   useEffect(() => {
     // Fetch users to get staff and managers
     const fetchUsers = async () => {
@@ -132,12 +162,12 @@ const Admin = ({ params }: Props) => {
           Export to Excel
         </button>
       </div>
-
+      Logged In as: {user?.username}
       {/* User Management */}
-      <UserManagement roles={roles} />
+      <UserManagement roles={roles} id={user?.id}/>
 
       {/* Company Management */}
-      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist}/>
+      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist} id={user?.id}/>
 
       {/* Images Table */}
       <div className="mt-8">

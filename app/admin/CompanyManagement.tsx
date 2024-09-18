@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Company, User } from "@prisma/client";
 import { Card, CardTitle } from "@/components/ui/card";
 
-const CompanyManagement = ({ staffUsers, managerUsers, list }: { staffUsers: User[], managerUsers: User[], list: Company[] }) => {
+const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers: User[], managerUsers: User[], list: Company[], id: string }) => {
   const [companies, setCompanies] = useState<Company[]>(list);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>(list);
   const [companyName, setCompanyName] = useState<string>("");
@@ -232,6 +232,7 @@ const CompanyManagement = ({ staffUsers, managerUsers, list }: { staffUsers: Use
                     prevCompanies.map((comp) => (comp.id === updatedCompany.id ? updatedCompany : comp))
                   );
                 }}
+                id={id}
               />
               
             </div>

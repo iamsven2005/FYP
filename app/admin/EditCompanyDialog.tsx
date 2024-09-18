@@ -29,6 +29,7 @@ type EditCompanyDialogProps = {
   staffUsers: User[]
   managerUsers: User[]
   onCompanyUpdate: (updatedCompany: Company) => void
+  id: string
 }
 
 export default function EditCompanyDialog({
@@ -36,6 +37,7 @@ export default function EditCompanyDialog({
   staffUsers,
   managerUsers,
   onCompanyUpdate,
+  id
 }: EditCompanyDialogProps) {
   const [companyName, setCompanyName] = useState(company.name)
   const [companyImgUrl, setCompanyImgUrl] = useState(company.img)

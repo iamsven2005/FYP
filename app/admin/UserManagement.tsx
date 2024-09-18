@@ -35,6 +35,7 @@ type User = {
 
 type UserManagementProps = {
   roles: string[]
+  id: string
 }
 
 const rolePriority: { [key: string]: number } = {
@@ -44,7 +45,7 @@ const rolePriority: { [key: string]: number } = {
   Client: 4,
 }
 
-export default function UserManagement({ roles }: UserManagementProps) {
+export default function UserManagement({ roles, id }: UserManagementProps) {
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState<string>("")
@@ -172,6 +173,7 @@ export default function UserManagement({ roles }: UserManagementProps) {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
+      {id}
       <Table>
         <TableHeader>
           <TableRow>

@@ -25,7 +25,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     if (!companies.length) {
       return NextResponse.json({ error: "No companies found for this user" }, { status: 400 });
     }
-
     return NextResponse.json({ companies });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch companies" }, { status: 500 });
