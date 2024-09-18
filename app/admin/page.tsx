@@ -3,11 +3,12 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner"; // Importing toast for error handling
-import { images, User } from "@prisma/client";
+import { Company, images, User } from "@prisma/client";
 import CompanyManagement from "./CompanyManagement";
 import UserManagement from "./UserManagement";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // shadcn table components
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"; // shadcn dialog components
+import * as XLSX from "xlsx"; 
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
 interface Props {
@@ -22,17 +23,23 @@ const Admin = ({ params }: Props) => {
   const [images, setImages] = useState<images[]>([]);
   const [filteredImages, setFilteredImages] = useState<images[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [clist, setlist] = useState<Company[]>([]);
+  const [AUsers, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     // Fetch users to get staff and managers
     const fetchUsers = async () => {
       try {
+        const companies = await fetch("/api/companies");
         const res = await fetch("/api/users");
         const items = await fetch("/api/items");
         const data = await res.json();
         const item = await items.json();
+        const list = await companies.json();
+        setlist(list)
         setImages(item); // Setting images
-        setFilteredImages(item); // Initially set filtered images to all items
+        setFilteredImages(item);
+        setUsers(data.users)
         setStaffUsers(data.users.filter((user: User) => user.role === "Staff"));
         setManagerUsers(data.users.filter((user: User) => user.role === "Manager"));
       } catch (error) {
@@ -41,13 +48,6 @@ const Admin = ({ params }: Props) => {
     };
     fetchUsers();
   }, []);
-
-  // Function to determine background color for ingredient status
-  const getStatusColor = (status: string) => {
-    if (status === "Not Safe") return "bg-red-500 text-white"; // Red for "Not Safe"
-    if (status === "Not Approved") return "bg-yellow-500 text-black"; // Yellow for "Not Approved"
-    return "bg-green-500 text-white"; // Green for approved
-  };
 
   // Function to handle the search input and filter the images
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,30 +72,86 @@ const Admin = ({ params }: Props) => {
     return counts;
   };
 
+  // Function to export data to Excel
+  const exportToExcel = () => {
+    // Prepare the data for each section
+    const usersData = AUsers.concat(AUsers).map(user => ({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+      email: user.email,
+    }));
+
+    const companyData = clist.concat(clist).map(data => ({
+      id: data.id,
+      name: data.name,
+      staff: data.staff,
+      manager: data.manager,
+      archived: data.archived,
+      create: data.createdAt
+    }));
+
+    const imagesData = images.map(image => ({
+      id: image.id,
+      name: image.name,
+      companyId: image.companyId,
+      status: image.status,
+      halal: image.halal ? "Yes" : "No",
+      healthy: image.healthy ? "Yes" : "No",
+      ai: image.AI,
+      retrived: image.retrived
+
+    }));
+
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+
+    // Add users sheet
+    const wsUsers = XLSX.utils.json_to_sheet(usersData);
+    XLSX.utils.book_append_sheet(wb, wsUsers, "Users");
+
+    // Add company sheet
+    const wsCompany = XLSX.utils.json_to_sheet(companyData);
+    XLSX.utils.book_append_sheet(wb, wsCompany, "Company");
+
+    // Add images sheet
+    const wsImages = XLSX.utils.json_to_sheet(imagesData);
+    XLSX.utils.book_append_sheet(wb, wsImages, "Images");
+
+    // Export the workbook
+    XLSX.writeFile(wb, "data_export.xlsx");
+  };
+
   return (
     <div className="container mx-auto mt-10">
       <h1 className="text-3xl font-bold text-base-content">Admin Dashboard</h1>
 
-      {/* Search Bar */}
+      {/* Export to Excel Button */}
       <div className="mb-4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder="Search for food items or ingredients"
-          className="border p-2 rounded-lg w-full"
-        />
+        <button onClick={exportToExcel} className="bg-green-500 text-white p-2 rounded">
+          Export to Excel
+        </button>
       </div>
 
       {/* User Management */}
       <UserManagement roles={roles} />
 
       {/* Company Management */}
-      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} />
+      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist}/>
 
       {/* Images Table */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">Images</h2>
+        {/* Search Bar */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder="Search for food items or ingredients"
+            className="border p-2 rounded-lg w-full"
+          />
+        </div>
         <Table>
           <TableHeader>
             <TableRow>

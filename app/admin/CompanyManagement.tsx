@@ -9,18 +9,12 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Archive, PlusCircle, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Company } from "@prisma/client";
+import { Company, User } from "@prisma/client";
 import { Card, CardTitle } from "@/components/ui/card";
 
-type User = {
-  id: string;
-  username: string;
-  role: string;
-};
-
-const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], managerUsers: User[] }) => {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
+const CompanyManagement = ({ staffUsers, managerUsers, list }: { staffUsers: User[], managerUsers: User[], list: Company[] }) => {
+  const [companies, setCompanies] = useState<Company[]>(list);
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>(list);
   const [companyName, setCompanyName] = useState<string>("");
   const [companyImgUrl, setCompanyImgUrl] = useState<string>("");
   const [companySearchTerm, setCompanySearchTerm] = useState<string>("");
@@ -28,20 +22,15 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
   const [selectedStaff, setSelectedStaff] = useState<string>("");
   const [selectedManager, setSelectedManager] = useState<string>("");
 
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const res = await fetch("/api/companies");
-        const data = await res.json();
-        setCompanies(data);
-        setFilteredCompanies(data);
-      } catch (error) {
-        toast.error("Failed to fetch companies");
-      }
-    };
+  // Log the list prop for debugging
+  console.log("List prop passed to CompanyManagement:", list);
 
-    fetchCompanies();
-  }, []);
+  // Set the companies state from the list prop when the component mounts
+  useEffect(() => {
+    console.log("Setting companies from list...");
+    setCompanies(list);
+    setFilteredCompanies(list);
+  }, [list]); // This effect runs when the list prop changes
 
   // Filter companies based on the search term and filter type
   useEffect(() => {
@@ -115,7 +104,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
       if (res.ok) {
         toast.success("Company created successfully");
         const newCompany = await res.json();
-        setCompanies((prevCompanies) => [...prevCompanies, newCompany]);
+        setCompanies((prevCompanies) => [...prevCompanies, newCompany]); // Update companies state
         setCompanyName("");
         setCompanyImgUrl("");
         setSelectedStaff("");
@@ -244,6 +233,7 @@ const CompanyManagement = ({ staffUsers, managerUsers }: { staffUsers: User[], m
                   );
                 }}
               />
+              
             </div>
           </Card>
         ))}
