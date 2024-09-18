@@ -74,7 +74,6 @@ export default function Component({ params }: Props) {
 
       if (response.ok) {
         const data = await response.json()
-        console.log(data)
         setOpenAIResult(data.result.choices[0].message.content)
         toast.success("OpenAI classification completed.")
       } else {

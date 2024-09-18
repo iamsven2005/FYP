@@ -70,7 +70,7 @@ export default function EditCompanyDialog({
         },
         body: JSON.stringify({
           name: companyName,
-          imgurl: companyImgUrl,
+          img: companyImgUrl,
           staff: selectedStaff,
           manager: selectedManager,
         }),

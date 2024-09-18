@@ -23,7 +23,7 @@ model images {
   halal       Boolean
   healthy     Boolean
   AI          String   @db.Text
-  ingredients Json?    // New field to store ingredients with statuses
+  ingredients Json?
 }
 
 model User {

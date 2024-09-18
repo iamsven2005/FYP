@@ -35,20 +35,16 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    // Extract company ID from the request URL
     const { searchParams } = new URL(req.url);
     const companyId = searchParams.get('id');
-
-    // If no company ID is provided, return 400 Bad Request
     if (!companyId) {
       return NextResponse.json({ error: "Company ID is required" }, { status: 400 });
     }
 
-    // Extract the data to be updated from the request body
-    const { name, imgurl, staff, manager } = await req.json();
+    const { name, img, staff, manager } = await req.json();
 
     // Check if at least one field to update is provided
-    if (!name && !imgurl && !staff && !manager) {
+    if (!name && !img && !staff && !manager) {
       return NextResponse.json({ error: "No data provided for update" }, { status: 400 });
     }
 
@@ -57,7 +53,7 @@ export async function PATCH(req: Request) {
       where: { id: companyId },
       data: {
         ...(name && { name }),
-        ...(imgurl && { imgurl }),    
+        ...(img && { img }),    
         ...(staff && { staff }),
         ...(manager && { manager }), 
       },
@@ -65,6 +61,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json(updatedCompany, { status: 200 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ error: "Failed to update company" }, { status: 500 });
   }
 }
