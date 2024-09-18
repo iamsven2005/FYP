@@ -89,38 +89,50 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   const handleApprove = async (itemId: string) => {
-    try {
-      const response = await axios.patch(`/api/items/${itemId}/approve`, {data:{
-          userFrom: user?.id
-        },
-      });
-        toast.success("Item approved successfully!"); // Use toast for success message
-        setItems((prevItems) =>
-          prevItems.map((item) =>
-            item.id === itemId ? { ...item, status: "APPROVED" } : item
-          )
-        );
-      }catch (error) {
-      toast.error("Error approving item"); // Use toast for error
+    if (!user?.id) {
+      toast.error("User ID is missing.");
+      return;
     }
-  };
-
-  const handleReject = async (itemId: string) => {
+  
     try {
-      const response = await axios.patch(`/api/items/${itemId}/reject`, {data:{
-          userFrom: user?.id
-        },
+      const response = await axios.patch(`/api/items/${itemId}/approve`, {
+        userFrom: user.id, // Ensure userFrom is passed
       });
-        toast.success("Item rejected successfully!"); // Use toast for success message
-        setItems((prevItems) =>
-          prevItems.map((item) =>
-            item.id === itemId ? { ...item, status: "REJECTED" } : item
-          )
-        );
+  
+      toast.success("Item approved successfully!");
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === itemId ? { ...item, status: "APPROVED" } : item
+        )
+      );
     } catch (error) {
-      toast.error("Error rejecting item"); // Use toast for error
+      toast.error("Error approving item");
     }
   };
+  
+  const handleReject = async (itemId: string) => {
+    if (!user?.id) {
+      toast.error("User ID is missing.");
+      return;
+    }
+  
+    try {
+      const response = await axios.patch(`/api/items/${itemId}/reject`, {
+        userFrom: user.id, // Ensure userFrom is passed
+      });
+  
+      toast.success("Item rejected successfully!");
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === itemId ? { ...item, status: "REJECTED" } : item
+        )
+      );
+    } catch (error) {
+      toast.error("Error rejecting item");
+    }
+  };
+  
+  
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
   if (error) return <p className="text-center p-8 text-red-500">{error}</p>;

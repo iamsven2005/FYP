@@ -7,6 +7,8 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bell, CheckCircle, Loader2 } from "lucide-react"
+import { Notification } from "@prisma/client"
+import Name from "./name"
 
 interface User {
   username: string
@@ -14,11 +16,6 @@ interface User {
   id: string
 }
 
-interface Notification {
-  id: string
-  body: string
-  createdAt: string
-}
 
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -92,6 +89,7 @@ export default function NotificationsPage() {
                 <div className="flex items-start space-x-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{notification.body}</p>
+                    <Name id={notification.user_from}/>
                     <p className="text-sm text-gray-500">
                       {new Date(notification.createdAt).toLocaleString()}
                     </p>

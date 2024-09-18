@@ -63,6 +63,7 @@ model Notification {
   user_to   String
   body      String
   read      String
+  createdAt DateTime @default(now())
 }
 
 model Checklist {

@@ -49,7 +49,11 @@ const Navbar = () => {
           About Us
         </Link>
       </NavigationMenuItem>
-
+      <NavigationMenuItem>
+            <Link href="/messages" className="text-foreground hover:text-primary transition-colors duration-300">
+              Messages
+            </Link>
+      </NavigationMenuItem>
       {isLoggedIn ? (
         <NavigationMenuItem>
           <button
@@ -71,11 +75,7 @@ const Navbar = () => {
               Register
             </Link>
           </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Link href="/messages" className="text-foreground hover:text-primary transition-colors duration-300">
-              Messages
-            </Link>
-          </NavigationMenuItem>
+
         </>
       )}
     </>
