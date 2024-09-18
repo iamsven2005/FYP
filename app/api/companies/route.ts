@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  const { imgurl, name, staffId, managerId } = await req.json();
+  const { imgurl, name, staffId, managerId, id } = await req.json();
 
   try {
     const newCompany = await db.company.create({
@@ -16,6 +16,22 @@ export async function POST(req: Request) {
         manager:managerId,
       },
     });
+    const notify = await db.notification.create({
+      data:{
+        user_from: id,
+        user_to: staffId,
+        body: `You have been assigned to work on ${name}`,
+        read: "Unread"
+      }
+    })
+    const notify2 = await db.notification.create({
+      data:{
+        user_from: id,
+        user_to: managerId,
+        body: `You have been assigned to manage ${name}`,
+        read: "Unread"
+      }
+    })
     return NextResponse.json(newCompany, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to create company" }, { status: 500 });
@@ -41,7 +57,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Company ID is required" }, { status: 400 });
     }
 
-    const { name, img, staff, manager } = await req.json();
+    const { name, img, staff, manager, id } = await req.json();
 
     // Check if at least one field to update is provided
     if (!name && !img && !staff && !manager) {
@@ -58,7 +74,22 @@ export async function PATCH(req: Request) {
         ...(manager && { manager }), 
       },
     });
-
+    const notify = await db.notification.create({
+      data:{
+        user_from: id,
+        user_to: staff,
+        body: `Admin as edited ${name}`,
+        read: "Unread"
+      }
+    })
+    const notify2 = await db.notification.create({
+      data:{
+        user_from: id,
+        user_to: manager,
+        body: `Admin as edited ${name}`,
+        read: "Unread"
+      }
+    })
     return NextResponse.json(updatedCompany, { status: 200 });
   } catch (error) {
     console.log(error)

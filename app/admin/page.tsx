@@ -9,7 +9,8 @@ import UserManagement from "./UserManagement";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // shadcn table components
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"; // shadcn dialog components
 import * as XLSX from "xlsx"; 
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import axios from "axios";
 
 const roles = ["Admin", "Staff", "Manager", "Client"];
 interface Props {
@@ -17,7 +18,7 @@ interface Props {
     id: string;
   };
 }
-interface User {
+interface UserI {
   username: string;
   email: string;
   id: string;
@@ -31,7 +32,7 @@ const Admin = ({ params }: Props) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [clist, setlist] = useState<Company[]>([]);
   const [AUsers, setUsers] = useState<User[]>([]);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserI | null>(null);
   const [loading, setLoading] = useState(true);
 
   function parseJwt(token: string) {
@@ -52,12 +53,12 @@ const Admin = ({ params }: Props) => {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      router.push("/login");
+      window.location.reload()
+      redirect("/login");
     }
     setLoading(false);
   }, [router]);
   useEffect(() => {
-    // Fetch users to get staff and managers
     const fetchUsers = async () => {
       try {
         const companies = await fetch("/api/companies");
@@ -73,13 +74,11 @@ const Admin = ({ params }: Props) => {
         setStaffUsers(data.users.filter((user: User) => user.role === "Staff"));
         setManagerUsers(data.users.filter((user: User) => user.role === "Manager"));
       } catch (error) {
-        toast.error("Failed to fetch users"); // Replacing console.error with toast error
+        toast.error("Failed to fetch users");
       }
     };
     fetchUsers();
   }, []);
-
-  // Function to handle the search input and filter the images
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.toLowerCase();
     setSearchTerm(value);
@@ -107,7 +106,7 @@ const Admin = ({ params }: Props) => {
     // Prepare the data for each section
     const usersData = AUsers.concat(AUsers).map(user => ({
       id: user.id,
-      name: user.name,
+      name: user.username,
       role: user.role,
       email: user.email,
     }));
@@ -151,7 +150,9 @@ const Admin = ({ params }: Props) => {
     // Export the workbook
     XLSX.writeFile(wb, "data_export.xlsx");
   };
-
+  if(!user){
+    return redirect("/")
+  }
   return (
     <div className="container mx-auto mt-10">
       <h1 className="text-3xl font-bold text-base-content">Admin Dashboard</h1>
@@ -162,12 +163,12 @@ const Admin = ({ params }: Props) => {
           Export to Excel
         </button>
       </div>
-      Logged In as: {user?.username}
+      Logged In as: {user.username}
       {/* User Management */}
-      <UserManagement roles={roles} id={user?.id}/>
+      <UserManagement roles={roles} id={user.id}/>
 
       {/* Company Management */}
-      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist} id={user?.id}/>
+      <CompanyManagement staffUsers={staffUsers} managerUsers={managerUsers} list={clist} id={user.id}/>
 
       {/* Images Table */}
       <div className="mt-8">

@@ -3,6 +3,33 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
+    const { id } = await req.json();
+    const company = await db.company.findFirst({
+      where:{
+        id: params.id
+      }
+    })
+    if(company){
+      const notify = await db.notification.create({
+        data:{
+          user_from: id,
+          user_to: company.staff,
+          body: `Admin archived ${company.name} you can no longer access it.`,
+          read: "Unread"
+        }
+        
+      })
+      const notify2 = await db.notification.create({
+        data:{
+          user_from: id,
+          user_to: company.manager,
+          body: `Admin archived ${company.name} you can no longer access it.`,
+          read: "Unread"
+        }
+        
+      })
+    }
+
     const updatedCompany = await db.company.update({
       where: { id: params.id },
       data: { archived: true },

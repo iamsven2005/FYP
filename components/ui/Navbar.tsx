@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from "@/components/ui/navigation-menu"
@@ -37,8 +37,9 @@ const Navbar = () => {
     localStorage.removeItem("token")
     localStorage.setItem("isLoggedIn", "false")
     setIsLoggedIn(false)
-    router.push("/")
     setIsMobileMenuOpen(false)
+    window.location.reload()
+    redirect("/")
   }
 
   const NavItems = () => (
@@ -68,6 +69,11 @@ const Navbar = () => {
           <NavigationMenuItem>
             <Link href="/register" className="text-foreground hover:text-primary transition-colors duration-300">
               Register
+            </Link>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Link href="/messages" className="text-foreground hover:text-primary transition-colors duration-300">
+              Messages
             </Link>
           </NavigationMenuItem>
         </>

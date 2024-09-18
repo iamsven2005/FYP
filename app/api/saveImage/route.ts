@@ -6,8 +6,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients } = body;
-
-    // Save the image data to the database with status "PENDING"
     const newImage = await db.images.create({
       data: {
         imageurl,
@@ -18,9 +16,24 @@ export async function POST(req: Request) {
         halal,
         healthy,
         AI,
-        ingredients, // Include the ingredients data
+        ingredients,
       },
     });
+    const company = await db.company.findFirst({
+      where:{
+        id: companyId
+      }
+    })
+    if(company){
+      const notify = await db.notification.create({
+        data:{
+          user_from: company.staff,
+          user_to: company.manager,
+          body: `Uploaded new image for ${company.name}`,
+          read: "Unread"
+        }
+      })
+    }
 
     return NextResponse.json({ success: true, data: newImage });
   } catch (error) {

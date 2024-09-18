@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { userId, rolename } = await req.json();
+  const { userId, rolename, id } = await req.json();
 
   // Validate that the role being assigned is one of the allowed roles
   const validRoles = ["Admin", "Staff", "Manager", "Client"];
@@ -11,12 +11,18 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Update the user's role in the User table
     const updatedUser = await db.user.update({
       where: { id: userId },
       data: { role: rolename },
     });
-
+    const notify = await db.notification.create({
+      data:{
+        user_from: id,
+        user_to: userId,
+        body: `Changed role to ${rolename}`,
+        read: "Unread"
+      }
+    })
     return NextResponse.json({ message: "Role updated successfully", updatedUser }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "Failed to assign role" }, { status: 500 });

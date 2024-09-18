@@ -12,7 +12,6 @@ export async function PATCH(req: Request, { params }: { params: { userId: string
   }
 
   try {
-    // Update the username for the given userId
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { username },
@@ -28,11 +27,9 @@ export async function DELETE(req: Request, { params }: { params: { userId: strin
   const { userId } = params;
 
   try {
-    // Delete user from the database
     await prisma.user.delete({
       where: { id: userId },
     });
-
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { db as prisma } from "@/lib/db"; // Prisma client import
+import { db, db as prisma } from "@/lib/db"; // Prisma client import
 import { createJWT } from "@/lib/session";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
@@ -114,6 +114,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "OTP sent to your email", userId: user.id }, { status: 200 });
 
   } catch (error: any) {
+    return NextResponse.json({ message: error }, { status: 500 });
+  }
+}
+export async function GET(req: NextRequest){
+  try{
+    const {id, role} = await req.json()
+    const user = await db.user.findFirst({
+      where:{
+        id,
+      }
+    })
+    if (user?.role === "admin") {
+      return NextResponse.redirect('/admin'); // Adjust the redirect path as needed
+    } else if (user?.role === "staff"){
+      return NextResponse.redirect("/Homepage")
+    } else if (user?.role === "manager"){
+      return NextResponse.redirect("/manager")
+    } else{
+      return NextResponse.redirect("/ogin")
+    }
+
+  }catch(error){
+    console.log("Verify", error)
     return NextResponse.json({ message: error }, { status: 500 });
   }
 }

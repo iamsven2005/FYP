@@ -114,7 +114,7 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
       const res = await fetch("/api/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, rolename: newRole }),
+        body: JSON.stringify({ userId, rolename: newRole, id }),
       })
 
       if (res.ok) {
@@ -173,7 +173,6 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      {id}
       <Table>
         <TableHeader>
           <TableRow>

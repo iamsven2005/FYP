@@ -99,6 +99,7 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
           imgurl: companyImgUrl, // Now a base64 string
           staffId: selectedStaff,
           managerId: selectedManager,
+          id
         }),
       });
       if (res.ok) {

@@ -75,6 +75,7 @@ export default function EditCompanyDialog({
           img: companyImgUrl,
           staff: selectedStaff,
           manager: selectedManager,
+          id
         }),
       })
 

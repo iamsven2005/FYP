@@ -44,8 +44,8 @@ model Company {
   img       String   @db.LongText
   name      String
   archived  Boolean  @default(false)
-  staff     String?
-  manager   String?
+  staff     String
+  manager   String
   createdAt DateTime @default(now())
 }
 
