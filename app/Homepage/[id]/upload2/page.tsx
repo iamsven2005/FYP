@@ -39,6 +39,9 @@ export default function Component({ params }: Props) {
   const [openAIResult, setOpenAIResult] = useState<string>("")
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [processing, setProcessing] = useState<boolean>(false)
+  const [isEditing, setIsEditing] = useState(false); // Tracks if ingredients are being edited
+  const [editableIngredients, setEditableIngredients] = useState<string>(""); // Holds the ingredients in editable form
+
 
   // State to hold checked ingredients
   const [checkedIngredients, setCheckedIngredients] = useState<IngredientStatus[]>([])
@@ -103,18 +106,21 @@ export default function Component({ params }: Props) {
 
   // Function to check ingredients against the approved and unsafe lists
   const checkIngredients = (ingredients: string[]): IngredientStatus[] => {
-    const { approvedIngredients, unsafeIngredients } = ingredientList
-
+    const { approvedIngredients, unsafeIngredients } = ingredientList;
+  
     return ingredients.map(ingredient => {
-      if (approvedIngredients.includes(ingredient)) {
-        return { name: ingredient, status: 'Approved' }
-      } else if (unsafeIngredients.includes(ingredient)) {
-        return { name: ingredient, status: 'Not Safe' }
+      const lowercasedIngredient = ingredient.toLowerCase(); // Convert ingredient to lowercase
+  
+      // Check against lowercase version of the approved and unsafe lists
+      if (approvedIngredients.map(i => i.toLowerCase()).includes(lowercasedIngredient)) {
+        return { name: ingredient, status: 'Approved' }; // Use original case for display
+      } else if (unsafeIngredients.map(i => i.toLowerCase()).includes(lowercasedIngredient)) {
+        return { name: ingredient, status: 'Not Safe' }; // Use original case for display
       } else {
-        return { name: ingredient, status: 'Not Approved' }
+        return { name: ingredient, status: 'Not Approved' }; // Use original case for display
       }
-    })
-  }
+    });
+  };  
 
   // useEffect to parse and check ingredients when openAIResult changes
   useEffect(() => {
@@ -204,6 +210,22 @@ export default function Component({ params }: Props) {
     }
   }
 
+  const toggleEditMode = () => {
+    if (!isEditing) {
+      // When entering edit mode, populate the editable ingredients from the checkedIngredients
+      const ingredientNames = checkedIngredients.map(ingredient => ingredient.name).join(', ');
+      setEditableIngredients(ingredientNames);
+    }
+    setIsEditing(!isEditing); // Toggle the edit mode
+  };
+
+  const handleSaveIngredients = () => {
+    const ingredientsArray = parseIngredients(editableIngredients); // Parse the edited text
+    const updatedIngredientsWithStatus = checkIngredients(ingredientsArray); // Check ingredients against JSON list
+    setCheckedIngredients(updatedIngredientsWithStatus); // Update the color-coded ingredients
+    setIsEditing(false); // Exit edit mode
+  };  
+
   const openBrowseImage = async () => {
     await imageInputRef.current?.click()
   }
@@ -284,8 +306,25 @@ export default function Component({ params }: Props) {
           {openAIData.Ingredients && (
             <div>
               <Label>Ingredients:</Label>
-              {/* Use the IngredientList component to display ingredients with highlights */}
-              <IngredientList ingredients={checkedIngredients} />
+              {isEditing ? (
+                <>
+                  <textarea
+                    value={editableIngredients}
+                    onChange={(e) => setEditableIngredients(e.target.value)}
+                    className="w-full h-32 p-2 border rounded"
+                  />
+                  <Button onClick={handleSaveIngredients} className="mt-2">
+                    Save
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <IngredientList ingredients={checkedIngredients} />
+                  <Button onClick={toggleEditMode} className="mt-2">
+                    Edit Ingredients
+                  </Button>
+                </>
+              )}
             </div>
           )}
 
@@ -307,5 +346,5 @@ export default function Component({ params }: Props) {
         </Button>
       </div>
     </div>
-  )
+  ) 
 }
