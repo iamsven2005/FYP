@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Expired OTP' }, { status: 401 });
     }
 
-    // Clear the OTP after successful verification
     await prisma.user.update({
       where: { id: user.id },
       data: {

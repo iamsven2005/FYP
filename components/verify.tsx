@@ -25,7 +25,7 @@ const Verify = ({ id }: Props) => {
         }
 
         // Send the request with Authorization header
-        const response = await axios.get(`/api/Login`, {
+        const response = await axios.get(`/api/login`, {
           params: { id },
           headers: {
             Authorization: `Bearer ${token}`, // Include the token in the Authorization header

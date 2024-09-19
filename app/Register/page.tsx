@@ -95,7 +95,7 @@ const RegisterPage = () => {
     }
 
     try {
-      const res = await axios.post('/api/Register', {
+      const res = await axios.post('/api/register', {
         username,
         email,
         password,
@@ -104,7 +104,7 @@ const RegisterPage = () => {
       if (res.status === 201) {
         toast.success('Registration successful! Redirecting to login...');
         setTimeout(() => {
-          router.push('/login'); // Redirect to login page
+          router.push('/Login'); // Redirect to login page
         }, 1000);
       }
     } catch (err) {

@@ -56,7 +56,7 @@ export default function ForgotPassword() {
       const res = await axios.post("/api/verify-otp", { userId, otp }, getAuthHeader()); // Add headers if needed
       const data = res.data;
 
-      localStorage.setItem("authToken", data.token); // Store token for further authentication
+      localStorage.setItem("token", data.token); // Store token for further authentication
       toast.success("OTP verified successfully");
       router.push("/auth/reset-password"); // Redirect to reset password page
     } catch (error) {

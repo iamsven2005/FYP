@@ -59,7 +59,7 @@ const LoginPage = () => {
   
     try {
       // Use axios for the login request
-      const res = await axios.post('/api/Login', {
+      const res = await axios.post('/api/login', {
         email,
         password
       });

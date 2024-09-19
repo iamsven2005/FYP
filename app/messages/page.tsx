@@ -87,8 +87,8 @@ export default function NotificationsPage() {
         {notifications.length === 0 ? (
           <div className="text-center py-8">
             <Bell className="w-12 h-12 mx-auto text-gray-400" />
-            <p className="mt-4 text-lg font-medium text-gray-900">No new notifications</p>
-            <p className="mt-1 text-sm text-gray-500">You&apos;re all caught up!</p>
+            <p className="mt-4 text-lg font-medium">No new notifications</p>
+            <p className="mt-1 text-sm">You&apos;re all caught up!</p>
           </div>
         ) : (
           <ul className="divide-y divide-gray-200">
