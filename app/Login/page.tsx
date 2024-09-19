@@ -51,28 +51,26 @@ const LoginPage = () => {
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault(); // Only prevent default if the event is passed
     setLoading(true);
-
+  
     if (!validateForm()) {
       setLoading(false);
       return;
     }
-
+  
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      // Use axios for the login request
+      const res = await axios.post('/api/login', {
+        email,
+        password
       });
-
-      const data = await res.json();
-
-      if (res.ok && data.token) {
+  
+      const data = res.data;
+  
+      if (res.status === 200 && data.token) {
         toast.success("Login successful!");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
-
+  
         // Redirect based on the role
         router.push(data.redirectTo);  // Redirect to the user-specific page based on their role
       } else if (data.userId) {
@@ -90,29 +88,35 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+  
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!otp) {
       toast.error('OTP is required');
       return;
     }
-
+  
     try {
-      const res = await axios.post('/api/verify-otp', {data:{ userId, otp }});
-
-      const data = await res.data;
-
+      const res = await axios.post('/api/verify-otp', { userId, otp });  // Correct the body format
+  
+      const data = res.data;
+  
+      if (res.status === 200) {
         toast.success("OTP verified successfully.");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
         const redirectTo = data.redirectTo || '/Homepage';
         router.push(redirectTo);
+      } else {
+        toast.error(data.message || 'Something went wrong');
+      }
     } catch (error) {
       toast.error('Something went wrong. Please try again later.'); // Error handling
     }
   };
+  
 
   return (
     <Card className="max-w-sm mx-auto mt-10 mb-10">

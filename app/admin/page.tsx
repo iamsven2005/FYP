@@ -161,7 +161,6 @@ const Admin = ({ params }: Props) => {
           Export to Excel
         </button>
       </div>
-      Logged In as: {user?.username}
       {/* User Management */}
 
       {/* Company Management */}

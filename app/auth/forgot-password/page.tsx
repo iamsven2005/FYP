@@ -20,20 +20,19 @@ export default function ForgotPassword() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("/api/forgot-password", {data:{ email },
-      });
-      const data = await res.data
+      const res = await axios.post("/api/forgot-password", { email }); // Correct request body format
+      const data = res.data; // Get the data from response directly
 
-      
-        toast.success("OTP sent successfully");
-        setIsOtpSent(true);
+      toast.success("OTP sent successfully");
+      setIsOtpSent(true);
 
-        if (data.userId) {
-          setUserId(data.userId); // Save the userId returned from the server
-        } else {
-          toast.error("Failed to retrieve user ID");
-        }
+      if (data.userId) {
+        setUserId(data.userId); // Save the userId returned from the server
+      } else {
+        toast.error("Failed to retrieve user ID");
+      }
     } catch (error) {
+      console.error(error);
       toast.error("Something went wrong");
     }
   };
@@ -43,19 +42,19 @@ export default function ForgotPassword() {
     e.preventDefault();
 
     if (!userId) {
-      toast.error("FFFFID is missing");
+      toast.error("User ID is missing");
       return;
     }
 
     try {
-      const res = await axios.post("/api/verify-otp", {data:{ userId, otp }, // Pass userId along with OTP
-      });
-      const data = await res.data;
+      const res = await axios.post("/api/verify-otp", { userId, otp }); // Correct request body format
+      const data = res.data;
 
-        localStorage.setItem('authToken', data.token);
-        toast.success("OTP verified successfully");
-        router.push("/auth/reset-password");
+      localStorage.setItem("authToken", data.token);
+      toast.success("OTP verified successfully");
+      router.push("/auth/reset-password"); // Redirect based on user role
     } catch (error) {
+      console.error(error);
       toast.error("Invalid OTP or something went wrong");
     }
   };

@@ -88,24 +88,34 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+  
     if (!validateForm()) {
       setLoading(false);
       return;
     }
-
+  
     try {
-      const res = await axios.post('/api/register', {data:{ username, email, password },
+      // Correct axios post format
+      const res = await axios.post('/api/register', {
+        username,
+        email,
+        password,
       });
+  
+      if (res.status === 200) {
         toast.success('Registration successful! Redirecting to login...');
         router.push('/login');
+      } else {
+        toast.error('Failed to register. Please try again later.');
+      }
     } catch (err) {
+      console.error('Error during registration:', err);
       toast.error('Failed to register. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Card className="max-w-md mx-auto mt-10 p-6">
       <CardHeader>
