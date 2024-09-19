@@ -14,8 +14,23 @@ const Verify = ({ id }: Props) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
+        // Get the token from localStorage
+        const token = localStorage.getItem("token");
+
+        // Check if the token exists before making the request
+        if (!token) {
+          console.error("No token found, redirecting to login.");
+          router.push("/login");
+          return;
+        }
+
+        // Send the request with Authorization header
         const response = await axios.get(`/api/login`, {
           params: { id },
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            "Content-Type": "application/json",
+          },
         });
 
         console.log(response.data); // Debugging: Check what the API returns

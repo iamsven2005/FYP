@@ -58,11 +58,17 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
   const [sortField, setSortField] = useState<string>("username")
   const [sortDirection, setSortDirection] = useState<string>("asc")
 
+  // Function to get the Authorization header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return { headers: { Authorization: `Bearer ${token}` } };
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       setIsFetching(true)
       try {
-        const res = await axios.get(`/api/users?page=${page}&limit=${limit}`)
+        const res = await axios.get(`/api/users?page=${page}&limit=${limit}`, getAuthHeader())  // Add header
         const data = await res.data
         setUsers(data.users)
         setFilteredUsers(data.users)
@@ -115,7 +121,7 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
         userId, 
         rolename: newRole, 
         id,  // This is the ID of the admin or the person assigning the role
-      })
+      }, getAuthHeader())  // Add header
       toast.success("Role assigned successfully")
       setUsers((prevUsers) =>
         prevUsers.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
@@ -145,7 +151,7 @@ export default function UserManagement({ roles, id }: UserManagementProps) {
 
   const deleteUser = async (userId: string) => {
     try {
-      const res = await axios.delete(`/api/users/${userId}`)
+      const res = await axios.delete(`/api/users/${userId}`, getAuthHeader())  // Add header
         toast.success("User deleted successfully")
         setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId))
     } catch (error) {

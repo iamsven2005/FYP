@@ -65,14 +65,24 @@ export default function EditCompanyDialog({
     }
   
     setLoading(true);
+    
     try {
+      // Get the token from localStorage
+      const token = localStorage.getItem("token");
+  
+      // Send the request with Authorization header
       const res = await axios.patch(`/api/companies?id=${company.id}`, {
         name: companyName,
         img: companyImgUrl,
         staff: selectedStaff,
         manager: selectedManager,
         id
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+        }
       });
+  
       toast.success("Company updated successfully");
       onCompanyUpdate(res.data);
     } catch (error) {
@@ -82,6 +92,7 @@ export default function EditCompanyDialog({
       setLoading(false);
     }
   };
+  
   
 
   return (

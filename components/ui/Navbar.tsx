@@ -84,7 +84,7 @@ const Navbar = () => {
   return (
     <header className="bg-background shadow">
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" passHref>
+        <Link href="/page" passHref>
           <img src="/NTUC-Fairprice-Logo.png" alt="NTUC Logo" width={50} height={50} className="cursor-pointer" />
         </Link>
 

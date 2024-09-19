@@ -50,6 +50,12 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
+  // Helper function to get Authorization header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -76,7 +82,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
   useEffect(() => {
     const loadCompanyDetails = async () => {
       try {
-        const response = await axios.get(`/api/companies/${params.id}/approve`);
+        const response = await axios.get(`/api/companies/${params.id}/approve`, getAuthHeader());
         const data = response.data;
 
         if (data.error) {
@@ -102,9 +108,13 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     }
 
     try {
-      const response = await axios.patch(`/api/items/${itemId}/approve`, {
-        userFrom: user.id, // Ensure userFrom is passed
-      });
+      const response = await axios.patch(
+        `/api/items/${itemId}/approve`,
+        {
+          userFrom: user.id, // Ensure userFrom is passed
+        },
+        getAuthHeader() // Include Authorization header
+      );
 
       toast.success("Item approved successfully!");
       setItems((prevItems) =>
@@ -124,9 +134,13 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     }
 
     try {
-      const response = await axios.patch(`/api/items/${itemId}/reject`, {
-        userFrom: user.id, // Ensure userFrom is passed
-      });
+      const response = await axios.patch(
+        `/api/items/${itemId}/reject`,
+        {
+          userFrom: user.id, // Ensure userFrom is passed
+        },
+        getAuthHeader() // Include Authorization header
+      );
 
       toast.success("Item rejected successfully!");
       setItems((prevItems) =>

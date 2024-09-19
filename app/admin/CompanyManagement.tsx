@@ -50,11 +50,17 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
     setFilteredCompanies(filtered);
   }, [companySearchTerm, companyFilter, companies]);
 
+  // Get the Authorization token from localStorage
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return { headers: { Authorization: `Bearer ${token}` } };
+  };
+
   const toggleArchiveCompany = async (companyId: string, archived: boolean) => {
     try {
       const res = await axios.patch(`/api/companies/${companyId}`, {
         archived, // No need for `data` wrapper
-      });
+      }, getAuthHeader());
       
       setCompanies((prevCompanies) =>
         prevCompanies.map((company) =>
@@ -66,7 +72,6 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
       toast.error("An error occurred while updating company status");
     }
   };
-  
 
   // Convert image to base64
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,7 +108,7 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
         staffId: selectedStaff,
         managerId: selectedManager,
         id
-      });
+      }, getAuthHeader()); // Add the Authorization header
   
       toast.success("Company created successfully");
       const newCompany = await res.data;
@@ -116,7 +121,6 @@ const CompanyManagement = ({ staffUsers, managerUsers, list, id }: { staffUsers:
       toast.error("An error occurred while creating the company");
     }
   };
-  
 
   return (
     <div>

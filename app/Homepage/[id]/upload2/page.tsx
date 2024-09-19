@@ -33,6 +33,12 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
+// Helper function to get Authorization header
+const getAuthHeader = () => {
+  const token = localStorage.getItem("token");
+  return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+};
+
 export default function Component({ params }: Props) {
   const [loading, setLoading] = useState<boolean>(false);
   const [itemName, setItemName] = useState<string>("");
@@ -69,7 +75,7 @@ export default function Component({ params }: Props) {
 
     setLoading(true);
     try {
-      const response = await axios.patch("/api/openaiCheck", { imagePath: inputText });
+      const response = await axios.patch("/api/openaiCheck", { imagePath: inputText }, getAuthHeader()); // Add headers
 
       if (response.status === 200) {
         const result = response.data.result.choices[0].message.content;
@@ -87,6 +93,7 @@ export default function Component({ params }: Props) {
         toast.error("Failed to get OpenAI classification.");
       }
     } catch (error) {
+      console.log(error)
       toast.error("Error in OpenAI request");
     } finally {
       setLoading(false);
@@ -161,7 +168,7 @@ export default function Component({ params }: Props) {
     };
 
     try {
-      const response = await axios.post("/api/saveImage", dataToSend);
+      const response = await axios.post("/api/saveImage", dataToSend, getAuthHeader()); // Add headers
 
       if (response.status === 200) {
         toast.success("Image processed and saved successfully!");

@@ -32,6 +32,12 @@ export default function ManagerDashboard() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Helper function to get Authorization header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -60,7 +66,8 @@ export default function ManagerDashboard() {
     const loadCompanies = async () => {
       try {
         if (user) {
-          const response = await axios.get(`/api/companies/${user.id}`);
+          // Make an API request with the Authorization header
+          const response = await axios.get(`/api/companies/${user.id}`, getAuthHeader());
           const data = response.data;
 
           if (data.error) {

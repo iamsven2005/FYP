@@ -25,7 +25,7 @@ interface UserI {
   id: string;
 }
 const Admin = ({ params }: Props) => {
-  const router = useRouter()
+  const router = useRouter();
   const [staffUsers, setStaffUsers] = useState<User[]>([]);
   const [managerUsers, setManagerUsers] = useState<User[]>([]);
   const [images, setImages] = useState<images[]>([]);
@@ -54,21 +54,30 @@ const Admin = ({ params }: Props) => {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      window.location.reload()
+      window.location.reload();
       redirect("/login");
     }
     setLoading(false);
   }, [router]);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const companies = await axios.get("/api/companies");
-        const res = await axios.get("/api/users");
-        const items = await axios.get("/api/items");
-        setlist(companies.data)
+        const token = localStorage.getItem("token"); // Get the token from localStorage
+        const authHeader = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Set the Authorization header
+          },
+        };
+
+        const companies = await axios.get("/api/companies", authHeader);
+        const res = await axios.get("/api/users", authHeader);
+        const items = await axios.get("/api/items", authHeader);
+
+        setlist(companies.data);
         setImages(items.data);
         setFilteredImages(items.data);
-        setUsers(res.data.users)
+        setUsers(res.data.users);
         setStaffUsers(res.data.users.filter((user: User) => user.role === "Staff"));
         setManagerUsers(res.data.users.filter((user: User) => user.role === "Manager"));
       } catch (error) {
@@ -77,6 +86,7 @@ const Admin = ({ params }: Props) => {
     };
     fetchUsers();
   }, []);
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.toLowerCase();
     setSearchTerm(value);

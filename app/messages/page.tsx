@@ -16,7 +16,6 @@ interface User {
   id: string
 }
 
-
 export default function NotificationsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,9 +39,16 @@ export default function NotificationsPage() {
     }
   }, [user])
 
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token")
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
   const fetchNotifications = async () => {
     try {
-      const { data } = await axios.get(`/api/items/${user!.id}/notify`)
+      const { data } = await axios.get(`/api/items/${user!.id}/notify`, {
+        headers: getAuthHeader(), // Add Authorization header here
+      })
       setNotifications(data)
     } catch (error) {
       toast.error("Failed to fetch notifications")
@@ -51,8 +57,10 @@ export default function NotificationsPage() {
 
   const handleRead = async (id: string) => {
     try {
-      await axios.post(`/api/items/${id}/notify`)
-      setNotifications((prevNotifications) => 
+      await axios.post(`/api/items/${id}/notify`, {}, {
+        headers: getAuthHeader(), // Add Authorization header here
+      })
+      setNotifications((prevNotifications) =>
         prevNotifications.filter((notification) => notification.id !== id)
       )
       toast.success("Notification marked as read")
@@ -89,7 +97,7 @@ export default function NotificationsPage() {
                 <div className="flex items-start space-x-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{notification.body}</p>
-                    <Name id={notification.user_from}/>
+                    <Name id={notification.user_from} />
                     <p className="text-sm text-gray-500">
                       {new Date(notification.createdAt).toLocaleString()}
                     </p>

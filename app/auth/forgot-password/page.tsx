@@ -15,12 +15,18 @@ export default function ForgotPassword() {
   const [userId, setUserId] = useState(""); // Store userId after OTP is sent
   const router = useRouter();
 
+  // Helper function to get Authorization header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   // Handle OTP request
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("/api/forgot-password", { email }); // Correct request body format
+      const res = await axios.post("/api/forgot-password", { email }, getAuthHeader()); // Add headers if needed
       const data = res.data; // Get the data from response directly
 
       toast.success("OTP sent successfully");
@@ -47,12 +53,12 @@ export default function ForgotPassword() {
     }
 
     try {
-      const res = await axios.post("/api/verify-otp", { userId, otp }); // Correct request body format
+      const res = await axios.post("/api/verify-otp", { userId, otp }, getAuthHeader()); // Add headers if needed
       const data = res.data;
 
-      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("authToken", data.token); // Store token for further authentication
       toast.success("OTP verified successfully");
-      router.push("/auth/reset-password"); // Redirect based on user role
+      router.push("/auth/reset-password"); // Redirect to reset password page
     } catch (error) {
       console.error(error);
       toast.error("Invalid OTP or something went wrong");

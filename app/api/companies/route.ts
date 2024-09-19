@@ -7,9 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export async function POST(req: Request) {
   // Extract the token from the Authorization header
-  const token = req.headers.get("Authorization")?.split(" ")[1];
-
-  // Verify the token and return 401 if it's missing or invalid
+  const token = req.headers.get('Authorization')?.split(' ')[1];
   if (!token) {
     return NextResponse.json({ error: "Authorization token is required" }, { status: 401 });
   }

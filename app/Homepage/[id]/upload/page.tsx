@@ -44,6 +44,12 @@ export default function TeachableMachineWithOCR({ params }: Props) {
   const [processedImageBase64, setProcessedImageBase64] = useState<string | null>(null);
   const [openAIResult, setOpenAIResult] = useState<string>("");
 
+  // Helper to get Authorization header
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   useEffect(() => {
     const loadModels = async () => {
       const halalModelURL = "/halal/model.json";
@@ -132,7 +138,7 @@ export default function TeachableMachineWithOCR({ params }: Props) {
     try {
       const response = await axios.post('/api/openaiCheck', {
         text: inputText,
-      });
+      }, getAuthHeader());  // Add headers here
 
       const data = response.data;
       setOpenAIResult(data.classification);
@@ -164,7 +170,7 @@ export default function TeachableMachineWithOCR({ params }: Props) {
     };
 
     try {
-      const response = await axios.post("/api/saveImage", dataToSend);
+      const response = await axios.post("/api/saveImage", dataToSend, getAuthHeader());  // Add headers here
 
       if (response.status === 200) {
         toast.success("Image processed and saved successfully!");

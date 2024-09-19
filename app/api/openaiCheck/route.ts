@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: 'gpt-4',
+        model: 'gpt-40-mini',
         messages: [
           {
             role: 'system',
@@ -65,7 +65,7 @@ export async function PATCH(req: Request) {
   try {
     const { imagePath } = await req.json();
     const payload = {
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "user",

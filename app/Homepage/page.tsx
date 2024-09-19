@@ -57,8 +57,15 @@ export default function Homepage() {
 
   useEffect(() => {
     if (user) {
+      const token = localStorage.getItem("token"); // Get token from localStorage
+
       axios
-        .get(`/api/companies/${user.id}`)
+        .get(`/api/companies/${user.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token in the headers
+            "Content-Type": "application/json",
+          },
+        })
         .then((response) => {
           const data = response.data;
           if (data.error) {
@@ -91,7 +98,7 @@ export default function Homepage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {user && (
-      <Verify id={user.id} />
+        <Verify id={user.id} />
       )}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-4">Welcome, {user?.username}</h1>
