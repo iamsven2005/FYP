@@ -66,12 +66,12 @@ const Navbar = () => {
       ) : (
         <>
           <NavigationMenuItem>
-            <Link href="/login" className="text-foreground hover:text-primary transition-colors duration-300">
+            <Link href="/Login" className="text-foreground hover:text-primary transition-colors duration-300">
               Login
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/register" className="text-foreground hover:text-primary transition-colors duration-300">
+            <Link href="/Register" className="text-foreground hover:text-primary transition-colors duration-300">
               Register
             </Link>
           </NavigationMenuItem>

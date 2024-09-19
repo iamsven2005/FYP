@@ -50,7 +50,7 @@ export default function Homepage() {
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
       window.location.reload();
-      router.push("/login");
+      router.push("/Login");
     }
     setLoading(false);
   }, [router]);

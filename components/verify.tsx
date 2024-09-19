@@ -20,12 +20,12 @@ const Verify = ({ id }: Props) => {
         // Check if the token exists before making the request
         if (!token) {
           console.error("No token found, redirecting to login.");
-          router.push("/login");
+          router.push("/Login");
           return;
         }
 
         // Send the request with Authorization header
-        const response = await axios.get(`/api/login`, {
+        const response = await axios.get(`/api/Login`, {
           params: { id },
           headers: {
             Authorization: `Bearer ${token}`, // Include the token in the Authorization header
@@ -43,11 +43,11 @@ const Verify = ({ id }: Props) => {
         } else if (response.data === "admin") {
           router.push("/admin");
         } else {
-          router.push("/login");
+          router.push("/Login");
         }
       } catch (error) {
         console.error("Verification failed:", error);
-        router.push("/login"); 
+        router.push("/Login"); 
       }
     };
 

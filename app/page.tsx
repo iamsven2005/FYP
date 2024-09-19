@@ -41,10 +41,10 @@ const MainPage = async () => {
           </Accordion>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Link href="/login">
+          <Link href="/Login">
             <Button variant="link">Login</Button>
           </Link>
-          <Link href="/register">
+          <Link href="/Register">
             <Button variant="secondary">Register</Button>
           </Link>
         </CardFooter>

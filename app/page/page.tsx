@@ -25,13 +25,13 @@ const Page = () => {
       }
     
       useEffect(() => {
-        const token = req.headers.get("token")?.split(" ")[1];
+        const token = localStorage.getItem("token");
         if (token) {
           const decoded = parseJwt(token);
           setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
         } else {
           window.location.reload();
-          redirect("/login");
+          redirect("/Login");
         }
         setLoading(false);
       }, [router]);

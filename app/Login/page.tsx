@@ -59,7 +59,7 @@ const LoginPage = () => {
   
     try {
       // Use axios for the login request
-      const res = await axios.post('/api/login', {
+      const res = await axios.post('/api/Login', {
         email,
         password
       });
@@ -199,7 +199,7 @@ const LoginPage = () => {
               <div className="mt-4 text-center">
                 <p className="text-sm">
                   Don’t have an account?{" "}
-                  <Link href="/register" className="text-blue-600 hover:underline">Sign up here</Link>.
+                  <Link href="/Register" className="text-blue-600 hover:underline">Sign up here</Link>.
                 </p>
               </div>
             </>

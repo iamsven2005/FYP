@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "OTP sent to your email", userId: user.id }, { status: 200 });
 
   } catch (error: any) {
+    console.log(error)
     return NextResponse.json({ message: error }, { status: 500 });
   }
 }
