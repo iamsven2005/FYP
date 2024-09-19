@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
@@ -33,10 +33,17 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await axios.post("/api/reset-password", {data:{ newPassword },
-      });
+      const token = localStorage.getItem('authToken'); // Get the token from localStorage
 
-      const data = await res.data
+      const res = await axios.post(
+        "/api/reset-password",
+        { newPassword }, // Request body
+        {
+          headers: {
+            Authorization: `Bearer ${token}` // Send token in Authorization header
+          }
+        }
+      );
 
       if (res.status === 400) {
         toast.error("New password cannot be the same as the old password");
@@ -45,7 +52,7 @@ export default function ResetPassword() {
         localStorage.removeItem('authToken');
         router.push("/login");
       } else {
-        toast.error(data.message);
+        toast.error(res.data.message);
       }
     } catch (error) {
       toast.error("Failed to reset password");

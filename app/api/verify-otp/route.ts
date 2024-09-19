@@ -11,8 +11,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Find the user by ID
-    const user = await prisma.user.findUnique({ where: { id: userId } }) as { id: string; username: string; email: string; password: string; otp: string | null; otpExpires: Date | null; createdAt: Date; updatedAt: Date; role: string };
-    
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
     if (!user) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
@@ -51,6 +53,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: 'OTP verified', token, role: user.role, redirectTo }, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
