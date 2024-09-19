@@ -1,7 +1,25 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
+async function checkAuthorization(req: Request) {
+  const token = req.headers.get('Authorization')?.split(' ')[1];
+  if (!token) {
+    return { error: true, response: NextResponse.json({ error: 'Authorization token is required' }, { status: 401 }) };
+  }
+  // You can add JWT verification here if needed, for example:
+  // const isValid = verify(token, process.env.JWT_SECRET);
+  // if (!isValid) {
+  //   return { error: true, response: NextResponse.json({ error: 'Invalid token' }, { status: 401 }) };
+  // }
+
+  return { error: false };
+}
+
 export async function POST(req: Request) {
+  // Check for Authorization header
+  const authCheck = await checkAuthorization(req);
+  if (authCheck.error) return authCheck.response;
+
   try {
     const { text } = await req.json();
 
@@ -40,6 +58,10 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  // Check for Authorization header
+  const authCheck = await checkAuthorization(req);
+  if (authCheck.error) return authCheck.response;
+
   try {
     const { imagePath } = await req.json();
     const payload = {
