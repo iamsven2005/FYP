@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ImageIcon } from "lucide-react";
 import { toast } from "sonner"; // Importing toast for notifications
+import axios from "axios"; // Importing axios for API requests
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -129,21 +130,13 @@ export default function TeachableMachineWithOCR({ params }: Props) {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/openaiCheck', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: inputText }),
+      const response = await axios.post('/api/openaiCheck', {
+        text: inputText,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setOpenAIResult(data.classification);
-        toast.success("OpenAI classification completed.");
-      } else {
-        toast.error("Failed to get OpenAI classification.");
-      }
+      const data = response.data;
+      setOpenAIResult(data.classification);
+      toast.success("OpenAI classification completed.");
     } catch (error) {
       toast.error("Error in OpenAI request");
     } finally {
@@ -171,18 +164,11 @@ export default function TeachableMachineWithOCR({ params }: Props) {
     };
 
     try {
-      const response = await fetch("/api/saveImage", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      const response = await axios.post("/api/saveImage", dataToSend);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
         toast.success("Image processed and saved successfully!");
-        window.location.reload()
+        window.location.reload();
       } else {
         toast.error("Failed to save the image.");
       }

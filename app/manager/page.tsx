@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -49,30 +50,36 @@ export default function ManagerDashboard() {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      window.location.reload()
+      window.location.reload();
       redirect("/login");
     }
     setLoading(false);
   }, [router]);
 
   useEffect(() => {
-    if (user) {
-      fetch(`/api/companies/${user.id}`)
-        .then((response) => response.json())
-        .then((data) => {
+    const loadCompanies = async () => {
+      try {
+        if (user) {
+          const response = await axios.get(`/api/companies/${user.id}`);
+          const data = response.data;
+
           if (data.error) {
-            toast.error(data.error); // Show error message via toast
+            toast.error(data.error);
             setError(data.error);
           } else {
             setCompanies(data.companies);
             setFilteredCompanies(data.companies);
-            toast.success("Companies loaded successfully"); // Success notification
+            toast.success("Companies loaded successfully");
           }
-        })
-        .catch(() => {
-          toast.error("Failed to load companies"); // Show error message via toast
-          setError("Failed to load companies");
-        });
+        }
+      } catch (error) {
+        toast.error("Failed to load companies");
+        setError("Failed to load companies");
+      }
+    };
+
+    if (user) {
+      loadCompanies();
     }
   }, [user]);
 
@@ -88,11 +95,11 @@ export default function ManagerDashboard() {
   }, [searchQuery, companies]);
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
-  if (!user) return redirect("/")
+  if (!user) return redirect("/");
 
   return (
     <div className="container mx-auto px-4 py-8">
-            <Verify id={user.id}/>
+      <Verify id={user.id} />
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-3xl">Welcome, {user.username}</CardTitle>

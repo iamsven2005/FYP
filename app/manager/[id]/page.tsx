@@ -8,19 +8,21 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner"; // Import toast for notifications
 
 // Import the IngredientList component
-import IngredientList from '@/components/IngredientList';
+import IngredientList from "@/components/IngredientList";
 import axios from "axios";
 
 // Define the IngredientStatus interface
 interface IngredientStatus {
   name: string;
-  status: 'Approved' | 'Not Approved' | 'Not Safe';
+  status: "Approved" | "Not Approved" | "Not Safe";
 }
+
 interface User {
   username: string;
   email: string;
   id: string;
 }
+
 interface Company {
   id: string;
   name: string;
@@ -70,22 +72,27 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     }
     setLoading(false);
   }, [router]);
+
   useEffect(() => {
-    fetch(`/api/companies/${params.id}/approve`)
-      .then((res) => res.json())
-      .then((data) => {
+    const loadCompanyDetails = async () => {
+      try {
+        const response = await axios.get(`/api/companies/${params.id}/approve`);
+        const data = response.data;
+
         if (data.error) {
           toast.error(data.error); // Use toast for errors
         } else {
           setCompany(data.company);
           setItems(data.items);
         }
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (error) {
         toast.error("Failed to fetch company details"); // Use toast for errors
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    loadCompanyDetails();
   }, [params.id]);
 
   const handleApprove = async (itemId: string) => {
@@ -93,12 +100,12 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
       toast.error("User ID is missing.");
       return;
     }
-  
+
     try {
       const response = await axios.patch(`/api/items/${itemId}/approve`, {
         userFrom: user.id, // Ensure userFrom is passed
       });
-  
+
       toast.success("Item approved successfully!");
       setItems((prevItems) =>
         prevItems.map((item) =>
@@ -109,18 +116,18 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
       toast.error("Error approving item");
     }
   };
-  
+
   const handleReject = async (itemId: string) => {
     if (!user?.id) {
       toast.error("User ID is missing.");
       return;
     }
-  
+
     try {
       const response = await axios.patch(`/api/items/${itemId}/reject`, {
         userFrom: user.id, // Ensure userFrom is passed
       });
-  
+
       toast.success("Item rejected successfully!");
       setItems((prevItems) =>
         prevItems.map((item) =>
@@ -131,8 +138,6 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
       toast.error("Error rejecting item");
     }
   };
-  
-  
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
   if (error) return <p className="text-center p-8 text-red-500">{error}</p>;
@@ -149,7 +154,11 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
             {company.archived ? "Archived" : "Active"}
           </Badge>
           {company.img && (
-            <img src={company.img} alt={company.name} className="mt-4 w-full h-auto rounded-lg" />
+            <img
+              src={company.img}
+              alt={company.name}
+              className="mt-4 w-full h-auto rounded-lg"
+            />
           )}
         </CardContent>
       </Card>
@@ -164,7 +173,11 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
               {items.map((item) => (
                 <Card key={item.id}>
                   <CardContent className="p-4">
-                    <img src={item.imageurl} alt={item.name} className="w-full h-48 object-cover rounded-md mb-4" />
+                    <img
+                      src={item.imageurl}
+                      alt={item.name}
+                      className="w-full h-48 object-cover rounded-md mb-4"
+                    />
                     <h3 className="text-xl font-bold mb-2">{item.name}</h3>
                     <div className="space-y-2 mb-4">
                       <Badge variant={item.halal ? "secondary" : "destructive"}>
@@ -187,10 +200,19 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                     )}
 
                     <div className="flex gap-2">
-                      <Button onClick={() => handleApprove(item.id)} size="sm" className="flex-1">
+                      <Button
+                        onClick={() => handleApprove(item.id)}
+                        size="sm"
+                        className="flex-1"
+                      >
                         Approve
                       </Button>
-                      <Button onClick={() => handleReject(item.id)} variant="destructive" size="sm" className="flex-1">
+                      <Button
+                        onClick={() => handleReject(item.id)}
+                        variant="destructive"
+                        size="sm"
+                        className="flex-1"
+                      >
                         Reject
                       </Button>
                     </div>

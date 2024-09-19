@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner"; // Import toast for notifications
 import Verify from "@/components/verify";
+import axios from "axios"; // Import axios
 
 interface User {
   username: string;
@@ -48,17 +49,18 @@ export default function Homepage() {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      window.location.reload()
-      redirect("/login");
+      window.location.reload();
+      router.push("/login");
     }
     setLoading(false);
   }, [router]);
 
   useEffect(() => {
     if (user) {
-      fetch(`/api/companies/${user.id}`)
-        .then((response) => response.json())
-        .then((data) => {
+      axios
+        .get(`/api/companies/${user.id}`)
+        .then((response) => {
+          const data = response.data;
           if (data.error) {
             toast.error(data.error); // Replaced setError with toast.error
           } else {
@@ -84,15 +86,17 @@ export default function Homepage() {
   }, [searchQuery, companies]);
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
-  if (!user) return redirect("/")
+  if (!user) router.push("/");
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Verify id={user.id}/>
+      {user && (
+      <Verify id={user.id} />
+      )}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
-        <p className="text-xl mb-2">Email: {user.email}</p>
-        <p className="text-xl mb-6">User ID: {user.id}</p>
+        <h1 className="text-3xl font-bold mb-4">Welcome, {user?.username}</h1>
+        <p className="text-xl mb-2">Email: {user?.email}</p>
+        <p className="text-xl mb-6">User ID: {user?.id}</p>
       </div>
 
       <Input
