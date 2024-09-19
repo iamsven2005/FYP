@@ -25,9 +25,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Return success response with status 201
     return NextResponse.json({ message: 'User created successfully', user }, { status: 201 });
   } catch (error) {
-    console.log(error)
-    return NextResponse.json({ message: error }, { status: 500 });
+    console.log(error);
+    if (error instanceof Error) {
+      return NextResponse.json({ message: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json({ message: 'An unknown error occurred' }, { status: 500 });
+    }
   }
 }
+
