@@ -22,7 +22,7 @@ interface Company {
   archived: boolean;
 }
 
-export default function staffpage() {
+export default function Homepage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -50,7 +50,7 @@ export default function staffpage() {
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
       window.location.reload();
-      router.push("/login");
+      router.push("/Login");
     }
     setLoading(false);
   }, [router]);
@@ -143,13 +143,13 @@ export default function staffpage() {
                 <CardFooter className="bg-gray-50 p-4">
                   <div className="flex justify-between w-full">
                     <Link
-                      href={`/staffpage/${company.id}`}
+                      href={`/Homepage/${company.id}`}
                       className="text-blue-600 hover:underline"
                     >
                       View
                     </Link>
                     <Link
-                      href={`/staffpage/${company.id}/upload2`}
+                      href={`/Homepage/${company.id}/upload2`}
                       className="text-blue-600 hover:underline"
                     >
                       Upload
