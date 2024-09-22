@@ -107,7 +107,7 @@ const LoginPage = () => {
         toast.success("OTP verified successfully.");
         localStorage.setItem('token', data.token);  // Store token in localStorage
         window.dispatchEvent(new Event('storage'));
-        const redirectTo = data.redirectTo || '/Homepage';
+        const redirectTo = data.redirectTo || '/staffpage';
         router.push(redirectTo);
       } else {
         toast.error(data.message || 'Something went wrong');
@@ -199,7 +199,7 @@ const LoginPage = () => {
               <div className="mt-4 text-center">
                 <p className="text-sm">
                   Don’t have an account?{" "}
-                  <Link href="/Register" className="text-blue-600 hover:underline">Sign up here</Link>.
+                  <Link href="/register" className="text-blue-600 hover:underline">Sign up here</Link>.
                 </p>
               </div>
             </>

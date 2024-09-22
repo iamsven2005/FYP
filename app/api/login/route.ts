@@ -20,9 +20,9 @@ const transporter = nodemailer.createTransport({
 // Define accounts that bypass OTP
 const bypassOtpAccounts = [
   { email: 'admin@ntuc.com', role: 'Admin', redirectTo: '/admin' },
-  { email: 'staff@ntuc.com', role: 'Staff', redirectTo: '/Homepage' },
+  { email: 'staff@ntuc.com', role: 'Staff', redirectTo: '/staffpage' },
   { email: 'manager@ntuc.com', role: 'Manager', redirectTo: '/manager' },
-  { email: 'client@ntuc.com', role: 'Client', redirectTo: '/Homepage' },
+  { email: 'client@ntuc.com', role: 'Client', redirectTo: '/Mainpage' },
 ];
 
 export async function POST(req: NextRequest) {

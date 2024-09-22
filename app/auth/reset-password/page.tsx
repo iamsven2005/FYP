@@ -50,7 +50,7 @@ export default function ResetPassword() {
       } else if (res.status === 200 ) {
         toast.success("Password reset successfully");
         localStorage.removeItem('authToken');
-        router.push("/Login");
+        router.push("/login");
       } else {
         toast.error(res.data.message);
       }

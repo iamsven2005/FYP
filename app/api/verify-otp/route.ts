@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Redirect based on role
-    let redirectTo = '/Homepage'; // Default redirect
+    let redirectTo = '/staffpage'; // Default redirect
     if (user.role === 'Admin') {
       redirectTo = '/admin';
     } else if (user.role === 'Manager') {

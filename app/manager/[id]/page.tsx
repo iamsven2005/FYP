@@ -74,7 +74,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
       const decoded = parseJwt(token);
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
-      router.push("/Login");
+      router.push("/login");
     }
     setLoading(false);
   }, [router]);

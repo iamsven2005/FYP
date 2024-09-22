@@ -55,7 +55,7 @@ const Admin = ({ params }: Props) => {
       setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
     } else {
       window.location.reload();
-      redirect("/Login");
+      redirect("/login");
     }
     setLoading(false);
   }, [router]);

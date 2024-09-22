@@ -20,7 +20,7 @@ const Verify = ({ id }: Props) => {
         // Check if the token exists before making the request
         if (!token) {
           console.error("No token found, redirecting to login.");
-          router.push("/Login");
+          router.push("/login");
           return;
         }
 
@@ -37,17 +37,17 @@ const Verify = ({ id }: Props) => {
 
         // Compare response data and use router.push for client-side navigation
         if (response.data === "staff") {
-          router.push("/Homepage");
+          router.push("/staffpage");
         } else if (response.data === "manager") {
           router.push("/manager");
         } else if (response.data === "admin") {
           router.push("/admin");
         } else {
-          router.push("/Login");
+          router.push("/login");
         }
       } catch (error) {
         console.error("Verification failed:", error);
-        router.push("/Login"); 
+        router.push("/login"); 
       }
     };
 
