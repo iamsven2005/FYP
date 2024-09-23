@@ -354,6 +354,22 @@ Upon selecting a food item for review, the manager sees a detailed breakdown of 
    - Approve or reject ingredients based on the compliance analysis.
 <img src="Markdown\staff-review.png" alt="Compliance Results" width="500"/>
 
+### Glossary
+
+To help you better understand the terms used in this documentation, here is a glossary of some key terms:
+
+- **JWT (JSON Web Token)**: A compact, URL-safe means of representing claims to be transferred between two parties. In this system, it helps in securely transmitting information between the client and the server as a JSON object.
+
+- **Prisma**: An open-source database toolkit that helps with database management. It's used in this system for building the database schema, performing migrations, and handling data queries and transactions.
+
+- **API (Application Programming Interface)**: A set of rules that allow different software entities to communicate with each other. In this system, API routes are used to handle requests and responses between the user interface and the server.
+
+- **AI-driven analysis**: The use of artificial intelligence to evaluate and make decisions based on data. In this application, AI is used to analyze food labels and check for compliance with health and safety standards.
+
+- **OCR (Optical Character Recognition)**: Technology that recognizes text within a digital image. It is used in this system to extract text from uploaded food label images for further analysis and compliance checking.
+
+These terms are integral to understanding how the system operates and interacts with its users.
+
 ### License
 
 This project is licensed under the MIT License.
