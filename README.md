@@ -2,108 +2,125 @@
 
 ## Overview
 
-The **Enhanced Food Label Compliance and Safety Monitoring System** is a comprehensive web application built with Next.js. It facilitates the management of users, companies, and food label images, ensuring compliance and safety through advanced OCR and AI-driven analysis. The system incorporates robust authentication, role-based access control, real-time notifications, and seamless integrations with OpenAI and Nodemailer.
+The **Enhanced Food Label Compliance and Safety Monitoring System** is a Next.js web application designed for NTUC FairPrice. It automates the scanning and verification of food labels to ensure compliance with Singapore regulations. By utilizing OCR and AI, it enhances label verification efficiency and accuracy. The system includes role-based access control, real-time notifications, and integrates with OpenAI and Nodemailer for advanced functionality.
 
 ## Features
 
+- **Automated Label Scanning**
+  - Extracts text from product labels using OCR technology to streamline the verification process.
+
+- **Compliance Checking**
+  - Assesses Halal and Healthy statuses with advanced Machine Learning models to ensure regulatory adherence.
+
 - **User Authentication**
-  - Secure registration and login with JWT and OTP verification.
-  - Role-based access control (Admin, Manager, Staff, Client).
+  - Secure login system utilizing JWT-based authentication and OTP verification for enhanced security.
+
+- **Role-Based Access Control**
+  - Different functionalities and permissions for Admins, Managers, and Staff to maintain organized workflows.
 
 - **Company Management**
   - Create, update, archive/unarchive companies.
-  - Assign staff and managers to companies.
-  - View detailed company information and associated images.
+  - Assign staff and managers to specific companies.
+  - View detailed information and associated images for each company.
 
-- **Image Handling**
-  - Upload and manage food label images.
-  - Extract text from images using OCR (Tesseract.js).
-  - Analyze food safety and compliance with OpenAI's GPT-4.
-  - Approve or reject images based on AI analysis.
+- **Image Management**
+  - Upload, view, and manage food label images efficiently.
+  - Extract and analyze text from images using OCR (Tesseract.js).
+  - Utilize AI (OpenAI's GPT-4) to analyze food safety and compliance.
+  - Approve or reject images based on AI-driven compliance results.
 
 - **Notifications**
-  - Real-time notifications for role changes, company assignments, and image approvals/rejections.
+  - Receive real-time alerts for role changes, company assignments, and image approvals/rejections to stay updated on important actions.
+
+- **Search Functionality**
+  - Easily search and filter companies and users to quickly find relevant information.
 
 - **Data Export**
-  - Export user, company, and image data to Excel for reporting and analysis.
+  - Export user, company, and image data to Excel files for reporting and analysis purposes.
+
+- **Responsive UI**
+  - Intuitive and user-friendly interface built with Tailwind CSS, ensuring accessibility across various devices.
 
 ## Technology Stack
 
 - **Frontend**
-  - [Next.js](https://nextjs.org/)
-  - React
-  - Tailwind CSS
-  - [shadcn/ui](https://shadcn.com/)
-  
-- **Backend**
-  - Next.js API Routes
-  - Prisma ORM
-  
-- **Services**
-  - [OpenAI](https://openai.com/) for AI-driven analysis
-  - [Nodemailer](https://nodemailer.com/) for email services
-  
-- **Others**
-  - [Tesseract.js](https://github.com/naptha/tesseract.js) for OCR
-  - [Sonner](https://github.com/sonner-ui/sonner) for toast notifications
-  - [Lucide React](https://lucide.dev/) for icons
+    - [Next.js](https://nextjs.org/)
+    - [React](https://reactjs.org/)
+    - [Tailwind CSS](https://tailwindcss.com/)
+    - [shadcn/ui](https://shadcn.com/)
 
-## Setup Guide
+- **Backend**
+    - [Next.js API Routes](https://nextjs.org/docs/api-routes/introduction)
+    - [Prisma ORM](https://www.prisma.io/)
+
+- **Services**
+    - [OpenAI](https://openai.com/) for AI-driven analysis
+    - [Nodemailer](https://nodemailer.com/about/) for email services
+
+- **Others**
+    - [Tesseract.js](https://github.com/naptha/tesseract.js) for OCR
+    - [Sonner](https://github.com/emilkowalski/sonner) for toast notifications
+    - [Lucide React](https://lucide.dev/docs/lucide-react) for icons
+
+
+## Getting Started
 
 ### Prerequisites
 
-- **Node.js** (v14 or later)
-- **pnpm** package manager
+Before you begin, ensure you have the following installed on your system:
+
+- **[Node.js](https://nodejs.org/)** (v18.x or later)
+- **[Next.js](https://nextjs.org/)**
+- **[pnpm](https://pnpm.io/)** (v7.x or later)
+- **[Visual Studio Code](https://code.visualstudio.com/)** or any preferred code editor
 
 ### Installation
 
 1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/iamsven2005/FYP.git
-   cd your-repo
-    ```
+    - `
+    git clone https://github.com/iamsven2005/FYP.git
+    `
 
 2. **Install Dependencies**
-    
-    ```bash
+    - `
     pnpm install
-    ```
+    `
+
 3. **Configure Environment Variables**
 
     - Rename .env.example to .env and fill in the required values.
     - Ensure all necessary environment variables are set, including:
-        - DATABASE_URL: Your Prisma database connection string.
+        ```        
+        - DATABASE_URL: Prisma database connection string.
         - JWT_SECRET: Secret key for JWT signing.
         - OPENAI_API_KEY: API key for OpenAI services.
         - EMAIL_SERVER_HOST, EMAIL_SERVER_PORT, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD: Credentials for Nodemailer.
         - EMAIL_FROM: The sender email address for outgoing emails.
+        ```
 
 4. **Run Database Migrations and Seed Data**
-
-    ```bash
-    pnpm gen
-    pnpm push
-    pnpm seed
-    ```
-
-    - pnpm gen: Generates the Prisma client.
-    - pnpm push: Applies database migrations.
-    - pnpm seed: Seeds the database with initial data.
+    - `pnpm gen`: Generates the Prisma client.
+    - `pnpm push`: Applies database migrations.
+    - `pnpm seed`: Seeds the database with initial data.
+        - Bypassed OTP Accounts for each role:
+            ```
+            - Admin: admin@ntuc.com, admin123
+            - Manager: manager@ntuc.com, manager123
+            - Staff: staff@ntuc.com, staff123
+            ```
 
 5. **Start Prisma Studio**
 
     Access Prisma Studio for database management and inspection.
-    ```
-    pnpm stu
-    ```
+    
+    - `pnpm stu`
 
     Open http://localhost:5555 in your browser to access Prisma Studio.
 
 6. **Start the Development Server**
-    ```
-    pnpm dev
-    ```
+    
+    - `pnpm dev`
+    
     This will start the Next.js development server on http://localhost:3000.
 
 7. **Access the Application**
@@ -114,156 +131,139 @@ The **Enhanced Food Label Compliance and Safety Monitoring System** is a compreh
 
 ### Authentication
 
- - Register a new user via the /api/register endpoint.
+ - Register a new user (default role staff) via the /api/register endpoint.
  - Login using the /api/login endpoint.
     - Default Roles (Admin, Manager, Staff, Client) bypass OTP verification.
     - Other Users receive an OTP via email for enhanced security.
  - Reset Password through the /api/forgot-password and /api/reset-password endpoints.
 
-### Admin Dashboard
- - **User Management:** View, assign roles, and delete users.
- - **Company Management:** Create, update, archive/unarchive companies, and assign staff and managers.
- - **Image Management:** Upload images, view details, and approve/reject based on compliance.
+## User Roles and Usage
 
-### API Endpoints
+The system supports three main user roles: Admin, Manager, and Staff. Each role has specific functionalities tailored to their responsibilities.
 
-For detailed API documentation, refer to the API Documentation section in the Wiki.
+### Admin
 
-## Detailed Sections
+## Responsibilities:
+ - **User Management:** Create, update, and delete user accounts (Admins, Managers, Staff).
+ - **Company Management:** Create, edit, archive, and manage companies along with their assigned staff and managers.
+ - **System Oversight:** Configure system settings and manage compliance workflows.
 
-### 1. Project Overview
+## Key Features:
+ - **User Management Interface:**
+    - View all users.
+    - Assign roles to users.
+    - Delete users with confirmation prompts.
+    ``` bash
+    // Example: Assigning a role to a user
+    const handleRoleChange = (userId: string, newRole: string) => {
+      setSelectedRoles((prevRoles) => ({ ...prevRoles, [userId]: newRole }));
+      assignRole(userId, newRole);
+    };
+      ```
+ - **Company Management Interface:**
+   - Create new companies by providing necessary details like name, image, staff, and manager.
+   - Edit existing companies through a dialog interface.
+   - Archive or unarchive companies as needed.
+    ``` bash
+    // Example: Toggling company archive status
+    const toggleArchiveCompany = async (companyId: string, archived: boolean) => {
+        // Update company archive status
+    };
+    ```
 
-Provides a high-level introduction, objectives, key features, and technology stack used in the project.
+## Usage:
 
-### 2. Setup Guide
+ 1. **Accessing Admin Dashboard:**
+    - Log in using your admin credentials.
+    - Navigate to the Admin Dashboard to manage users and companies.
 
-Detailed instructions on how to set up the project locally, including cloning the repository, installing dependencies, configuring environment variables, running database migrations, seeding data, starting Prisma Studio, and running the development server.
+ 2. **Managing Users:**
+    - Use the User Management section to add or remove users.
+    - Assign appropriate roles to ensure users have the necessary permissions.
 
-### 3. Database Schema
+ 3. **Managing Companies:**
+    - Use the Company Management section to create or edit companies.
+    - Assign staff and managers to each company to streamline operations.
 
- - **Prisma Models:** Detailed explanation of each model in prisma/schema.prisma.
- - **Relationships:** Describe relationships between models (e.g., User ↔ Company).
- - **Seeding Data:** Instructions on using prisma/seed.ts to seed the database with initial data.
+### Manager
 
-### 4. Authentication
+## Responsibilities:
+ - **Compliance Oversight:** Monitor compliance processes and ensure adherence to regulations.
+ - **Reporting:** Generate and review detailed reports on compliance statuses.
+ - **User Support:** Assist Staff in resolving compliance-related queries.
 
- - **JWT Implementation:** Explain how JWTs are created and verified (lib/session.ts).
- - **OTP Verification:** Describe the OTP flow for enhanced security (app/api/login/route.ts, app/api/forgot-password/route.ts, app/api/reset-password/route.ts).
- - **User Roles and Permissions:** Detail different roles (Admin, Manager, Staff, Client) and their permissions.
- - **Session Management:** How sessions are handled and terminated (app/api/session/route.ts).
+## Key Features:
+ - **Compliance Reports:**
+    - View and analyze compliance data.
+    - Generate reports to track compliance trends and issues.
+  
+ - **Notification Management:**
+   - Receive alerts about new uploads and compliance issues.
+   - Address and resolve compliance-related notifications.
 
-### 5. Components Documentation
+## Usage:
 
-For each React component, include:
+ 1. **Accessing Manager Dashboard:**
+    - Log in using your manager credentials.
+    - Navigate to the Manager Dashboard to oversee compliance activities.
 
- - **Purpose:** What the component does.
- - **Props and State:** Detailed explanation of props and state variables.
- - **Usage:** How and where the component is used within the app.
+ 2. **Monitoring Compliance:**
+    - Use the reporting tools to keep track of compliance statuses.
+    - Address any compliance issues flagged by the system.
 
-**Components to Document:**
+ 3. **Managing Companies:**
+    - Use the Company Management section to create or edit companies.
+    - Assign staff and managers to each company to streamline operations.
 
- - UserManagement.tsx
- - CompanyManagement.tsx
- - EditCompanyDialog.tsx
- - IngredientList.tsx
- - Navbar.tsx
- - Others ui as needed.
+### Staff
 
-### 6. API Documentation
+## Responsibilities:
+ - **Label Management:** Upload product labels/artwork submitted by stakeholders.
+ - **Compliance Verification:** Conduct compliance checks using predefined checklists.
+ - **Approval/Rejection:** Approve or reject ingredients based on compliance results.
+ - **Risk Advisory:** Provide guidance and risk assessments to stakeholders regarding compliance issues.
 
-Organize APIs by functionality with details on endpoints, parameters, and responses.
+## Key Features:
+ - **Image Upload and Management:**
+    - Easily upload product label images for compliance verification.
+    - View and manage uploaded images through the dashboard.
+    
+      ``` bash
+      // Example: Handling image upload
+      const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setCompanyImgUrl(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      ```
 
-**Structure for Each Endpoint:**
+ - **Compliance Checks:**
+   - Use integrated OCR and Machine Learning tool, OpenAI API to verify label information.
+   - Approve or reject ingredients as per compliance guidelines.
 
- - Endpoint URL & Method
-    - Example: POST /api/login
- - Description
-    - What the endpoint does.
- - Request Parameters
-    - Headers: Authentication tokens, content types.
-    - Body: Required and optional fields with data types.
- - Response
-    - Success: Status codes and response body examples.
-    - Errors: Possible error messages and status codes.
- - Example Requests and Responses
-    - cURL commands or JSON examples.
+ -  **Workflow Management:**
+   - Route approval or rejection tasks to appropriate parties.
+   - Track the status of compliance tasks through the dashboard.
 
-**Categories:**
+## Usage:
 
- - Users Endpoints
-    - GET /api/users
-    - PATCH /api/users/[userId]
-    - DELETE /api/users/[userId]
- - Authentication
-    - POST /api/login
-    - POST /api/register
-    - POST /api/forgot-password
-    - POST /api/reset-password
-    - DELETE /api/session
- - Companies Endpoints
-    - POST /api/companies
-    - GET /api/companies
-    - PATCH /api/companies/[id]
-    - GET /api/companies/[id]
- - Image Handling
-    - POST /api/saveImage
-    - GET /api/items
-    - PATCH /api/items/[id]/approve
-    - PATCH /api/items/[id]/reject
-    - GET /api/items/[id]/name
-    - GET & POST /api/items/[id]/notify
-    - POST /api/items/[id]/notes
- - Roles Management
-    - POST /api/roles
-    - OpenAI Integration
-    - POST /api/openaiCheck
-    - PATCH /api/openaiCheck
- - OCR Processing
-    - POST /api/ocr
+ 1. **Accessing Staff Dashboard:**
+     - Log in using your staff credentials.
+     - Navigate to the Staff Dashboard to manage label uploads and compliance checks.
 
-### 7. Utilities
+ 2. **Uploading Labels:**
+     - Use the Image Management section to upload new product labels.
+     - Ensure all necessary fields are filled out before submission.
 
- - **Utility Functions:** Describe utility functions in lib/utils.ts and others.
- - **Database Initialization:** Explain how the database is initialized (lib/db.ts).
- - **Helpers:** Any helper functions or modules used across the project.
+ 3. **Conducting Compliance Checks:**
+    - Review the extracted text and compliance results for each uploaded label.
+    - Approve or reject ingredients based on the compliance analysis.
 
-### 8. Ingredient Compliance
+### License
 
- - **Data Structures:** Explain how ingredients and their statuses are managed.
- - **Compliance Logic:** Detail the logic for checking ingredient compliance using OpenAI and OCR results.
- - **Approved vs. Not Safe Ingredients:** Criteria and handling.
-
-### 9. Styling and Theming
-
- - **CSS Framework:** Explain the use of Tailwind CSS and integration with shadcn/ui.
- - **Theming:** How themes are managed using next-themes.
- - **Component Styling:** Best practices for styling components.
-
-### 10. Security Best Practices
-
- - **Protecting Sensitive Data:** Guidelines on managing .env files and secrets.
- - **JWT Security:** Token expiration, storage, and rotation strategies.
- - **Input Validation:** How inputs are validated across the app.
- - **Error Handling:** Secure error messages to avoid leaking sensitive information.
- - **Rotating Exposed Secrets:** Steps to rotate keys and secrets if compromised.
-
-### 11. Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-### 12. Security
-
- - Sensitive Data Protection: Ensure .env is added to .gitignore to prevent exposing sensitive information.
- - JWT Security: Tokens have an expiration time and are securely managed.
- - Input Validation: All inputs are validated to prevent security vulnerabilities.
- 
-For detailed security practices, visit the Security Best Practices section in the Wiki.
-
-### 13. License
 This project is licensed under the MIT License.
-
-### 14. Contact
-For any inquiries or support, please contact NTUC Support.
-
