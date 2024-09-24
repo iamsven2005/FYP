@@ -1,3 +1,30 @@
+# Table of Contents
+- [Table of Contents](#table-of-contents)
+- [Enhanced Food Label Compliance and Safety Monitoring System](#enhanced-food-label-compliance-and-safety-monitoring-system)
+  - [Overview](#overview)
+  - [Features](#features)
+  - [Technology Stack](#technology-stack)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+  - [Authentication](#authentication)
+  - [User Roles and Usage](#user-roles-and-usage)
+    - [Admin](#admin)
+      - [Responsibilities:](#responsibilities)
+      - [Key Features:](#key-features)
+      - [Usage:](#usage)
+    - [Manager](#manager)
+      - [Responsibilities:](#responsibilities-1)
+      - [Key Features:](#key-features-1)
+      - [Usage:](#usage-1)
+    - [Staff](#staff)
+      - [Responsibilities:](#responsibilities-2)
+      - [Key Features:](#key-features-2)
+      - [Usage:](#usage-2)
+  - [Glossary](#glossary)
+  - [License](#license)
+
+
 # Enhanced Food Label Compliance and Safety Monitoring System
 
 ## Overview
@@ -132,10 +159,7 @@ Before you begin, ensure you have the following installed on your system:
 
     <img src="./markdown/Ntuc-mainpage.png" alt="Ntuc-mainpage" width="500"/>
 
-
-## Usage
-
-### Authentication
+## Authentication
 
  - Register a new user (default role staff) via the /api/register endpoint.
  - Login using the /api/login endpoint.
@@ -149,7 +173,7 @@ The system supports three main user roles: Admin, Manager, and Staff. Each role 
 
 ### Admin
 
-## Responsibilities:
+#### Responsibilities:
  - **User Management:** Create, update, and delete user accounts (Admins, Managers, Staff).
 <img src="Markdown/admin-usermanagement.png" alt="admin-usermanagement" width="500"/>
 
@@ -164,7 +188,7 @@ The system supports three main user roles: Admin, Manager, and Staff. Each role 
 
  - **Generate Excel Report:** Admins have the ability to export user, company, and image data into an Excel report for tracking and analysis.
 
-## Key Features:
+#### Key Features:
  - **User Management Interface:**
     - Admins can view all registered users, assign or modify their roles (Admin, Manager, Staff, and Client), and delete users as necessary.
     - User roles can be reassigned from the admin dashboard.
@@ -192,9 +216,9 @@ The system supports three main user roles: Admin, Manager, and Staff. Each role 
   - **Data Export (Generate Excel Report):**
     - Admins can generate a report in Excel format for tracking all users, companies, and food images in the system. This report contains detailed records of users, their roles, companies, and images that have been processed.
 
-#### Example: Generating Excel Report
+  - **Example: Generating Excel Report**
 
-Admins can export data using the **Export to Excel** button available on the dashboard. This function will create a workbook with three sheets `Users`, `Companies`, and `Images` which can then be downloaded as an Excel file.
+    - Admins can export data using the **Export to Excel** button available on the dashboard. This function will create a workbook with three sheets `Users`, `Companies`, and `Images` which can then be downloaded as an Excel file.
 
 ```bash
 // Function to export data to Excel
@@ -243,22 +267,22 @@ const exportToExcel = () => {
 <img src="Markdown\admin-exportexcel.png" alt="admin-exportexcel" width="500"/>
 
 
-## Usage:
+#### Usage:
 
- 1. **Accessing Admin Dashboard:**
-    - Log in using your admin credentials.
-    - Navigate to the Admin Dashboard to manage users and companies.
+   1. **Accessing Admin Dashboard:**
+      - Log in using your admin credentials.
+      - Navigate to the Admin Dashboard to manage users and companies.
 
- 2. **Managing Users:**
-    - Use the User Management section to add or remove users.
-    - Assign appropriate roles to ensure users have the necessary permissions.
+   2. **Managing Users:**
+      - Use the User Management section to add or remove users.
+      - Assign appropriate roles to ensure users have the necessary permissions.
 
- 3. **Managing Companies:**
-    - Create new companies or edit existing ones through the Company Management section.
-    - Assign staff and managers to each company for oversight and workflow management.
- 
- 4. **Generating Reports:**
-    - Admins can use the "Export to Excel" button to download detailed reports containing data on users, companies, and uploaded images for compliance tracking and analysis.
+   3. **Managing Companies:**
+      - Create new companies or edit existing ones through the Company Management section.
+      - Assign staff and managers to each company for oversight and workflow management.
+   
+   4. **Generating Reports:**
+      - Admins can use the "Export to Excel" button to download detailed reports containing data on users, companies, and uploaded images for compliance tracking and analysis.
  
 ### Manager
 
@@ -302,13 +326,13 @@ Upon selecting a food item for review, the manager sees a detailed breakdown of 
 
 ### Staff
 
-## Responsibilities:
+#### Responsibilities:
 - **Label Management:** Upload product labels submitted by stakeholders.
 - **Compliance Verification:** Conduct compliance checks using predefined checklists (ingredients.json).
 - **Approval/Rejection:** Approve or reject ingredients based on compliance results.
 - **Risk Advisory:** Provide guidance and risk assessments to stakeholders regarding compliance issues.
 
-## Key Features:
+#### Key Features:
 - **Image Upload and Management:**
     - Easily upload product label images for compliance verification.
     - View and manage uploaded images through the dashboard.
@@ -335,7 +359,7 @@ Upon selecting a food item for review, the manager sees a detailed breakdown of 
   - Route approval or rejection tasks to appropriate parties. (Manager and Admin).
   - Track the status of compliance tasks through the dashboard. (Await for approval from manager).
 
-## Usage:
+#### Usage:
 
 1. **Accessing Staff Dashboard:**
    - Log in using your staff credentials.
@@ -354,22 +378,20 @@ Upon selecting a food item for review, the manager sees a detailed breakdown of 
    - Approve or reject ingredients based on the compliance analysis.
 <img src="Markdown\staff-review.png" alt="Compliance Results" width="500"/>
 
-### Glossary
+## Glossary
 
-To help you better understand the terms used in this documentation, here is a glossary of some key terms:
+  To help you better understand the terms used in this documentation, here is a glossary of some key terms:
 
-- **JWT (JSON Web Token)**: A compact, URL-safe means of representing claims to be transferred between two parties. In this system, it helps in securely transmitting information between the client and the server as a JSON object.
+  - **JWT (JSON Web Token)**: A compact, URL-safe means of representing claims to be transferred between two parties. In this system, it helps in securely transmitting information between the client and the server as a JSON object.
 
-- **Prisma**: An open-source database toolkit that helps with database management. It's used in this system for building the database schema, performing migrations, and handling data queries and transactions.
+  - **Prisma**: An open-source database toolkit that helps with database management. It's used in this system for building the database schema, performing migrations, and handling data queries and transactions.
 
-- **API (Application Programming Interface)**: A set of rules that allow different software entities to communicate with each other. In this system, API routes are used to handle requests and responses between the user interface and the server.
+  - **API (Application Programming Interface)**: A set of rules that allow different software entities to communicate with each other. In this system, API routes are used to handle requests and responses between the user interface and the server.
 
-- **AI-driven analysis**: The use of artificial intelligence to evaluate and make decisions based on data. In this application, AI is used to analyze food labels and check for compliance with health and safety standards.
+  - **AI-driven analysis**: The use of artificial intelligence to evaluate and make decisions based on data. In this application, AI is used to analyze food labels and check for compliance with health and safety standards.
 
-- **OCR (Optical Character Recognition)**: Technology that recognizes text within a digital image. It is used in this system to extract text from uploaded food label images for further analysis and compliance checking.
+  - **OCR (Optical Character Recognition)**: Technology that recognizes text within a digital image. It is used in this system to extract text from uploaded food label images for further analysis and compliance checking.
 
-These terms are integral to understanding how the system operates and interacts with its users.
-
-### License
+## License
 
 This project is licensed under the MIT License.
