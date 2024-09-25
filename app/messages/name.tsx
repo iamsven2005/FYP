@@ -30,7 +30,7 @@ const Name = ({ id }: Props) => {
     fetchName();
   }, [id]);
 
-  return <p className="text-sm text-gray-500">{username || "Loading..."}</p>;
+  return <p className="text-sm">{username || "Loading..."}</p>;
 };
 
 export default Name;

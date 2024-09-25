@@ -60,16 +60,14 @@ export async function POST(req: Request) {
           user_from: company.staff, // Notification from staff
           user_to: company.manager, // Notification to the manager
           body: `Uploaded new image for ${company.name}`,
-          read: "Unread" // Notification status is unread initially
+          read: "Unread" 
         }
       });
     }
 
-    // Return the success response with the created image details
     return NextResponse.json({ success: true, data: newImage });
   } catch (error) {
     console.log(error);
-    // Return a failure response in case of an error
     return NextResponse.json({ success: false, message: error }, { status: 500 });
   }
 }

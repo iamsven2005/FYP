@@ -96,7 +96,7 @@ export default function NotificationsPage() {
               <li key={notification.id} className="py-4">
                 <div className="flex items-start space-x-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{notification.body}</p>
+                    <p className="text-sm font-medium ">{notification.body}</p>
                     <Name id={notification.user_from} />
                     <p className="text-sm text-gray-500">
                       {new Date(notification.createdAt).toLocaleString()}

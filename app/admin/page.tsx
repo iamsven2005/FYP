@@ -35,6 +35,7 @@ const Admin = ({ params }: Props) => {
   const [AUsers, setUsers] = useState<User[]>([]);
   const [user, setUser] = useState<UserI | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ingredientName, setIngredientName] = useState("");
 
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
@@ -158,7 +159,22 @@ const Admin = ({ params }: Props) => {
     // Export the workbook
     XLSX.writeFile(wb, "data_export.xlsx");
   };
+  const handleSubmitIngredient = async () => {
+    try {
+      const token = localStorage.getItem("token"); // Get the token from localStorage
+      const authHeader = {
+        headers: {
+          Authorization: `Bearer ${token}`, // Set the Authorization header
+        },
+      };
 
+      await axios.post("/api/ingredient", { name: ingredientName }, authHeader); // POST to /api/ingredient
+      toast.success("Ingredient submitted successfully");
+      setIngredientName(""); // Reset the input field after submission
+    } catch (error) {
+      toast.error("Failed to submit ingredient");
+    }
+  };
   return (
     <div className="container mx-auto mt-10">
       <h1 className="text-3xl font-bold text-base-content">Admin Dashboard</h1>
@@ -182,7 +198,20 @@ const Admin = ({ params }: Props) => {
 
 
       )}
-
+       {/* Ingredient Submission */}
+       <div className="mb-4">
+        <h2 className="text-2xl font-bold">Submit a New Ingredient</h2>
+        <input
+          type="text"
+          value={ingredientName}
+          onChange={(e) => setIngredientName(e.target.value)}
+          placeholder="Enter ingredient name"
+          className="border p-2 rounded-lg w-full mb-4"
+        />
+        <button onClick={handleSubmitIngredient} className="bg-blue-500 text-white p-2 rounded">
+          Submit Ingredient
+        </button>
+      </div>
       {/* Images Table */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">Images</h2>
