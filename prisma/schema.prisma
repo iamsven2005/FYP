@@ -22,6 +22,7 @@ model images {
   retrived    String   @db.Text
   halal       Boolean
   healthy     Boolean
+  grade       String?
   AI          String   @db.Text
   ingredients Json?
 }

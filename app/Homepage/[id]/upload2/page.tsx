@@ -152,6 +152,7 @@ export default function Component({ params }: Props) {
 
     const isHalal = openAIData?.halal?.toLowerCase() === "yes";
     const isHealthy = openAIData?.healthy?.toLowerCase() === "yes";
+    const isGrade = openAIData?.grade?.toLowerCase()
     const AI = openAIData?.Ingredients;
     const texts = openAIData?.warning;
 
@@ -163,6 +164,7 @@ export default function Component({ params }: Props) {
       retrived: texts,
       halal: isHalal,
       healthy: isHealthy,
+      grade: isGrade,
       AI: AI,
       ingredients: checkedIngredients, // Include the ingredients with statuses
     };
@@ -263,7 +265,12 @@ export default function Component({ params }: Props) {
               <p>{openAIData.healthy}</p>
             </div>
           )}
-
+          {openAIData.grade && (
+            <div>
+              <Label>Nutri-grade:</Label>
+              <p>{openAIData.grade}</p>
+            </div>
+          )}
           {openAIData.Ingredients && (
             <div>
               <Label>Ingredients:</Label>

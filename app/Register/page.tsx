@@ -251,7 +251,7 @@ const RegisterPage = () => {
         <div className="mt-4 text-center">
           <p className="text-sm">
             Already have an account?{" "}
-            <a href="/login" className="text-blue-600 hover:underline">Login here</a>.
+            <a href="/Login" className="text-blue-600 hover:underline">Login here</a>.
           </p>
         </div>
       </CardContent>

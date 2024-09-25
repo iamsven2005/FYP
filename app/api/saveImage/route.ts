@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients } = body;
+    const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients, grade } = body;
     
     // Create a new image entry with all the details, including the updated ingredients
     const newImage = await db.images.create({
@@ -42,6 +42,7 @@ export async function POST(req: Request) {
         halal,
         healthy,
         AI,
+        grade,
         ingredients, // Store the ingredients (with their status: Approved, Not Approved, Not Safe)
       },
     });
