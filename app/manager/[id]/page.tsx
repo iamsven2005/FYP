@@ -9,6 +9,7 @@ import { toast } from "sonner"; // Import toast for notifications
 
 // Import the IngredientList component
 import IngredientList from "@/components/IngredientList";
+import { checkIngredients } from "@/lib/ingredientChecker"; // Import the ingredient checking function
 import axios from "axios";
 
 // Define the IngredientStatus interface
@@ -89,7 +90,13 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
           toast.error(data.error); // Use toast for errors
         } else {
           setCompany(data.company);
-          setItems(data.items);
+          const checkedItems = await Promise.all(
+            data.items.map(async (item: Item) => {
+              const checkedIngredients = await checkIngredients(item.ingredients.map(i => i.name)); // Check the ingredients using the database
+              return { ...item, ingredients: checkedIngredients }; // Return item with updated ingredients
+            })
+          );
+          setItems(checkedItems);          
         }
       } catch (error) {
         toast.error("Failed to fetch company details"); // Use toast for errors

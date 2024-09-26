@@ -8,8 +8,7 @@ import { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import axios from "axios";
 
-// Import the ingredients.json file
-import ingredientList from "@/data/ingredients.json";
+import { checkIngredients } from "@/lib/ingredientChecker"; // External function
 // Import the IngredientList component
 import IngredientList from "@/components/IngredientList";
 
@@ -102,44 +101,39 @@ export default function Component({ params }: Props) {
 
   // Function to parse ingredients string into an array
   const parseIngredients = (ingredientsText: string): string[] => {
-    // Remove text inside parentheses
     const textWithoutParentheses = ingredientsText.replace(/\(.*?\)/g, "");
-
-    // Replace ' and ' with ','
     const standardizedText = textWithoutParentheses.replace(/\band\b/gi, ",");
-
-    // Split by commas and semicolons, trim whitespace, convert to lowercase
     return standardizedText
       .split(/,|;/)
       .map((ingredient) => ingredient.trim().toLowerCase())
       .filter((ingredient) => ingredient !== "");
   };
 
-  // Function to check ingredients against the approved and unsafe lists
-  const checkIngredients = (ingredients: string[]): IngredientStatus[] => {
-    const { approvedIngredients, unsafeIngredients } = ingredientList;
+  // Function to check ingredients using the ingredientChecker
+  const getIngredientStatuses = async (ingredients: string[]): Promise<IngredientStatus[]> => {
+    const checkedIngredients: IngredientStatus[] = [];
 
-    return ingredients.map((ingredient) => {
-      const lowercasedIngredient = ingredient.toLowerCase(); // Convert ingredient to lowercase
+    for (const ingredient of ingredients) {
+      const [ingredientStatus] = await checkIngredients([ingredient]); // checkIngredients returns an array
+      checkedIngredients.push({ name: ingredient, status: ingredientStatus.status }); // Use the status from the result
+    }
 
-      // Check against lowercase version of the approved and unsafe lists
-      if (approvedIngredients.map((i) => i.toLowerCase()).includes(lowercasedIngredient)) {
-        return { name: ingredient, status: "Approved" }; // Use original case for display
-      } else if (unsafeIngredients.map((i) => i.toLowerCase()).includes(lowercasedIngredient)) {
-        return { name: ingredient, status: "Not Safe" }; // Use original case for display
-      } else {
-        return { name: ingredient, status: "Not Approved" }; // Use original case for display
-      }
-    });
+    return checkedIngredients;
   };
 
   useEffect(() => {
-    if (openAIData?.Ingredients) {
-      const ingredientsText = openAIData.Ingredients;
-      const ingredientsArray = parseIngredients(ingredientsText);
-      const ingredientsWithStatus = checkIngredients(ingredientsArray);
-      setCheckedIngredients(ingredientsWithStatus);
-    }
+    const checkAndSetIngredients = async () => {
+      if (openAIData?.Ingredients) {
+        const ingredientsText = openAIData.Ingredients;
+        const ingredientsArray = parseIngredients(ingredientsText);
+
+        // Check ingredients asynchronously
+        const ingredientsWithStatus = await getIngredientStatuses(ingredientsArray);
+        setCheckedIngredients(ingredientsWithStatus);
+      }
+    };
+
+    checkAndSetIngredients();
   }, [openAIData]);
 
   const handlePost = async () => {
@@ -152,7 +146,7 @@ export default function Component({ params }: Props) {
 
     const isHalal = openAIData?.halal?.toLowerCase() === "yes";
     const isHealthy = openAIData?.healthy?.toLowerCase() === "yes";
-    const isGrade = openAIData?.grade?.toLowerCase()
+    const isGrade = openAIData?.grade?.toLowerCase();
     const AI = openAIData?.Ingredients;
     const texts = openAIData?.warning;
 
@@ -186,18 +180,17 @@ export default function Component({ params }: Props) {
 
   const toggleEditMode = () => {
     if (!isEditing) {
-      // When entering edit mode, populate the editable ingredients from the checkedIngredients
       const ingredientNames = checkedIngredients.map((ingredient) => ingredient.name).join(", ");
       setEditableIngredients(ingredientNames);
     }
-    setIsEditing(!isEditing); // Toggle the edit mode
+    setIsEditing(!isEditing);
   };
 
-  const handleSaveIngredients = () => {
-    const ingredientsArray = parseIngredients(editableIngredients); // Parse the edited text
-    const updatedIngredientsWithStatus = checkIngredients(ingredientsArray); // Check ingredients against JSON list
-    setCheckedIngredients(updatedIngredientsWithStatus); // Update the color-coded ingredients
-    setIsEditing(false); // Exit edit mode
+  const handleSaveIngredients = async () => {
+    const ingredientsArray = parseIngredients(editableIngredients);
+    const updatedIngredientsWithStatus = await getIngredientStatuses(ingredientsArray);
+    setCheckedIngredients(updatedIngredientsWithStatus);
+    setIsEditing(false);
   };
 
   const openBrowseImage = async () => {
