@@ -2,18 +2,29 @@
 
 import * as React from "react"
 import { redirect, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent } from "@/components/ui/navigation-menu"
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu"
 import { ModeToggle } from "../switch"
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+import { Menu, Send, X } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-const Navbar = () => {
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export default function Navbar() {
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [inputText, setInputText] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const checkLoginStatus = () => {
     const storedToken = localStorage.getItem("token")
@@ -33,6 +44,12 @@ const Navbar = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    }
+  }, [messages])
+
   const handleLogout = () => {
     localStorage.removeItem("token")
     localStorage.setItem("isLoggedIn", "false")
@@ -40,6 +57,34 @@ const Navbar = () => {
     setIsMobileMenuOpen(false)
     window.location.reload()
     redirect("/")
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!inputText.trim()) return
+
+    const userMessage: Message = { role: 'user', content: inputText }
+    setMessages(prevMessages => [...prevMessages, userMessage])
+    setInputText('')
+
+    try {
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: inputText }),
+      });
+
+      const data = await response.json();
+      const assistantMessage: Message = { role: 'assistant', content: data.message.content }
+      setMessages(prevMessages => [...prevMessages, assistantMessage])
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      const errorMessage: Message = { role: 'assistant', content: 'Sorry, an error occurred. Please try again.' }
+      setMessages(prevMessages => [...prevMessages, errorMessage])
+    }
   }
 
   const NavItems = () => (
@@ -50,19 +95,29 @@ const Navbar = () => {
         </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-            <Link href="/messages" className="text-foreground hover:text-primary transition-colors duration-300">
-              Messages
-            </Link>
+        <Link href="/messages" className="text-foreground hover:text-primary transition-colors duration-300">
+          Messages
+        </Link>
       </NavigationMenuItem>
       {isLoggedIn ? (
-        <NavigationMenuItem>
-          <button
-            onClick={handleLogout}
-            className="text-foreground hover:text-primary transition-colors duration-300"
-          >
-            Logout
-          </button>
-        </NavigationMenuItem>
+        <>
+          <NavigationMenuItem>
+            <button
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className="text-foreground hover:text-primary transition-colors duration-300"
+            >
+              {isChatOpen ? 'Close Chat' : 'Open Chat'}
+            </button>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <button
+              onClick={handleLogout}
+              className="text-foreground hover:text-primary transition-colors duration-300"
+            >
+              Logout
+            </button>
+          </NavigationMenuItem>
+        </>
       ) : (
         <>
           <NavigationMenuItem>
@@ -75,7 +130,6 @@ const Navbar = () => {
               Register
             </Link>
           </NavigationMenuItem>
-
         </>
       )}
     </>
@@ -114,8 +168,41 @@ const Navbar = () => {
           </Sheet>
         </div>
       </nav>
+
+      {isLoggedIn && isChatOpen && (
+        <div className="fixed bottom-0 right-0 w-full md:w-96 bg-background p-4 shadow-lg rounded-t-lg border border-border">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-semibold">Chat with AI</h2>
+            <Button variant="ghost" size="icon" onClick={() => setIsChatOpen(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <ScrollArea className="h-64 mb-4" ref={scrollAreaRef}>
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`mb-2 p-2 rounded ${
+                  message.role === 'user' ? 'bg-primary text-primary-foreground ml-4' : 'bg-muted text-foreground mr-4'
+                }`}
+              >
+                <p>{message.content}</p>
+              </div>
+            ))}
+          </ScrollArea>
+          <form onSubmit={handleSubmit} className="flex space-x-2">
+            <Input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Ask ChatGPT..."
+              className="flex-grow"
+            />
+            <Button type="submit" size="icon">
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
+        </div>
+      )}
     </header>
   )
 }
-
-export default Navbar
