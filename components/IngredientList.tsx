@@ -10,6 +10,8 @@ interface IngredientListProps {
 }
 
 const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
+  // Log the ingredients being passed
+  console.log('Rendering ingredients in IngredientList:', ingredients);
   // Function to return the appropriate CSS class based on ingredient status
   const getIngredientClass = (status: string) => {
     switch (status) {
@@ -26,6 +28,7 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
 
   // Render a fallback message if the ingredients array is empty or null
   if (!ingredients || ingredients.length === 0) {
+    console.log('No ingredients available.');
     return <p>No ingredients available.</p>;
   }
 

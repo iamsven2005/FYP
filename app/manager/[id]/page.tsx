@@ -80,6 +80,14 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     setLoading(false);
   }, [router]);
 
+  // Parse the AI output into ingredients array
+  const parseAIIngredients = (aiText: string) => {
+    if (!aiText) return [];
+
+    const ingredients = aiText.split(",").map(ingredient => ingredient.trim().toLowerCase());
+    return ingredients;
+  };
+
   useEffect(() => {
     const loadCompanyDetails = async () => {
       try {
@@ -87,19 +95,32 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         const data = response.data;
 
         if (data.error) {
-          toast.error(data.error); // Use toast for errors
+          toast.error(data.error);
         } else {
           setCompany(data.company);
+
+          // Log the items before they are processed
+          console.log('Items fetched from API:', data.items);
+
           const checkedItems = await Promise.all(
             data.items.map(async (item: Item) => {
-              const checkedIngredients = await checkIngredients(item.ingredients.map(i => i.name)); // Check the ingredients using the database
+              const aiIngredients = parseAIIngredients(item.AI); // Parse AI ingredients
+              const checkedIngredients = await checkIngredients(aiIngredients); // Check the ingredients
+
+              // Log the result of the checked ingredients
+              console.log('Checked ingredients for item:', item.name, checkedIngredients);
+
               return { ...item, ingredients: checkedIngredients }; // Return item with updated ingredients
             })
           );
-          setItems(checkedItems);          
+
+          // Log the final items that will be displayed
+          console.log('Final items with checked ingredients:', checkedItems);
+
+          setItems(checkedItems);
         }
       } catch (error) {
-        toast.error("Failed to fetch company details"); // Use toast for errors
+        toast.error("Failed to fetch company details");
       } finally {
         setLoading(false);
       }
@@ -107,6 +128,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
 
     loadCompanyDetails();
   }, [params.id]);
+
 
   const handleApprove = async (itemId: string) => {
     if (!user?.id) {
@@ -212,14 +234,18 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                     <p className="text-sm mb-2">Extracted Text: {item.retrived}</p>
                     <p className="text-sm mb-4">AI Advisory: {item.AI}</p>
 
+                    {(() => { console.log('Ingredients passed to IngredientList:', item.ingredients); return null; })()}
                     {/* Display Ingredients with Highlights */}
                     {item.ingredients && item.ingredients.length > 0 && (
                       <div className="mb-4">
                         <h4 className="font-semibold">Ingredients:</h4>
+                        {(() => {
+                          console.log('Rendering IngredientList for item:', item.name, item.ingredients);
+                          return null;
+                        })()}
                         <IngredientList ingredients={item.ingredients} />
                       </div>
                     )}
-
                     <div className="flex gap-2">
                       <Button
                         onClick={() => handleApprove(item.id)}
