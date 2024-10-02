@@ -1,4 +1,3 @@
-// File: /app/api/approved-ingredients/route.ts
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 

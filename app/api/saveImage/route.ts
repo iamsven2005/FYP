@@ -9,14 +9,17 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 async function checkAuthorization(req: Request) {
   const token = req.headers.get('Authorization')?.split(' ')[1];
   if (!token) {
+    console.error("Authorization token is missing");
     return { error: true, response: NextResponse.json({ error: 'Authorization token is required' }, { status: 401 }) };
   }
 
   try {
     // Verify the JWT token
     const decoded = verify(token, JWT_SECRET);
+    console.log('Token verified. Decoded token:', decoded);
     return { error: false, decoded };
   } catch (error) {
+    console.error('JWT verification failed:', error);
     return { error: true, response: NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 }) };
   }
 }
@@ -30,7 +33,34 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients, grade } = body;
-    
+
+    // Log the data received
+    console.log('Received data for new image:', {
+      imageurl,
+      name,
+      companyId,
+      retrived,
+      halal,
+      healthy,
+      AI,
+      ingredients,
+      grade
+    });
+
+    // Validate ingredients
+    if (!Array.isArray(ingredients)) {
+      console.error('Ingredients is not an array:', ingredients);
+      return NextResponse.json({ success: false, message: 'Invalid ingredients format' }, { status: 400 });
+    }
+
+    // Optionally, validate each ingredient has name and status
+    for (const ingredient of ingredients) {
+      if (!ingredient.name || !ingredient.status) {
+        console.error('Invalid ingredient format:', ingredient);
+        return NextResponse.json({ success: false, message: 'Invalid ingredient format' }, { status: 400 });
+      }
+    }
+
     // Create a new image entry with all the details, including the updated ingredients
     const newImage = await db.images.create({
       data: {
@@ -47,6 +77,9 @@ export async function POST(req: Request) {
       },
     });
 
+    // Log the new image created
+    console.log('New image created:', newImage);
+
     // Find the company associated with the image
     const company = await db.company.findFirst({
       where: {
@@ -54,8 +87,9 @@ export async function POST(req: Request) {
       }
     });
 
-    // If the company exists, notify the manager about the new image upload
     if (company) {
+      console.log(`Notifying manager (${company.manager}) about new image upload for company ${company.name}.`);
+      // If the company exists, notify the manager about the new image upload
       await db.notification.create({
         data: {
           user_from: company.staff, // Notification from staff
@@ -64,11 +98,14 @@ export async function POST(req: Request) {
           read: "Unread" 
         }
       });
+      console.log('Notification sent to manager.');
+    } else {
+      console.warn(`Company with ID ${companyId} not found when trying to send notification.`);
     }
 
     return NextResponse.json({ success: true, data: newImage });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json({ success: false, message: error }, { status: 500 });
+  } catch (error: any) {
+    console.error('Error saving new image:', error);
+    return NextResponse.json({ success: false, message: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -9,7 +9,6 @@ import { toast } from "sonner"; // Import toast for notifications
 
 // Import the IngredientList component
 import IngredientList from "@/components/IngredientList";
-import { checkIngredients } from "@/lib/ingredientChecker"; // Import the ingredient checking function
 import axios from "axios";
 
 // Define the IngredientStatus interface
@@ -40,7 +39,7 @@ interface Item {
   retrived: string;
   AI: string;
   status: string;
-  ingredients: IngredientStatus[]; // Added ingredients field
+  ingredients: IngredientStatus[]; // Post-processed ingredients
 }
 
 export default function CompanyDetails({ params }: { params: { id: string } }) {
@@ -57,6 +56,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   };
 
+  // Function to parse JWT token
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -69,67 +69,64 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     return JSON.parse(jsonPayload);
   }
 
+  // Decode JWT and set user state
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const decoded = parseJwt(token);
-      setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
+      try {
+        const decoded = parseJwt(token);
+        setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
+        console.log('User decoded from token:', { id: decoded.userId, username: decoded.username, email: decoded.email });
+      } catch (err) {
+        console.error('Error decoding token:', err);
+        toast.error("Invalid token. Please log in again.");
+        router.push("/Login");
+      }
     } else {
+      console.warn("No token found, redirecting to login.");
       router.push("/Login");
     }
     setLoading(false);
   }, [router]);
 
-  // Parse the AI output into ingredients array
-  const parseAIIngredients = (aiText: string) => {
-    if (!aiText) return [];
-
-    const ingredients = aiText.split(",").map(ingredient => ingredient.trim().toLowerCase());
-    return ingredients;
-  };
-
+  // Fetch company details and items
   useEffect(() => {
     const loadCompanyDetails = async () => {
       try {
         const response = await axios.get(`/api/companies/${params.id}/approve`, getAuthHeader());
         const data = response.data;
 
+        console.log('API response for company details:', data);
+
         if (data.error) {
           toast.error(data.error);
+          setError(data.error);
         } else {
           setCompany(data.company);
+          console.log('Company fetched:', data.company);
 
-          // Log the items before they are processed
           console.log('Items fetched from API:', data.items);
 
-          const checkedItems = await Promise.all(
-            data.items.map(async (item: Item) => {
-              const aiIngredients = parseAIIngredients(item.AI); // Parse AI ingredients
-              const checkedIngredients = await checkIngredients(aiIngredients); // Check the ingredients
+          // **Set the items directly without reprocessing ingredients**
+          setItems(data.items);
 
-              // Log the result of the checked ingredients
-              console.log('Checked ingredients for item:', item.name, checkedIngredients);
-
-              return { ...item, ingredients: checkedIngredients }; // Return item with updated ingredients
-            })
-          );
-
-          // Log the final items that will be displayed
-          console.log('Final items with checked ingredients:', checkedItems);
-
-          setItems(checkedItems);
+          console.log('Items set with post-processed ingredients:', data.items);
         }
-      } catch (error) {
+      } catch (error: any) {
+        console.error('Error fetching company details:', error);
         toast.error("Failed to fetch company details");
+        setError("Failed to fetch company details");
       } finally {
         setLoading(false);
       }
     };
 
-    loadCompanyDetails();
-  }, [params.id]);
+    if (user) {
+      loadCompanyDetails();
+    }
+  }, [params.id, user]);
 
-
+  // Handle approval of an item
   const handleApprove = async (itemId: string) => {
     if (!user?.id) {
       toast.error("User ID is missing.");
@@ -145,17 +142,21 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         getAuthHeader() // Include Authorization header
       );
 
+      console.log(`Item ${itemId} approved:`, response.data);
+
       toast.success("Item approved successfully!");
       setItems((prevItems) =>
         prevItems.map((item) =>
           item.id === itemId ? { ...item, status: "APPROVED" } : item
         )
       );
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`Error approving item ${itemId}:`, error);
       toast.error("Error approving item");
     }
   };
 
+  // Handle rejection of an item
   const handleReject = async (itemId: string) => {
     if (!user?.id) {
       toast.error("User ID is missing.");
@@ -171,13 +172,16 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         getAuthHeader() // Include Authorization header
       );
 
+      console.log(`Item ${itemId} rejected:`, response.data);
+
       toast.success("Item rejected successfully!");
       setItems((prevItems) =>
         prevItems.map((item) =>
           item.id === itemId ? { ...item, status: "REJECTED" } : item
         )
       );
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`Error rejecting item ${itemId}:`, error);
       toast.error("Error rejecting item");
     }
   };
@@ -232,17 +236,16 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                       <Badge variant="outline">{item.status}</Badge>
                     </div>
                     <p className="text-sm mb-2">Extracted Text: {item.retrived}</p>
-                    <p className="text-sm mb-4">AI Advisory: {item.AI}</p>
-
-                    {(() => { console.log('Ingredients passed to IngredientList:', item.ingredients); return null; })()}
+                    {(() => { 
+                      console.log('Ingredients passed to IngredientList:', item.ingredients); 
+                      return null; 
+                    })()}
+                    {/* <p className="text-sm mb-4">AI Extracted Ingredients: {item.AI}</p> */}
                     {/* Display Ingredients with Highlights */}
+                    <p className="text-sm mb-4">AI Extracted Ingredients: {item.AI}</p>
                     {item.ingredients && item.ingredients.length > 0 && (
                       <div className="mb-4">
-                        <h4 className="font-semibold">Ingredients:</h4>
-                        {(() => {
-                          console.log('Rendering IngredientList for item:', item.name, item.ingredients);
-                          return null;
-                        })()}
+                        <h4 className="font-semibold">Post-Processed Ingredients:</h4>
                         <IngredientList ingredients={item.ingredients} />
                       </div>
                     )}

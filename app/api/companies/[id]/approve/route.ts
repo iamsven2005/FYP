@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { verify } from 'jsonwebtoken';
-import { checkIngredients } from "@/lib/ingredientChecker";
 
 // Secret key for verifying the JWT token
 const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -19,6 +18,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   try {
     // Verify the token
     verify(token, JWT_SECRET);
+    console.log("JWT token verified successfully.");
 
     // Fetch the company by ID
     const company = await db.company.findUnique({
@@ -32,44 +32,33 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return NextResponse.json({ error: "Company not found" }, { status: 404 });
     }
 
+    console.log(`Company fetched:`, company);
+
     // Fetch the associated images
     const images = await db.images.findMany({
-      where: {
-        companyId: params.id,
-      },
+      where: { companyId: params.id },
       select: {
         id: true,
         name: true,
         imageurl: true,
+        AI: true, // Keep for raw data (if needed)
         halal: true,
         healthy: true,
         retrived: true,
-        AI: true,
         status: true,
-        ingredients: true, // Include the ingredients field
+        ingredients: true, // Fetch post-processed ingredients
       },
     });
 
-    if (!images) {
+    if (!images || images.length === 0) {
       console.error(`No images found for company with ID ${params.id}`);
       return NextResponse.json({ error: "No images found for this company" }, { status: 404 });
     }
 
-    // Check the ingredients for each image, handling potential nulls
-    const imagesWithCheckedIngredients = await Promise.all(images.map(async (image) => {
-      // Check if ingredients exist and are in array format before mapping
-      if (Array.isArray(image.ingredients)) {
-        const checkedIngredients = await checkIngredients(
-          image.ingredients.filter((i): i is string => typeof i === 'string').map((i: string) => i)
-        );
-        return { ...image, ingredients: checkedIngredients }; // Add checked ingredients
-      } else {
-        // Handle case where ingredients is null or not an array
-        return { ...image, ingredients: [] }; // Default to empty array if ingredients are null or not an array
-      }
-    }));
+    console.log(`Fetched ${images.length} images for company ID ${params.id}:`, images);
 
-    return NextResponse.json({ company, items: imagesWithCheckedIngredients });
+    // Directly return the ingredients as stored without reprocessing
+    return NextResponse.json({ company, items: images });
   } catch (error: any) {
     console.error("Error occurred while fetching company details:", error);
 
@@ -77,7 +66,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     if (error.name === 'JsonWebTokenError') {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
-    
+
     return NextResponse.json({ error: "Failed to fetch company details" }, { status: 500 });
   }
 }
