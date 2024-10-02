@@ -1,6 +1,8 @@
+# Enhanced Food Label Compliance and Safety Monitoring System
+
 # Table of Contents
-- [Table of Contents](#table-of-contents)
 - [Enhanced Food Label Compliance and Safety Monitoring System](#enhanced-food-label-compliance-and-safety-monitoring-system)
+- [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Features](#features)
   - [Technology Stack](#technology-stack)
@@ -23,9 +25,6 @@
       - [Usage:](#usage-2)
   - [Glossary](#glossary)
   - [License](#license)
-
-
-# Enhanced Food Label Compliance and Safety Monitoring System
 
 ## Overview
 
@@ -220,70 +219,83 @@ The system supports three main user roles: Admin, Manager, and Staff. Each role 
 
     - Admins can export data using the **Export to Excel** button available on the dashboard. This function will create a workbook with three sheets `Users`, `Companies`, and `Images` which can then be downloaded as an Excel file.
 
-```bash
-// Function to export data to Excel
-const exportToExcel = () => {
-  // Prepare data for each section
-  const usersData = AUsers.map(user => ({
-    id: user.id,
-    name: user.username,
-    role: user.role,
-    email: user.email,
-  }));
+    ```bash
+    // Function to export data to Excel
+    const exportToExcel = () => {
+      // Prepare data for each section
+      const usersData = AUsers.map(user => ({
+        id: user.id,
+        name: user.username,
+        role: user.role,
+        email: user.email,
+      }));
 
-  const companyData = clist.map(data => ({
-    id: data.id,
-    name: data.name,
-    staff: data.staff,
-    manager: data.manager,
-    archived: data.archived,
-    create: data.createdAt,
-  }));
+      const companyData = clist.map(data => ({
+        id: data.id,
+        name: data.name,
+        staff: data.staff,
+        manager: data.manager,
+        archived: data.archived,
+        create: data.createdAt,
+      }));
 
-  const imagesData = images.map(image => ({
-    id: image.id,
-    name: image.name,
-    companyId: image.companyId,
-    status: image.status,
-    halal: image.halal ? "Yes" : "No",
-    healthy: image.healthy ? "Yes" : "No",
-    ai: image.AI,
-    retrived: image.retrived,
-  }));
+      const imagesData = images.map(image => ({
+        id: image.id,
+        name: image.name,
+        companyId: image.companyId,
+        status: image.status,
+        halal: image.halal ? "Yes" : "No",
+        healthy: image.healthy ? "Yes" : "No",
+        ai: image.AI,
+        retrived: image.retrived,
+      }));
 
-  // Create a new workbook
-  const wb = XLSX.utils.book_new();
+      // Create a new workbook
+      const wb = XLSX.utils.book_new();
 
-  // Add each section as a sheet
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(usersData), "Users");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(companyData), "Companies");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(imagesData), "Images");
+      // Add each section as a sheet
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(usersData), "Users");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(companyData), "Companies");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(imagesData), "Images");
 
-  // Export the workbook as an Excel file
-  XLSX.writeFile(wb, "data_export.xlsx");
-};
-```
+      // Export the workbook as an Excel file
+      XLSX.writeFile(wb, "data_export.xlsx");
+    };
+    ```
 
-<img src="Markdown\admin-exportexcel.png" alt="admin-exportexcel" width="500"/>
-
+    <img src="Markdown\admin-exportexcel.png" alt="admin-exportexcel" width="500"/>
 
 #### Usage:
 
    1. **Accessing Admin Dashboard:**
-      - Log in using your admin credentials.
-      - Navigate to the Admin Dashboard to manage users and companies.
+      - Log In: Use your admin credentials to log into the system.
+      - Navigate: Once logged in, go to the Admin Dashboard to manage users and companies.
 
    2. **Managing Users:**
-      - Use the User Management section to add or remove users.
-      - Assign appropriate roles to ensure users have the necessary permissions.
+      - Add or Remove Users: Utilize the User Management section to add new users or remove existing ones.
+      - Assign Roles: Assign appropriate roles to users to ensure they have the necessary permissions for their responsibilities.
 
    3. **Managing Companies:**
-      - Create new companies or edit existing ones through the Company Management section.
-      - Assign staff and managers to each company for oversight and workflow management.
+      - Create or Edit Companies: Through the Company Management section, you can create new companies or edit details of existing ones.
+      - Assign Staff and Managers: Assign staff members and managers to each company to facilitate oversight and streamline workflow management.
    
-   4. **Generating Reports:**
-      - Admins can use the "Export to Excel" button to download detailed reports containing data on users, companies, and uploaded images for compliance tracking and analysis.
- 
+   4. **Adding Approved Ingredients** 
+      - Method 1: Submitting Ingredients Manually
+        - Submit Ingredients: Admins can manually add approved ingredients by submitting each ingredient through the admin interface.
+      - Method 2: Uploading Ingredients via XLSX
+        - Prepare the File:
+          - Use [Gemini](https://gemini.google.com/app) to convert a screenshot of a table into a structured format.
+          - Upload the screenshot to Gemini, prompt it to generate a table, and export the table to Google Sheets.
+          - Download the Google Sheets document as an XLSX file.
+        - Upload the File:
+          - Navigate to the Approved Ingredients section in the admin dashboard.
+          - Upload the prepared XLSX file to add the approved ingredients list to the database.
+
+   5. **Generating Reports:**
+      - Export to Excel:
+        - Admins can click the "Export to Excel" button to download comprehensive reports.
+        - Report Contents: The exported reports include detailed data on users, companies, and uploaded images, aiding in compliance tracking and analysis.
+  
 ### Manager
 
 #### Responsibilities:
