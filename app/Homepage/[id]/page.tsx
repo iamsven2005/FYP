@@ -1,10 +1,17 @@
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db";
+import IngredientList from "@/components/IngredientList"; // Import IngredientList
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   params: {
     id: string;
   };
+}
+
+interface IngredientStatus {
+  name: string;
+  status: "Approved" | "Not Approved" | "Not Safe";
 }
 
 interface Image {
@@ -14,6 +21,7 @@ interface Image {
   retrived: string;
   AI: string;
   status: string;
+  ingredients: IngredientStatus[] | null; // Adjusted to include ingredient statuses
 }
 
 export default async function Page({ params }: Props) {
@@ -21,6 +29,15 @@ export default async function Page({ params }: Props) {
     const images = (await db.images.findMany({
       where: {
         companyId: params.id,
+      },
+      select: {
+        id: true,
+        imageurl: true,
+        name: true,
+        retrived: true,
+        AI: true,
+        status: true,
+        ingredients: true, // Include ingredients in the query
       },
     })) as Image[];
 
@@ -40,8 +57,17 @@ export default async function Page({ params }: Props) {
                     <CardDescription>
                       <span className="font-medium">AI Advisory:</span> {image.AI}
                     </CardDescription>
+                    {/* Display Ingredients with Highlights */}
+                    {image.ingredients && image.ingredients.length > 0 ? (
+                      <div className="mt-4">
+                        <h4 className="font-semibold mb-2">Ingredients:</h4>
+                        <IngredientList ingredients={image.ingredients} />
+                      </div>
+                    ) : (
+                      <p className="text-gray-500">No ingredients available.</p>
+                    )}
                     <CardDescription>
-                      <span className="font-medium">Status:</span> {image.status}
+                      <span className="font-medium">Status:</span> <Badge> {image.status} </Badge>
                     </CardDescription>
                   </div>
                 </CardContent>
