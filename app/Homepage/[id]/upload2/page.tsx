@@ -92,7 +92,7 @@ export default function Component({ params }: Props) {
         toast.error("Failed to get OpenAI classification.");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error("Error in OpenAI request");
     } finally {
       setLoading(false);
@@ -101,12 +101,17 @@ export default function Component({ params }: Props) {
 
   // Function to parse ingredients string into an array
   const parseIngredients = (ingredientsText: string): string[] => {
-    const textWithoutParentheses = ingredientsText.replace(/\(.*?\)/g, "");
+    const textWithoutParentheses = ingredientsText.replace(/\s*\([^)]*\)/g, "");
     const standardizedText = textWithoutParentheses.replace(/\band\b/gi, ",");
-    return standardizedText
-      .split(/,|;/)
+    const ingredientsArray = standardizedText
+      .split(/[;,]\s*|\s+and\s+/)
       .map((ingredient) => ingredient.trim().toLowerCase())
       .filter((ingredient) => ingredient !== "");
+
+    // Capitalize each ingredient
+    return ingredientsArray.map((ingredient) =>
+      ingredient.charAt(0).toUpperCase() + ingredient.slice(1)
+    );
   };
 
   // Function to check ingredients using the ingredientChecker
@@ -233,7 +238,7 @@ export default function Component({ params }: Props) {
       )}
 
       <div className="space-y-4">
-        <Label htmlFor="item-name">Item Name (required):</Label>
+        <Label htmlFor="item-name">Product Name (required):</Label>
         <Input
           id="item-name"
           type="text"
