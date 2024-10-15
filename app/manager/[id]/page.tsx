@@ -6,6 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner"; // Import toast for notifications
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // Import AlertDialog components
 
 // Import the IngredientList component
 import IngredientList from "@/components/IngredientList";
@@ -186,6 +197,44 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     }
   };
 
+  // Function to handle item approval with a confirmation if there are "Not Safe" ingredients
+  const confirmApprove = (item: Item) => {
+    const hasNotSafeIngredient = item.ingredients.some(
+      (ingredient) => ingredient.status === "Not Safe"
+    );
+
+    if (hasNotSafeIngredient) {
+      return (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button size="sm" className="flex-1">
+              Approve
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This item contains one or more ingredients marked as "Not Safe". Are you sure you want to approve it?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleApprove(item.id)}>Approve</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      );
+    }
+
+    // If there are no "Not Safe" ingredients, approve directly
+    return (
+      <Button onClick={() => handleApprove(item.id)} size="sm" className="flex-1">
+        Approve
+      </Button>
+    );
+  };
+
   if (loading) return <p className="text-center p-8">Loading...</p>;
   if (error) return <p className="text-center p-8 text-red-500">{error}</p>;
   if (!company) return <p className="text-center p-8">No company details found.</p>;
@@ -250,13 +299,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                       </div>
                     )}
                     <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleApprove(item.id)}
-                        size="sm"
-                        className="flex-1"
-                      >
-                        Approve
-                      </Button>
+                      {confirmApprove(item)}
                       <Button
                         onClick={() => handleReject(item.id)}
                         variant="destructive"
