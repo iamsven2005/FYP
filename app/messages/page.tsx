@@ -69,6 +69,18 @@ export default function NotificationsPage() {
     }
   }
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      await axios.post(`/api/items/${user!.id}/notify/mark-all-read`, {}, {
+        headers: getAuthHeader(),
+      })
+      setNotifications([])
+      toast.success("All notifications marked as read")
+    } catch (error) {
+      toast.error("Failed to mark all notifications as read")
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -82,6 +94,11 @@ export default function NotificationsPage() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Notifications</CardTitle>
         <CardDescription>Stay updated with your latest notifications</CardDescription>
+        {notifications.length > 0 && (
+          <Button onClick={handleMarkAllAsRead} className="mt-4">
+            Mark All as Read
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {notifications.length === 0 ? (
