@@ -1,4 +1,3 @@
-// Example path: C:\Users\nasif\Documents\GitHub\FYP\app\api\items\[userId]\notify\mark-all-read\route.ts
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { verify } from "jsonwebtoken";
@@ -6,8 +5,8 @@ import { verify } from "jsonwebtoken";
 // Secret key for verifying the JWT token
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-// POST method to mark all notifications as read
-export async function POST(req: Request, { params }: { params: { userId: string } }) {
+// DELETE method to delete all notifications for a user
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
     // Extract the token from the Authorization header
     const token = req.headers.get("Authorization")?.split(" ")[1];
 
@@ -20,14 +19,10 @@ export async function POST(req: Request, { params }: { params: { userId: string 
         // Verify the JWT token
         verify(token, JWT_SECRET);
 
-        // Update the read status of all notifications for the user
-        await db.notification.updateMany({
+        // Delete all notifications for the user
+        await db.notification.deleteMany({
             where: {
-                user_to: params.userId,
-                read: "Unread",
-            },
-            data: {
-                read: "Read",
+                user_to: params.id,
             },
         });
 

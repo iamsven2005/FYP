@@ -49,7 +49,9 @@ export default function NotificationsPage() {
       const { data } = await axios.get(`/api/items/${user!.id}/notify`, {
         headers: getAuthHeader(), // Add Authorization header here
       })
-      setNotifications(data)
+      // Sort notifications in descending order by createdAt
+      const sortedNotifications = data.sort((a: Notification, b: Notification) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      setNotifications(sortedNotifications)
     } catch (error) {
       toast.error("Failed to fetch notifications")
     }
@@ -57,7 +59,7 @@ export default function NotificationsPage() {
 
   const handleRead = async (id: string) => {
     try {
-      await axios.post(`/api/items/${id}/notify`, {}, {
+      await axios.delete(`/api/items/${id}/notify`, {
         headers: getAuthHeader(), // Add Authorization header here
       })
       setNotifications((prevNotifications) =>
@@ -65,19 +67,19 @@ export default function NotificationsPage() {
       )
       toast.success("Notification marked as read")
     } catch (error) {
-      toast.error("Failed to mark notification as read")
+      toast.error("Failed to mark as read notification")
     }
   }
 
   const handleMarkAllAsRead = async () => {
     try {
-      await axios.post(`/api/items/${user!.id}/notify/mark-all-read`, {}, {
+      await axios.delete(`/api/items/${user!.id}/notify/mark-all-as-read`, {
         headers: getAuthHeader(),
       })
       setNotifications([])
-      toast.success("All notifications marked as read")
+      toast.success("All notifications deleted successfully")
     } catch (error) {
-      toast.error("Failed to mark all notifications as read")
+      toast.error("Failed to delete all notifications")
     }
   }
 
