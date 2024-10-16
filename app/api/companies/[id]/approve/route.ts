@@ -47,6 +47,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         retrived: true,
         status: true,
         ingredients: true, // Fetch post-processed ingredients
+        recommendation: true,
       },
     });
 

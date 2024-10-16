@@ -23,6 +23,7 @@ import IngredientList from "@/components/IngredientList";
 import axios from "axios";
 
 // Define the IngredientStatus interface
+// Define the IngredientStatus interface
 interface IngredientStatus {
   name: string;
   status: "Approved" | "Not Approved" | "Not Safe";
@@ -51,6 +52,7 @@ interface Item {
   AI: string;
   status: string;
   ingredients: IngredientStatus[]; // Post-processed ingredients
+  recommendation: "Approve" | "Reject"; // Add recommendation property
 }
 
 export default function CompanyDetails({ params }: { params: { id: string } }) {
@@ -267,6 +269,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
           {items.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((item) => (
+                // In the item card, add a section to display the recommendation
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <img
@@ -285,12 +288,6 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                       <Badge variant="outline">{item.status}</Badge>
                     </div>
                     <p className="text-sm mb-2">Extracted Text: {item.retrived}</p>
-                    {(() => { 
-                      console.log('Ingredients passed to IngredientList:', item.ingredients); 
-                      return null; 
-                    })()}
-                    {/* <p className="text-sm mb-4">AI Extracted Ingredients: {item.AI}</p> */}
-                    {/* Display Ingredients with Highlights */}
                     <p className="text-sm mb-4">AI Extracted Ingredients: {item.AI}</p>
                     {item.ingredients && item.ingredients.length > 0 && (
                       <div className="mb-4">
@@ -298,6 +295,13 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                         <IngredientList ingredients={item.ingredients} />
                       </div>
                     )}
+                    {/* Display Recommendation */}
+                    <div className="mb-4">
+                      <h4 className="font-semibold">Recommendation:</h4>
+                      <p className={`text-${item.recommendation === "Approve" ? "green" : "red"}-600 font-bold`}>
+                        {item.recommendation || "Pending"}
+                      </p>
+                    </div>
                     <div className="flex gap-2">
                       {confirmApprove(item)}
                       <Button

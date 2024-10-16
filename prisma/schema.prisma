@@ -13,18 +13,24 @@ enum ImageStatus {
   REJECTED
 }
 
+enum RecommendationStatus {
+  APPROVE
+  REJECT
+}
+
 model images {
-  id          String   @id @default(cuid())
-  imageurl    String   @db.LongText
-  name        String
-  companyId   String
-  status      ImageStatus @default(PENDING)
-  retrived    String   @db.Text
-  halal       Boolean
-  healthy     Boolean
-  grade       String?
-  AI          String   @db.Text
-  ingredients Json?
+  id              String      @id @default(cuid())
+  imageurl        String      @db.LongText
+  name            String
+  companyId       String
+  status          ImageStatus @default(PENDING)
+  retrived        String      @db.Text
+  halal           Boolean
+  healthy         Boolean
+  grade           String?
+  AI              String      @db.Text
+  ingredients     Json?
+  recommendation  String?     
 }
 
 model User {

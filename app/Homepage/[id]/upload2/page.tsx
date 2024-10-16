@@ -141,6 +141,21 @@ export default function Component({ params }: Props) {
     checkAndSetIngredients();
   }, [openAIData]);
 
+  // Function to calculate recommendation based on ingredient statuses
+  const calculateRecommendation = (ingredients: IngredientStatus[]): string => {
+    if (ingredients.length === 0) return "Pending"; // Ensure there's a recommendation even if no ingredients exist
+  
+    const approvedIngredients = ingredients.filter((ingredient) => ingredient.status === "Approved").length;
+    const notSafeIngredients = ingredients.some((ingredient) => ingredient.status === "Not Safe");
+    const approvedPercentage = (approvedIngredients / ingredients.length) * 100;
+  
+    if (notSafeIngredients || approvedPercentage < 80) {
+      return "Reject";
+    }
+    return "Approve";
+  };  
+
+  // Function to handle posting the image along with its details
   const handlePost = async () => {
     if (!processedImageBase64 || !itemName.trim()) {
       toast.error("Please provide both an image and the item name.");
@@ -155,6 +170,9 @@ export default function Component({ params }: Props) {
     const AI = openAIData?.Ingredients;
     const texts = openAIData?.warning;
 
+    // Calculate the recommendation based on checked ingredients
+    const recommendation = calculateRecommendation(checkedIngredients);
+
     const dataToSend = {
       imageurl: processedImageBase64,
       name: itemName,
@@ -166,6 +184,7 @@ export default function Component({ params }: Props) {
       grade: isGrade,
       AI: AI,
       ingredients: checkedIngredients, // Include the ingredients with statuses
+      recommendation: recommendation, // Include the recommendation
     };
 
     try {
@@ -293,7 +312,12 @@ export default function Component({ params }: Props) {
               )}
             </div>
           )}
-
+          {checkedIngredients.length > 0 && (
+            <div>
+              <Label>Recommendation:</Label>
+              <p className="font-bold">{calculateRecommendation(checkedIngredients)}</p>
+            </div>
+          )}
           {openAIData.warning && (
             <div>
               <Label>Warning:</Label>

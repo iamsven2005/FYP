@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients, grade } = body;
+    const { imageurl, name, companyId, retrived, halal, healthy, AI, ingredients, grade, recommendation } = body;
 
     // Log the data received
     console.log('Received data for new image:', {
@@ -44,7 +44,8 @@ export async function POST(req: Request) {
       healthy,
       AI,
       ingredients,
-      grade
+      grade,
+      recommendation 
     });
 
     // Validate ingredients
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
         AI,
         grade,
         ingredients, // Store the ingredients (with their status: Approved, Not Approved, Not Safe)
+        recommendation,
       },
     });
 
