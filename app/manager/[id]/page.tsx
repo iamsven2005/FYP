@@ -217,7 +217,7 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This item contains one or more ingredients marked as "Not Safe". Are you sure you want to approve it?
+                This item contains one or more ingredients marked as &quot;Not Safe&quot;. Are you sure you want to approve it?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
