@@ -204,8 +204,10 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     const hasNotSafeIngredient = item.ingredients.some(
       (ingredient) => ingredient.status === "Not Safe"
     );
-
-    if (hasNotSafeIngredient) {
+  
+    const recommendationIsReject = item.recommendation === "Reject";
+  
+    if (hasNotSafeIngredient || recommendationIsReject) {
       return (
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -217,25 +219,29 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This item contains one or more ingredients marked as "Not Safe". Are you sure you want to approve it?
+                {recommendationIsReject
+                  ? "The system recommends rejecting this item. Are you sure you want to approve it?"
+                  : "This item contains one or more ingredients marked as 'Not Safe'. Are you sure you want to approve it?"}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleApprove(item.id)}>Approve</AlertDialogAction>
+              <AlertDialogAction onClick={() => handleApprove(item.id)}>
+                Approve
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       );
     }
-
-    // If there are no "Not Safe" ingredients, approve directly
+  
+    // Approve directly if no warnings apply
     return (
       <Button onClick={() => handleApprove(item.id)} size="sm" className="flex-1">
         Approve
       </Button>
     );
-  };
+  };  
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
   if (error) return <p className="text-center p-8 text-red-500">{error}</p>;
