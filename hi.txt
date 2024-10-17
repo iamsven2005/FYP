@@ -1,0 +1,89 @@
+# Stage 1: Base image
+FROM node:18-alpine AS base
+
+# Install dependencies needed for Prisma and Next.js
+RUN apk add --no-cache libc6-compat openssl
+
+WORKDIR /app
+
+# Set environment variables that are required at build time
+ARG DATABASE_URL
+ARG JWT_SECRET
+ARG OPENAI_API_KEY
+ARG EMAIL_SERVER_HOST
+ARG EMAIL_SERVER_PORT
+ARG EMAIL_SERVER_USER
+ARG EMAIL_SERVER_PASSWORD
+
+# Copy Prisma schema and migrations first to ensure it's available
+COPY prisma ./prisma
+
+# Copy package manager lock files and install dependencies
+COPY package.json pnpm-lock.yaml* ./
+RUN corepack enable pnpm && pnpm i
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy the rest of the project files
+COPY . .
+
+# Set environment variables for the build step
+ENV DATABASE_URL=$DATABASE_URL \
+    JWT_SECRET=$JWT_SECRET \
+    OPENAI_API_KEY=$OPENAI_API_KEY \
+    EMAIL_SERVER_HOST=$EMAIL_SERVER_HOST \
+    EMAIL_SERVER_PORT=$EMAIL_SERVER_PORT \
+    EMAIL_SERVER_USER=$EMAIL_SERVER_USER \
+    EMAIL_SERVER_PASSWORD=$EMAIL_SERVER_PASSWORD
+
+# Build the project (Next.js and Prisma)
+RUN npm run build
+
+# Stage 2: Production-ready image
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+# Set environment variables for production
+ENV NODE_ENV=production
+
+# Copy over node_modules and built files from the previous stage
+COPY --from=base /app/public ./public
+COPY --from=base /app/.next/standalone .
+COPY --from=base /app/.next/static ./.next/static
+COPY --from=base / ./prisma
+
+# Expose the application port
+EXPOSE 3000
+
+# Run the application
+ENTRYPOINT ["node", "server.js"]
+
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: ""
+      JWT_SECRET: ""
+      OPENAI_API_KEY: ""
+      EMAIL_SERVER_HOST: "smtp.gmail.com"
+      EMAIL_SERVER_PORT: 587
+      EMAIL_SERVER_USER: ""
+      EMAIL_SERVER_PASSWORD: ""
+    depends_on:
+      - db
+    command: pnpm run dev
+
+  db:
+    image: tidbcloud/tidb:latest
+    ports:
+      - "4000:4000"
+    environment:
+      TIDB_ROOT_PASSWORD: ""
