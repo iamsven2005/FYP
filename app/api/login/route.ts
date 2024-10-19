@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
   </div>
 `;
 
+
     await transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to: user.email,
