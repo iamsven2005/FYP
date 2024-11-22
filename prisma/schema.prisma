@@ -34,6 +34,9 @@ model images {
   recommendation String?
   createdAt      DateTime?   @default(now())
   updatedAt      DateTime?   @updatedAt
+  description    String?
+  stock          Int?
+  pricing        Float?
 }
 
 model User {
@@ -59,7 +62,7 @@ model Company {
   staff     String
   manager   String
   createdAt DateTime @default(now())
-
+  meeting   DateTime?
   images images[]
 
 }

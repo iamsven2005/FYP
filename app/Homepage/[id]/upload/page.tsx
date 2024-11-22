@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { ImageIcon } from "lucide-react";
 import { toast } from "sonner"; // Importing toast for notifications
 import axios from "axios"; // Importing axios for API requests
+import { redirect } from "next/navigation";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -182,6 +183,7 @@ export default function TeachableMachineWithOCR({ params }: Props) {
       toast.error("Error sending image to API.");
     } finally {
       setLoading(false);
+      redirect("/Homepage")
     }
   };
 

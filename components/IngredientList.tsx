@@ -36,7 +36,7 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
   // Render a fallback message if the ingredients array is empty or null
   if (!ingredients || ingredients.length === 0) {
     console.log('No ingredients available.');
-    return <p>No ingredients available.</p>;
+    return <p>Loading ...</p>;
   }
 
   // Group ingredients by their status

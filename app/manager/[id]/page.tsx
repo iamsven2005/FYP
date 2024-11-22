@@ -18,12 +18,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"; // Import AlertDialog components
 
-// Import the IngredientList component
 import IngredientList from "@/components/IngredientList";
 import axios from "axios";
 
-// Define the IngredientStatus interface
-// Define the IngredientStatus interface
 interface IngredientStatus {
   name: string;
   status: "Approved" | "Not Approved" | "Not Safe";
@@ -40,6 +37,7 @@ interface Company {
   name: string;
   archived: boolean;
   img: string | null;
+  meeting?: string; // Add meeting property
 }
 
 interface Item {
@@ -51,8 +49,8 @@ interface Item {
   retrived: string;
   AI: string;
   status: string;
-  ingredients: IngredientStatus[]; // Post-processed ingredients
-  recommendation: "Approve" | "Reject"; // Add recommendation property
+  ingredients: IngredientStatus[];
+  recommendation: "Approve" | "Reject";
 }
 
 export default function CompanyDetails({ params }: { params: { id: string } }) {
@@ -63,13 +61,11 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
-  // Helper function to get Authorization header
   const getAuthHeader = () => {
     const token = localStorage.getItem("token");
     return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   };
 
-  // Function to parse JWT token
   function parseJwt(token: string) {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -82,51 +78,47 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     return JSON.parse(jsonPayload);
   }
 
-  // Decode JWT and set user state
+  const copyMeetingLink = () => {
+    const meetingLink = `https://meet.bihance.app/rooms/${params.id}`;
+    navigator.clipboard
+      .writeText(meetingLink)
+      .then(() => {
+        toast.success("Meeting link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy the meeting link.");
+      });
+  };
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = parseJwt(token);
         setUser({ id: decoded.userId, username: decoded.username, email: decoded.email });
-        console.log('User decoded from token:', { id: decoded.userId, username: decoded.username, email: decoded.email });
       } catch (err) {
-        console.error('Error decoding token:', err);
         toast.error("Invalid token. Please log in again.");
         router.push("/Login");
       }
     } else {
-      console.warn("No token found, redirecting to login.");
       router.push("/Login");
     }
     setLoading(false);
   }, [router]);
 
-  // Fetch company details and items
   useEffect(() => {
     const loadCompanyDetails = async () => {
       try {
         const response = await axios.get(`/api/companies/${params.id}/approve`, getAuthHeader());
         const data = response.data;
 
-        console.log('API response for company details:', data);
-
         if (data.error) {
           toast.error(data.error);
           setError(data.error);
         } else {
           setCompany(data.company);
-          console.log('Company fetched:', data.company);
-
-          console.log('Items fetched from API:', data.items);
-
-          // **Set the items directly without reprocessing ingredients**
           setItems(data.items);
-
-          console.log('Items set with post-processed ingredients:', data.items);
         }
       } catch (error: any) {
-        console.error('Error fetching company details:', error);
         toast.error("Failed to fetch company details");
         setError("Failed to fetch company details");
       } finally {
@@ -139,7 +131,6 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     }
   }, [params.id, user]);
 
-  // Handle approval of an item
   const handleApprove = async (itemId: string) => {
     if (!user?.id) {
       toast.error("User ID is missing.");
@@ -149,13 +140,9 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     try {
       const response = await axios.patch(
         `/api/items/${itemId}/approve`,
-        {
-          userFrom: user.id, // Ensure userFrom is passed
-        },
-        getAuthHeader() // Include Authorization header
+        { userFrom: user.id },
+        getAuthHeader()
       );
-
-      console.log(`Item ${itemId} approved:`, response.data);
 
       toast.success("Item approved successfully!");
       setItems((prevItems) =>
@@ -164,12 +151,10 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         )
       );
     } catch (error: any) {
-      console.error(`Error approving item ${itemId}:`, error);
       toast.error("Error approving item");
     }
   };
 
-  // Handle rejection of an item
   const handleReject = async (itemId: string) => {
     if (!user?.id) {
       toast.error("User ID is missing.");
@@ -179,13 +164,9 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
     try {
       const response = await axios.patch(
         `/api/items/${itemId}/reject`,
-        {
-          userFrom: user.id, // Ensure userFrom is passed
-        },
-        getAuthHeader() // Include Authorization header
+        { userFrom: user.id },
+        getAuthHeader()
       );
-
-      console.log(`Item ${itemId} rejected:`, response.data);
 
       toast.success("Item rejected successfully!");
       setItems((prevItems) =>
@@ -194,19 +175,17 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         )
       );
     } catch (error: any) {
-      console.error(`Error rejecting item ${itemId}:`, error);
       toast.error("Error rejecting item");
     }
   };
 
-  // Function to handle item approval with a confirmation if there are "Not Safe" ingredients
   const confirmApprove = (item: Item) => {
     const hasNotSafeIngredient = item.ingredients.some(
       (ingredient) => ingredient.status === "Not Safe"
     );
-  
+
     const recommendationIsReject = item.recommendation === "Reject";
-  
+
     if (hasNotSafeIngredient || recommendationIsReject) {
       return (
         <AlertDialog>
@@ -234,14 +213,13 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
         </AlertDialog>
       );
     }
-  
-    // Approve directly if no warnings apply
+
     return (
       <Button onClick={() => handleApprove(item.id)} size="sm" className="flex-1">
         Approve
       </Button>
     );
-  };  
+  };
 
   if (loading) return <p className="text-center p-8">Loading...</p>;
   if (error) return <p className="text-center p-8 text-red-500">{error}</p>;
@@ -264,6 +242,27 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
               className="mt-4 w-full h-auto rounded-lg"
             />
           )}
+          {company.meeting && (
+            <div className="mt-4">
+              <h4 className="font-semibold">Meeting Details:</h4>
+              <p className="text-sm mb-2">{company.meeting}</p>
+              <a
+                href={`https://meet.bihance.app/${params.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                Join Meeting
+              </a>
+              <Button
+                onClick={copyMeetingLink}
+                variant="outline"
+                className="mt-2 ml-4"
+              >
+                Copy Link
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -275,7 +274,6 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
           {items.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((item) => (
-                // In the item card, add a section to display the recommendation
                 <Card key={item.id}>
                   <CardContent className="p-4">
                     <img
@@ -301,7 +299,6 @@ export default function CompanyDetails({ params }: { params: { id: string } }) {
                         <IngredientList ingredients={item.ingredients} />
                       </div>
                     )}
-                    {/* Display Recommendation */}
                     <div className="mb-4">
                       <h4 className="font-semibold">Recommendation:</h4>
                       <p className={`text-${item.recommendation === "Approve" ? "green" : "red"}-600 font-bold`}>
